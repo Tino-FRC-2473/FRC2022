@@ -44,14 +44,14 @@ public class TeleopInput {
 	 * @return Axis value
 	 */
 	public double getLeftJoystickX() {
-		return leftJoystick.getX(GenericHID.Hand.kLeft);
+		return leftJoystick.getX();
 	}
 	/**
 	 * Get Y axis of Left Joystick.
 	 * @return Axis value
 	 */
 	public double getLeftJoystickY() {
-		return leftJoystick.getY(GenericHID.Hand.kLeft);
+		return leftJoystick.getY();
 	}
 	/**
 	 * Get the value of the shooter button.
@@ -74,14 +74,14 @@ public class TeleopInput {
 	 * @return Axis value
 	 */
 	public double getRightJoystickX() {
-		return rightJoystick.getX(GenericHID.Hand.kRight);
+		return rightJoystick.getX();
 	}
 	/**
 	 * Get Y axis of Right Joystick.
 	 * @return Axis value
 	 */
 	public double getRightJoystickY() {
-		return rightJoystick.getY(GenericHID.Hand.kRight);
+		return rightJoystick.getY();
 	}
 
 	/* ======================== Private methods ======================== */
