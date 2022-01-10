@@ -358,7 +358,7 @@ public class DriveFSMSystem {
 			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
 		double arcLength = (currentEncoderPos - prevEncoderPosArc) / REVOLUTIONS_PER_INCH;
 		if (Math.abs(theta) < ODOMETRY_MIN_THETA) {
-			theta = 1;
+			theta = ODOMETRY_MIN_THETA;
 		}
 		double radius = 180 * arcLength / (Math.PI * theta);
 		double alpha = prevGyroAngle - 90;
