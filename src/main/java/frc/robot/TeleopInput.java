@@ -89,6 +89,22 @@ public class TeleopInput {
 		return rightJoystick.getY();
 	}
 
+	/**
+	 * Get if the Right Joystick's trigger is pressed
+	 * @return Trigger Pressed value
+	 */
+	public boolean getRightTriggerPressed(){
+		return rightJoystick.getTriggerPressed();
+	}
+
+	/**
+	 * Get if the Right Joystick's trigger is released
+	 * @return Trigger Released value
+	 */
+	public boolean getRightTriggerReleased(){
+		return rightJoystick.getTriggerReleased();
+	}
+
 	/* ------------------------ Wheel ------------------------ */
 	/**
 	 * Get Angle of the steering Wheel.
