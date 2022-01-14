@@ -13,6 +13,8 @@ import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
 
 public class DriveFSMSystem {
+	public static final double KP_MOVE_STRAIGHT = 0.05;
+	private static final double PROPORTION_MAX_POWER = 0.5;
     /* ======================== Constants ======================== */
     public static final double WHEEL_DIAMETER_INCHES = 7.65;
     public static final double KP_MOVE_STRAIGHT = 0.1;
@@ -228,28 +230,44 @@ public class DriveFSMSystem {
     * @param initialEncoderPos The encoder position of the front left motor
     * when the state/handler method was first initiated
     */
-    private void handleForwardOrBackwardState(TeleopInput input,
-        double inches, double initialEncoderPos) {
-        double currrentPosTicks = frontLeftMotor.getEncoder().getPosition();
-        if (forwardStateInitialEncoderPos == -1) {
-            forwardStateInitialEncoderPos = currrentPosTicks;
-        }
-        double positionRev = frontLeftMotor.getEncoder().getPosition() - initialEncoderPos;
-        double currentPosInches = positionRev * Math.PI * WHEEL_DIAMETER_INCHES;
-        double error = inches - currentPosInches;
-        if (error < ERR_THRESHOLD_STRAIGHT_IN) {
-            finishedMovingStraight = true;
-        }
-        double speed = KP_MOVE_STRAIGHT * error;
+	private void handleForwardOrBackwardState(TeleopInput input,
+	double inches, double initialEncoderPos) {
+		double currrentPosTicks = frontLeftMotor.getEncoder().getPosition();
+		System.out.println("currrentPosTicks: " + currrentPosTicks);
+		// printing as 0
+		if (forwardStateInitialEncoderPos == -1) {
+			forwardStateInitialEncoderPos = currrentPosTicks;
+		}
+		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
+		double positionRev = frontLeftMotor.getEncoder().getPosition() - initialEncoderPos;
+		double currentPosInches = positionRev * Math.PI * WHEEL_DIAMETER_INCHES;
+		double error = inches - currentPosInches;
+		System.out.println("Error: " + error);
+		// Error is yeilding a negative number. About -16.8 almost every time. Sometimes
+		// it's -14.2ish
+		if (error < ERR_THRESHOLD_STRAIGHT_IN) {
+			System.out.println("im here");
+			finishedMovingStraight = true;
+		}
+		// another version of KP_MOVE_STRAIGHT which is dependent on the inches moved
+		// double speedMultipler = 0.1; 
+		// speed multipler if it is dependent on the inches 
+		// double speedMultipler = inches / 100;
+		
+		double speed = KP_MOVE_STRAIGHT * error;
+		System.out.println("speed: " + speed);
+		// double speed = speedMultipler * error;
 
-        if (speed >= 1) {
-            setPowerForAllMotors(1);
-        } else if (speed <= -1) {
-            setPowerForAllMotors(-1);
-        } else {
-            setPowerForAllMotors(speed);
-        }
-    }
+		if (speed >= 1) {
+			// make this 0.7ish if this is too fast
+			setPowerForAllMotors(1);
+		} else if (speed <= -1) {
+			// goes in here everytime (wheels moving backwards)
+			setPowerForAllMotors(-1);
+		} else {
+			setPowerForAllMotors(speed);
+		}
+	}
 
     /**
     * Sets power for all motors.
