@@ -14,8 +14,9 @@ import frc.robot.HardwareMap;
 
 public class DriveFSMSystem {
     /* ======================== Constants ======================== */
+	public static final double KP_MOVE_STRAIGHT = 0.05;
+	private static final double PROPORTION_MAX_POWER = 0.5;
     public static final double WHEEL_DIAMETER_INCHES = 7.65;
-    public static final double KP_MOVE_STRAIGHT = 0.1;
     public static final double ERR_THRESHOLD_STRAIGHT_IN = 0.1;
     private static final double TELEOP_ANGLE_POWER_RATIO = 90.0;
     private static final double MAX_POWER = 1.0;
