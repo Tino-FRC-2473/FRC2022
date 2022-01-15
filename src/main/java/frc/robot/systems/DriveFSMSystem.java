@@ -240,8 +240,8 @@ public class DriveFSMSystem {
 		}
 		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
 		double positionRev = currrentPosTicks - initialEncoderPos;
-		double currentPosInches = positionRev * Math.PI * WHEEL_DIAMETER_INCHES;
-		double error = inches - currentPosInches;
+		double currentPosInches = (positionRev * Math.PI * WHEEL_DIAMETER_INCHES) / GEAR_RATIO;
+		double error = Math.abs(inches - currentPosInches);
 		System.out.println("Error: " + error);
 		// Error is yeilding a negative number. About -16.8 almost every time. Sometimes
 		// it's -14.2ish
@@ -276,8 +276,8 @@ public class DriveFSMSystem {
     private void setPowerForAllMotors(double power) {
         frontLeftMotor.set(-power);
         frontRightMotor.set(power);
-        // backLeftMotor.set(-power);
-        // backRightMotor.set(power);
+        backLeftMotor.set(-power);
+        backRightMotor.set(power);
     }
 
     /**
