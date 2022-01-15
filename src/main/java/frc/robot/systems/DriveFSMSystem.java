@@ -16,7 +16,7 @@ public class DriveFSMSystem {
     /* ======================== Constants ======================== */
 	public static final double KP_MOVE_STRAIGHT = 0.05;
 	private static final double PROPORTION_MAX_POWER = 0.5;
-    public static final double WHEEL_DIAMETER_INCHES = 7.65;
+    public static final double WHEEL_DIAMETER_INCHES = 6.00;
     public static final double ERR_THRESHOLD_STRAIGHT_IN = 0.1;
     private static final double TELEOP_ANGLE_POWER_RATIO = 90.0;
     private static final double MAX_POWER = 0.5;
@@ -125,7 +125,7 @@ public class DriveFSMSystem {
         finishedMovingStraight = false;
         finishedTurning = false;
 
-        currentState = FSMState.FORWARD_STATE_10_IN;
+        currentState = FSMState.TELEOP_STATE;
 
         timer.reset();
 		timer.start();
@@ -156,7 +156,7 @@ public class DriveFSMSystem {
                 break;
 
             case FORWARD_STATE_10_IN:
-                handleForwardOrBackwardState(input, 10);
+                handleForwardOrBackwardState(input, 30);
                 break;
 
             case TURN_STATE:
@@ -232,7 +232,7 @@ public class DriveFSMSystem {
     */
 	private void handleForwardOrBackwardState(TeleopInput input,
 	double inches) {
-		double currrentPosTicks = frontLeftMotor.getEncoder().getPosition();
+		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
 		System.out.println("currrentPosTicks: " + currrentPosTicks);
 		// printing as 0
 		if (forwardStateInitialEncoderPos == -1) {
@@ -241,7 +241,7 @@ public class DriveFSMSystem {
 		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
 		double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
 		double currentPosInches = (positionRev * Math.PI * WHEEL_DIAMETER_INCHES) / GEAR_RATIO;
-		double error = Math.abs(inches - currentPosInches);
+		double error = inches - currentPosInches;
 		System.out.println("Error: " + error);
 		// Error is yeilding a negative number. About -16.8 almost every time. Sometimes
 		// it's -14.2ish
@@ -260,12 +260,12 @@ public class DriveFSMSystem {
 		System.out.println("speed: " + speed);
 		// double speed = speedMultipler * error;
 
-		if (speed >= 1) {
+		if (speed >= 0.1) {
 			// make this 0.7ish if this is too fast
-			setPowerForAllMotors(1);
-		} else if (speed <= -1) {
+			setPowerForAllMotors(0.1);
+		} else if (speed <= -0.1) {
 			// goes in here everytime (wheels moving backwards)
-			setPowerForAllMotors(-1);
+			setPowerForAllMotors(-0.1);
 		} else {
 			setPowerForAllMotors(speed);
 		}
