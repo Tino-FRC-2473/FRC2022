@@ -19,7 +19,7 @@ public class DriveFSMSystem {
     public static final double WHEEL_DIAMETER_INCHES = 7.65;
     public static final double ERR_THRESHOLD_STRAIGHT_IN = 0.1;
     private static final double TELEOP_ANGLE_POWER_RATIO = 90.0;
-    private static final double MAX_POWER = 0.5;
+    private static final double MAX_POWER = 1.0;
     private static final double REDUCED_MAX_POWER = 0.5;
     private static final double TURN_ERROR_POWER_RATIO = 360;
     private static final double MIN_TURN_POWER = 0.1;
@@ -238,9 +238,9 @@ public class DriveFSMSystem {
 			forwardStateInitialEncoderPos = currrentPosTicks;
 		}
 		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
-		double positionRev = currrentPosTicks - initialEncoderPos;
-		double currentPosInches = positionRev * Math.PI * WHEEL_DIAMETER_INCHES;
-		double error = inches - currentPosInches;
+		double positionRev = frontLeftMotor.getEncoder().getPosition() - initialEncoderPos;
+		double currentPosInches = (positionRev * Math.PI * WHEEL_DIAMETER_INCHES) / GEAR_RATIO;
+		double error = Math.abs(inches - currentPosInches);
 		System.out.println("Error: " + error);
 		// Error is yeilding a negative number. About -16.8 almost every time. Sometimes
 		// it's -14.2ish
@@ -273,8 +273,8 @@ public class DriveFSMSystem {
     private void setPowerForAllMotors(double power) {
         frontLeftMotor.set(-power);
         frontRightMotor.set(power);
-        // backLeftMotor.set(-power);
-        // backRightMotor.set(power);
+        backLeftMotor.set(-power);
+        backRightMotor.set(power);
     }
 
     /**
@@ -330,22 +330,21 @@ public class DriveFSMSystem {
         System.out.println("Trigger Released? : " + input.getRightTriggerReleased());
 		System.out.println("Trigger Pressed? : " + input.getRightTriggerPressed());
 
+		if (leftPower < targetLeftPower) {
+			leftPower += Math.pow(targetLeftPower, 3);
+		}
 
-		// if (leftPower < targetLeftPower) {
-		// 	leftPower += Math.pow(targetLeftPower, 3);
-		// }
-
-		// if (leftPower > targetLeftPower) {
-		// 	leftPower -= Math.pow(targetLeftPower, 3);
-		// }
+		if (leftPower > targetLeftPower) {
+			leftPower -= Math.pow(targetLeftPower, 3);
+		}
 		
-		// if (rightPower < targetRightPower) {
-		// 	rightPower += Math.pow(targetRightPower, 3);
-		// }
+		if (rightPower < targetRightPower) {
+			rightPower += Math.pow(targetRightPower, 3);
+		}
 
-		// if (rightPower > targetRightPower) {
-		// 	rightPower -= Math.pow(targetRightPower, 3);
-		// }
+		if (rightPower > targetRightPower) {
+			rightPower -= Math.pow(targetRightPower, 3);
+		}
 
         // leftPower += (targetLeftPower - leftPower) / TELEOP_ACCELERATION_CONSTANT;
         // rightPower += (targetRightPower - rightPower) / TELEOP_ACCELERATION_CONSTANT;
@@ -358,24 +357,13 @@ public class DriveFSMSystem {
                 leftPower = 0;
                 rightPower = 0;
             }
-        }else {
-			leftPower = targetLeftPower;
-			rightPower = targetRightPower;
-		}
+        }
 
 
         System.out.println("Driving Stick: " + joystickY);
         System.out.println("Steering Wheel: " + steerAngle);
         System.out.println("Left power: " + leftPower);
         System.out.println("Right Power: " + rightPower);
-		System.out.println("HeadingZ: " + gyro.getAngle());
-		System.out.println("Yaw: " + gyro.getYaw());
-		System.out.println("Pitch: " + gyro.getPitch());
-		System.out.println("Roll: " + gyro.getRoll());
-		// System.out.println("Quaternion X: " + gyro.getQuaternionX() * 180);
-		// System.out.println("Quaternion Y: " + gyro.getQuaternionY() * 180);
-		// System.out.println("Quaternion Z: " + gyro.getQuaternionZ() * 180);
-		System.out.println("connected?: " + gyro.isConnected());
 
         frontRightMotor.set(rightPower);
         frontLeftMotor.set(leftPower);
