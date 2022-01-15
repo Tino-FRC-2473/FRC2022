@@ -156,7 +156,7 @@ public class DriveFSMSystem {
                 break;
 
             case FORWARD_STATE_10_IN:
-                handleForwardOrBackwardState(input, 10, forwardStateInitialEncoderPos);
+                handleForwardOrBackwardState(input, 10);
                 break;
 
             case TURN_STATE:
@@ -195,7 +195,7 @@ public class DriveFSMSystem {
                 if (finishedMovingStraight) {
                     finishedMovingStraight = false;
                     forwardStateInitialEncoderPos = -1;
-                    return FSMState.TURN_STATE;
+                    return FSMState.TELEOP_STATE;
                 } else {
                     return FSMState.FORWARD_STATE_10_IN;
                 }
@@ -231,15 +231,15 @@ public class DriveFSMSystem {
     * when the state/handler method was first initiated
     */
 	private void handleForwardOrBackwardState(TeleopInput input,
-	double inches, double initialEncoderPos) {
-		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
+	double inches) {
+		double currrentPosTicks = frontLeftMotor.getEncoder().getPosition();
 		System.out.println("currrentPosTicks: " + currrentPosTicks);
 		// printing as 0
 		if (forwardStateInitialEncoderPos == -1) {
 			forwardStateInitialEncoderPos = currrentPosTicks;
 		}
 		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
-		double positionRev = currrentPosTicks - initialEncoderPos;
+		double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
 		double currentPosInches = (positionRev * Math.PI * WHEEL_DIAMETER_INCHES) / GEAR_RATIO;
 		double error = Math.abs(inches - currentPosInches);
 		System.out.println("Error: " + error);
@@ -248,6 +248,8 @@ public class DriveFSMSystem {
 		if (error < ERR_THRESHOLD_STRAIGHT_IN) {
 			System.out.println("im here");
 			finishedMovingStraight = true;
+            setPowerForAllMotors(0);
+            return;
 		}
 		// another version of KP_MOVE_STRAIGHT which is dependent on the inches moved
 		// double speedMultipler = 0.1; 
