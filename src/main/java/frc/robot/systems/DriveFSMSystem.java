@@ -21,6 +21,7 @@ public class DriveFSMSystem {
     private static final double TELEOP_ANGLE_POWER_RATIO = 90.0;
     private static final double MAX_POWER = 1.0;
     private static final double REDUCED_MAX_POWER = 0.5;
+    private static final double JOYSTICK_INPUT_ADJUSTMENT = 2.0;
     private static final double TURN_ERROR_POWER_RATIO = 360;
     private static final double MIN_TURN_POWER = 0.1;
     private static final double TURN_ERROR_THRESHOLD_DEGREE = 1.0;
@@ -316,35 +317,26 @@ public class DriveFSMSystem {
         double joystickY = input.getDrivingJoystickY();
         double steerAngle = input.getSteerAngle();
 
+
+        double adjustedInput = Math.pow(joystickY, JOYSTICK_INPUT_ADJUSTMENT);
+
+        if (joystickY < 0 && adjustedInput > 0) {
+            adjustedInput *= -1;
+        }
+
         double targetLeftPower;
         double targetRightPower;
 
         if (input.getRightTriggerPressed()) {
-            targetLeftPower = limitPower(joystickY * (1 + steerAngle)) * REDUCED_MAX_POWER;
-            targetRightPower = limitPower(-joystickY * (1 - steerAngle)) * REDUCED_MAX_POWER;
+            targetLeftPower = limitPower(adjustedInput * (1 + steerAngle)) * REDUCED_MAX_POWER;
+            targetRightPower = limitPower(-adjustedInput * (1 - steerAngle)) * REDUCED_MAX_POWER;
         } else {
-            targetLeftPower = limitPower(joystickY * (1 + steerAngle)) * MAX_POWER;
-            targetRightPower = limitPower(-joystickY * (1 - steerAngle)) * MAX_POWER;
+            targetLeftPower = limitPower(adjustedInput * (1 + steerAngle)) * MAX_POWER;
+            targetRightPower = limitPower(-adjustedInput * (1 - steerAngle)) * MAX_POWER;
         }
 
         System.out.println("Trigger Released? : " + input.getRightTriggerReleased());
 		System.out.println("Trigger Pressed? : " + input.getRightTriggerPressed());
-
-		if (leftPower < targetLeftPower) {
-			leftPower += Math.pow(targetLeftPower, 3);
-		}
-
-		if (leftPower > targetLeftPower) {
-			leftPower -= Math.pow(targetLeftPower, 3);
-		}
-		
-		if (rightPower < targetRightPower) {
-			rightPower += Math.pow(targetRightPower, 3);
-		}
-
-		if (rightPower > targetRightPower) {
-			rightPower -= Math.pow(targetRightPower, 3);
-		}
 
         // leftPower += (targetLeftPower - leftPower) / TELEOP_ACCELERATION_CONSTANT;
         // rightPower += (targetRightPower - rightPower) / TELEOP_ACCELERATION_CONSTANT;
@@ -357,7 +349,10 @@ public class DriveFSMSystem {
                 leftPower = 0;
                 rightPower = 0;
             }
-        }
+        } else {
+			leftPower = targetLeftPower;
+			rightPower = targetRightPower;
+		}
 
 
         System.out.println("Driving Stick: " + joystickY);
