@@ -322,21 +322,38 @@ public class DriveFSMSystem {
         double steerAngle = input.getSteerAngle();
 
 
-        double adjustedInput = Math.pow(joystickY, JOYSTICK_INPUT_ADJUSTMENT);
+        // double adjustedInput = Math.pow(joystickY, JOYSTICK_INPUT_ADJUSTMENT);
+        double adjustedInput = (1 - Math.cos(Math.PI * (Math.abs(joystickY) / 2)));
 
         if (joystickY < 0 && adjustedInput > 0) {
             adjustedInput *= -1;
         }
 
-        double targetLeftPower;
-        double targetRightPower;
+        double targetLeftPower = 0;
+        double targetRightPower = 0;
 
         if (input.getTriggerPressed()) {
-            targetLeftPower = limitPower(adjustedInput * (1 + steerAngle)) * MAX_POWER;
-            targetRightPower = limitPower(-adjustedInput * (1 - steerAngle)) * MAX_POWER;
+            if (steerAngle < -0.05) {
+                targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
+            } else if (steerAngle > 0.05) {
+                targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
+            } else {
+                targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
+            }
         } else {
-            targetLeftPower = limitPower(adjustedInput * (1 + steerAngle)) * REDUCED_MAX_POWER;
-            targetRightPower = limitPower(-adjustedInput * (1 - steerAngle)) * REDUCED_MAX_POWER;
+            if (steerAngle < -0.05) {
+                targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
+            } else if (steerAngle > 0.05) {
+                targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
+            } else {
+                targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
+            }
         }
 
         System.out.println("Trigger Pressed? : " + input.getTriggerPressed());
