@@ -1,7 +1,11 @@
 package frc.robot;
 
+import com.ctre.phoenix.ButtonMonitor;
+
 // WPILib Imports
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PS4Controller.Button;
+
 
 /**
  * Common class for providing driver inputs during Teleop.
@@ -23,6 +27,7 @@ public class TeleopInput {
     private Joystick rightJoystick;
     private Joystick wheel;
     private Joystick drivingJoystick;
+
 
     /* ======================== Constructor ======================== */
     /**
@@ -89,30 +94,14 @@ public class TeleopInput {
         return rightJoystick.getY();
     }
 
-	/**
-	 * Get if the Right Joystick's trigger is pressed
-	 * @return Trigger Pressed value
-	 */
-	public boolean getRightTriggerPressed(){
-		return rightJoystick.getTriggerPressed();
-	}
-
-	/**
-	 * Get if the Right Joystick's trigger is released
-	 * @return Trigger Released value
-	 */
-	public boolean getRightTriggerReleased(){
-		return rightJoystick.getTriggerReleased();
-	}
-
-	/* ------------------------ Wheel ------------------------ */
-	/**
-	 * Get Angle of the steering Wheel.
-	 * @return Angle
-	 */
-	public double getSteerAngle() {
-		return wheel.getX();
-	}
+    /* ------------------------ Wheel ------------------------ */
+    /**
+     * Get Angle of the steering Wheel.
+     * @return Angle
+     */
+    public double getSteerAngle() {
+        return wheel.getX();
+    }
 
     /* ------------------------ Driving Joystick ------------------------ */
     /**
@@ -121,6 +110,14 @@ public class TeleopInput {
      */
     public double getDrivingJoystickY() {
         return drivingJoystick.getY();
+    }
+
+    /**
+     * Get if the Driving Joystick's trigger button is being pressed
+     * @return Trigger button's state
+     */
+    public boolean getTriggerPressed(){
+        return drivingJoystick.getTrigger();
     }
 
     /* ======================== Private methods ======================== */

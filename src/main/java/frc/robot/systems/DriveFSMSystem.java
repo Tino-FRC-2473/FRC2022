@@ -141,7 +141,7 @@ public class DriveFSMSystem {
      */
     public void update(TeleopInput input) {
         double updatedTime = timer.get();
-        System.out.println("DTime: " + (updatedTime - currentTime));
+        //System.out.println("DTime: " + (updatedTime - currentTime));
         currentTime = updatedTime;
         rawGyroAngle = gyro.getAngle();
         updateLineOdometry();
@@ -233,7 +233,7 @@ public class DriveFSMSystem {
 	private void handleForwardOrBackwardState(TeleopInput input,
 	double inches) {
 		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
-		System.out.println("currrentPosTicks: " + currrentPosTicks);
+		//System.out.println("currrentPosTicks: " + currrentPosTicks);
 		// printing as 0
 		if (forwardStateInitialEncoderPos == -1) {
 			forwardStateInitialEncoderPos = currrentPosTicks;
@@ -242,11 +242,11 @@ public class DriveFSMSystem {
 		double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
 		double currentPosInches = (positionRev * Math.PI * WHEEL_DIAMETER_INCHES) / GEAR_RATIO;
 		double error = inches - currentPosInches;
-		System.out.println("Error: " + error);
+		//System.out.println("Error: " + error);
 		// Error is yeilding a negative number. About -16.8 almost every time. Sometimes
 		// it's -14.2ish
 		if (error < ERR_THRESHOLD_STRAIGHT_IN) {
-			System.out.println("im here");
+			//System.out.println("im here");
 			finishedMovingStraight = true;
             setPowerForAllMotors(0);
             return;
@@ -257,7 +257,7 @@ public class DriveFSMSystem {
 		// double speedMultipler = inches / 100;
 		
 		double speed = KP_MOVE_STRAIGHT * error;
-		System.out.println("speed: " + speed);
+		//System.out.println("speed: " + speed);
 		// double speed = speedMultipler * error;
 
 		if (speed >= 0.1) {
@@ -322,33 +322,49 @@ public class DriveFSMSystem {
         double steerAngle = input.getSteerAngle();
 
 
-        double adjustedInput = Math.pow(joystickY, JOYSTICK_INPUT_ADJUSTMENT);
+        // double adjustedInput = Math.pow(joystickY, JOYSTICK_INPUT_ADJUSTMENT);
+        double adjustedInput = (1 - Math.cos(Math.PI * (Math.abs(joystickY) / 2)));
 
         if (joystickY < 0 && adjustedInput > 0) {
             adjustedInput *= -1;
         }
 
-        double targetLeftPower;
-        double targetRightPower;
+        double targetLeftPower = 0;
+        double targetRightPower = 0;
 
-        if (input.getRightTriggerPressed()) {
-            targetLeftPower = limitPower(adjustedInput * (1 + steerAngle)) * REDUCED_MAX_POWER;
-            targetRightPower = limitPower(-adjustedInput * (1 - steerAngle)) * REDUCED_MAX_POWER;
+        if (input.getTriggerPressed()) {
+            if (steerAngle < -0.05) {
+                targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
+            } else if (steerAngle > 0.05) {
+                targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
+            } else {
+                targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
+            }
         } else {
-            targetLeftPower = limitPower(adjustedInput * (1 + steerAngle)) * MAX_POWER;
-            targetRightPower = limitPower(-adjustedInput * (1 - steerAngle)) * MAX_POWER;
+            if (steerAngle < -0.05) {
+                targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
+            } else if (steerAngle > 0.05) {
+                targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
+            } else {
+                targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
+                targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
+            }
         }
 
-        System.out.println("Trigger Released? : " + input.getRightTriggerReleased());
-		System.out.println("Trigger Pressed? : " + input.getRightTriggerPressed());
+        System.out.println("Trigger Pressed? : " + input.getTriggerPressed());
 
         // leftPower += (targetLeftPower - leftPower) / TELEOP_ACCELERATION_CONSTANT;
         // rightPower += (targetRightPower - rightPower) / TELEOP_ACCELERATION_CONSTANT;
 
         if (Math.abs(joystickY) < 0.05) {
             if (Math.abs(steerAngle) > 0.05) {
-                leftPower = steerAngle;
-                rightPower = steerAngle;
+                leftPower = -steerAngle;
+                rightPower = -steerAngle;
             } else {
                 leftPower = 0;
                 rightPower = 0;
@@ -359,18 +375,18 @@ public class DriveFSMSystem {
 		}
 
 
-        System.out.println("Driving Stick: " + joystickY);
-        System.out.println("Steering Wheel: " + steerAngle);
-        System.out.println("Left power: " + leftPower);
-        System.out.println("Right Power: " + rightPower);
-		System.out.println("HeadingZ: " + gyro.getAngle());
-		System.out.println("Yaw: " + gyro.getYaw());
-		System.out.println("Pitch: " + gyro.getPitch());
-		System.out.println("Roll: " + gyro.getRoll());
+        // System.out.println("Driving Stick: " + joystickY);
+        // System.out.println("Steering Wheel: " + steerAngle);
+        // System.out.println("Left power: " + leftPower);
+        // System.out.println("Right Power: " + rightPower);
+		// System.out.println("HeadingZ: " + gyro.getAngle());
+		// System.out.println("Yaw: " + gyro.getYaw());
+		// System.out.println("Pitch: " + gyro.getPitch());
+		// System.out.println("Roll: " + gyro.getRoll());
 		// System.out.println("Quaternion X: " + gyro.getQuaternionX() * 180);
 		// System.out.println("Quaternion Y: " + gyro.getQuaternionY() * 180);
 		// System.out.println("Quaternion Z: " + gyro.getQuaternionZ() * 180);
-		System.out.println("connected?: " + gyro.isConnected());
+		//System.out.println("connected?: " + gyro.isConnected());
 
         frontRightMotor.set(rightPower);
         frontLeftMotor.set(leftPower);
@@ -399,8 +415,8 @@ public class DriveFSMSystem {
         robotYPosLine += dY;
 
         prevEncoderPosLine = currentEncoderPos;
-        System.out.println("Raw Encoder Value: " + currentEncoderPos);
-        System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
+        //System.out.println("Raw Encoder Value: " + currentEncoderPos);
+        //System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
     }
 
     private void updateArcOdometry() {
@@ -422,7 +438,7 @@ public class DriveFSMSystem {
 
         prevGyroAngle = adjustedAngle;
         prevEncoderPosArc = currentEncoderPos;
-        System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
+        //System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
 
     }
 }
