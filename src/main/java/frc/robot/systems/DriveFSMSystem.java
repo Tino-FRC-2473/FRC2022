@@ -35,7 +35,7 @@ public class DriveFSMSystem {
     private static final double TELEOP_ACCELERATION_CONSTANT = 0.05;
     private static final double TELEOP_ACCELERATION_MIN = 0.1;
     private static final double COUNTS_PER_MOTOR_REVOLUTION = 42;
-    private static final double GEAR_RATIO = 26.0 * 4.67 / 12.0;
+    private static final double GEAR_RATIO = 84.0 * 4.67 / 60.0;
     private static final double REVOLUTIONS_PER_INCH
         = GEAR_RATIO / (Math.PI * WHEEL_DIAMETER_INCHES);
     private static final double ODOMETRY_MIN_THETA = 1.0;
@@ -55,14 +55,14 @@ public class DriveFSMSystem {
     private boolean finishedMovingStraight;
     private boolean finishedTurning;
     private double forwardStateInitialEncoderPos = -1;
-    private double gyroAngle = 0;
+    // private double rawGyroAngle = 0;
     private double robotXPosLine = 0;
     private double robotYPosLine = 0;
     private double prevEncoderPosLine = 0;
     private double prevEncoderPosArc = 0;
     private double robotXPosArc = 0;
     private double robotYPosArc = 0;
-    private double prevGyroAngle = 0;
+    // private double prevGyroAngle = 0;
     private double leftPower = 0;
     private double rightPower = 0;
     private Timer timer;
@@ -78,7 +78,6 @@ public class DriveFSMSystem {
     private CANSparkMax backLeftMotor;
 
     // private AHRS gyro;
-    private ADIS16448_IMU imu;
 
     /* ======================== Constructor ======================== */
     /**
@@ -99,7 +98,6 @@ public class DriveFSMSystem {
                                             CANSparkMax.MotorType.kBrushless);
 
         // gyro = new AHRS(SPI.Port.kMXP);
-        imu = new ADIS16448_IMU();
 
         timer = new Timer();
 
@@ -132,12 +130,11 @@ public class DriveFSMSystem {
 
         // gyro.reset();
         // gyro.zeroYaw();
-        imu.reset();
 
         finishedMovingStraight = false;
         finishedTurning = false;
 
-        currentState = FSMState.TELEOP_STATE;
+        currentState = FSMState.FORWARD_STATE_10_IN;
 
         timer.reset();
 		timer.start();
@@ -155,7 +152,7 @@ public class DriveFSMSystem {
         double updatedTime = timer.get();
         //System.out.println("DTime: " + (updatedTime - currentTime));
         currentTime = updatedTime;
-        gyroAngle = getHeading();
+        // rawGyroAngle = gyro.getAngle();
         updateLineOdometry();
         updateArcOdometry();
         switch (currentState) {
@@ -168,7 +165,7 @@ public class DriveFSMSystem {
                 break;
 
             case FORWARD_STATE_10_IN:
-                handleForwardOrBackwardState(input, 30);
+                handleForwardOrBackwardState(input, 60);
                 break;
 
             case TURN_STATE:
@@ -244,37 +241,38 @@ public class DriveFSMSystem {
     */
 	private void handleForwardOrBackwardState(TeleopInput input,
 	double inches) {
+        if(inches > 0){
+            inches = inches * 1.392;
+        }else{
+            inches = inches * 1.554;
+        }
 		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
-		//System.out.println("currrentPosTicks: " + currrentPosTicks);
-		// printing as 0
-		if (forwardStateInitialEncoderPos == -1) {
-			forwardStateInitialEncoderPos = currrentPosTicks;
-		}
+		System.out.println("currrentPosTicks: " + currrentPosTicks);
+		// if (forwardStateInitialEncoderPos == -1) {
+		// 	forwardStateInitialEncoderPos = currrentPosTicks;
+		// }
 		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
 		double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
 		double currentPosInches = (positionRev * Math.PI * WHEEL_DIAMETER_INCHES) / GEAR_RATIO;
 		double error = inches - currentPosInches;
-		//System.out.println("Error: " + error);
-		// Error is yeilding a negative number. About -16.8 almost every time. Sometimes
-		// it's -14.2ish
-		if (error < ERR_THRESHOLD_STRAIGHT_IN) {
-			//System.out.println("im here");
+        System.out.println("Inches: " + inches);
+		System.out.println("Error: " + error);
+
+        // Try This Next Time:
+		if ((inches > 0 && error < ERR_THRESHOLD_STRAIGHT_IN) || (inches < 0 && error > -ERR_THRESHOLD_STRAIGHT_IN)) {
+			System.out.println("im here");
 			finishedMovingStraight = true;
             setPowerForAllMotors(0);
             return;
 		}
-		// another version of KP_MOVE_STRAIGHT which is dependent on the inches moved
-		// double speedMultipler = 0.1; 
-		// speed multipler if it is dependent on the inches 
-		// double speedMultipler = inches / 100;
-		
+        
 		double speed = KP_MOVE_STRAIGHT * error;
 		//System.out.println("speed: " + speed);
 		// double speed = speedMultipler * error;
 
 		if (speed >= 0.1) {
-			// make this 0.7ish if this is too fast
-			setPowerForAllMotors(0.1);
+            // To adjust the speed of the robot, play around with the front decimal. It represents the max power
+			setPowerForAllMotors(0.25 * (-Math.pow((2.8 * Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2) + 0.6));
 		} else if (speed <= -0.1) {
 			// goes in here everytime (wheels moving backwards)
 			setPowerForAllMotors(-0.1);
@@ -301,29 +299,29 @@ public class DriveFSMSystem {
     * @param degrees The final angle of the robot after the desired turn
     */
     private void handleTurnState(TeleopInput input, double degrees) {
-        double error = degrees - getHeading();
-        if (error <= TURN_ERROR_THRESHOLD_DEGREE) {
-            finishedTurning = true;
-            return;
-        }
-        double power = error / TURN_ERROR_POWER_RATIO;
-        if (Math.abs(power) < MIN_TURN_POWER) {
-            power = MIN_TURN_POWER * power < 0 ? -1 : 1;
-        }
+        // double error = degrees - getHeading();
+        // if (error <= TURN_ERROR_THRESHOLD_DEGREE) {
+        //     finishedTurning = true;
+        //     return;
+        // }
+        // double power = error / TURN_ERROR_POWER_RATIO;
+        // if (Math.abs(power) < MIN_TURN_POWER) {
+        //     power = MIN_TURN_POWER * power < 0 ? -1 : 1;
+        // }
 
-        frontLeftMotor.set(power);
-        frontRightMotor.set(-power);
-        backLeftMotor.set(power);
-        backRightMotor.set(-power);
+        // frontLeftMotor.set(power);
+        // frontRightMotor.set(-power);
+        // backLeftMotor.set(power);
+        // backRightMotor.set(-power);
     }
 
-    /**
-    * Gets the heading from the gyro.
-    * @return the gyro heading
-    */
-    private double getHeading() {
-        return 90 - imu.getGyroAngleZ();
-    }
+    // /**
+    // * Gets the heading from the gyro.
+    // * @return the gyro heading
+    // */
+    // private double getHeading() {
+    //     return -Math.IEEEremainder(gyro.getAngle(), 360);
+    // }
 
     private void handleTeleOpState(TeleopInput input) {
         if (input == null) {
@@ -430,40 +428,40 @@ public class DriveFSMSystem {
     }
 
     private void updateLineOdometry() {
-        double adjustedAngle = gyroAngle;
-        double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-            + frontRightMotor.getEncoder().getPosition()) / 2.0);
-        double dEncoder = (currentEncoderPos - prevEncoderPosLine) / REVOLUTIONS_PER_INCH;
-        double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
-        double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
-        robotXPosLine += dX;
-        robotYPosLine += dY;
+        // double adjustedAngle = 90 - rawGyroAngle;
+        // double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+        //     + frontRightMotor.getEncoder().getPosition()) / 2.0);
+        // double dEncoder = (currentEncoderPos - prevEncoderPosLine) / REVOLUTIONS_PER_INCH;
+        // double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
+        // double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
+        // robotXPosLine += dX;
+        // robotYPosLine += dY;
 
-        prevEncoderPosLine = currentEncoderPos;
-        //System.out.println("Raw Encoder Value: " + currentEncoderPos);
-        //System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
+        // prevEncoderPosLine = currentEncoderPos;
+        // //System.out.println("Raw Encoder Value: " + currentEncoderPos);
+        // //System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
     }
 
     private void updateArcOdometry() {
-        double adjustedAngle = gyroAngle;
-        double theta = Math.abs(adjustedAngle - prevGyroAngle);
-        double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-            + frontRightMotor.getEncoder().getPosition()) / 2.0);
-        double arcLength = (currentEncoderPos - prevEncoderPosArc) / REVOLUTIONS_PER_INCH;
-        if (Math.abs(theta) < ODOMETRY_MIN_THETA) {
-            theta = ODOMETRY_MIN_THETA;
-        }
-        double radius = 180 * arcLength / (Math.PI * theta);
-        double alpha = prevGyroAngle - 90;
-        double circleX = robotXPosArc + radius * Math.cos(Math.toRadians(alpha));
-        double circleY = robotYPosArc + radius * Math.sin(Math.toRadians(alpha));
-        double beta = alpha + 180 - theta;
-        robotXPosArc = circleX + radius * Math.cos(Math.toRadians(beta));
-        robotYPosArc = circleY + radius * Math.sin(Math.toRadians(beta));
+        // double adjustedAngle = 90 - rawGyroAngle;
+        // double theta = Math.abs(adjustedAngle - prevGyroAngle);
+        // double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+        //     + frontRightMotor.getEncoder().getPosition()) / 2.0);
+        // double arcLength = (currentEncoderPos - prevEncoderPosArc) / REVOLUTIONS_PER_INCH;
+        // if (Math.abs(theta) < ODOMETRY_MIN_THETA) {
+        //     theta = ODOMETRY_MIN_THETA;
+        // }
+        // double radius = 180 * arcLength / (Math.PI * theta);
+        // double alpha = prevGyroAngle - 90;
+        // double circleX = robotXPosArc + radius * Math.cos(Math.toRadians(alpha));
+        // double circleY = robotYPosArc + radius * Math.sin(Math.toRadians(alpha));
+        // double beta = alpha + 180 - theta;
+        // robotXPosArc = circleX + radius * Math.cos(Math.toRadians(beta));
+        // robotYPosArc = circleY + radius * Math.sin(Math.toRadians(beta));
 
-        prevGyroAngle = adjustedAngle;
-        prevEncoderPosArc = currentEncoderPos;
-        //System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
+        // prevGyroAngle = adjustedAngle;
+        // prevEncoderPosArc = currentEncoderPos;
+        // //System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
 
     }
 }
