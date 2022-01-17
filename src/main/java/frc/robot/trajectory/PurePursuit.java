@@ -24,14 +24,16 @@ public class PurePursuit {
             Point endPoint = pathPoints.get(i);
 
             Vector v = new Vector (startPoint, endPoint);
-
+            
             double numPoints = Math.ceil(v.getMagnitude() / SPACING);
             v = v.normalize().multiplyByScalar(SPACING);
 
-            for (int j = 0; j < (int) numPoints; j++) {
-                // add (vector * i + startPoint) to pathPoints arraylist
+            for (int i = 0; i < (int) numPoints; i++) {
+                
             }
-            // need to consider point order when choosing closest point (in case of looped path) 
+            // find ceiling of vector mag/spacing
+            // vector = normalized vector * spacing
+            // second for loop to inject points 
         }
     }
 }
