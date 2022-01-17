@@ -1,10 +1,10 @@
 package frc.robot.systems;
 
-import edu.wpi.first.hal.SimEnum;
-import edu.wpi.first.wpilibj.ADIS16448_IMU;
 // WPILib Imports
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.ADIS16448_IMU;
+import edu.wpi.first.hal.SimEnum;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -343,7 +343,6 @@ public class DriveFSMSystem {
 
         System.out.println("isDrivingForward: " + isDrivingForward);
 
-        // double adjustedInput = Math.pow(joystickY, JOYSTICK_INPUT_ADJUSTMENT);
         double adjustedInput = (1 - Math.cos(Math.PI * (Math.abs(joystickY) / 2.0)));
         double adjustedSteering = -Math.abs(2 * Math.cos(Math.PI * steerAngle / 2.0 + Math.PI / 2.0)) + 1;
 
@@ -381,9 +380,6 @@ public class DriveFSMSystem {
             targetRightPower *= REDUCED_MAX_POWER;
         }
 
-        // leftPower += (targetLeftPower - leftPower) / TELEOP_ACCELERATION_CONSTANT;
-        // rightPower += (targetRightPower - rightPower) / TELEOP_ACCELERATION_CONSTANT;
-
         //acceleration
         double dLeftPower = targetLeftPower - currentLeftPower;
         double dRightPower = targetRightPower - currentRightPower;
@@ -409,19 +405,6 @@ public class DriveFSMSystem {
 
         System.out.println("Ecoder left: " + frontLeftMotor.getEncoder().getPosition());
         System.out.println("Encoder right: " + frontRightMotor.getEncoder().getPosition());
-
-        // System.out.println("Driving Stick: " + joystickY);
-        // System.out.println("Steering Wheel: " + steerAngle);
-        // System.out.println("Left power: " + leftPower);
-        // System.out.println("Right Power: " + rightPower);
-		// System.out.println("HeadingZ: " + gyro.getAngle());
-		// System.out.println("Yaw: " + gyro.getYaw());
-		// System.out.println("Pitch: " + gyro.getPitch());
-		// System.out.println("Roll: " + gyro.getRoll());
-		// System.out.println("Quaternion X: " + gyro.getQuaternionX() * 180);
-		// System.out.println("Quaternion Y: " + gyro.getQuaternionY() * 180);
-		// System.out.println("Quaternion Z: " + gyro.getQuaternionZ() * 180);
-		//System.out.println("connected?: " + gyro.isConnected());
 
         frontRightMotor.set(rightPower);
         frontLeftMotor.set(leftPower);
