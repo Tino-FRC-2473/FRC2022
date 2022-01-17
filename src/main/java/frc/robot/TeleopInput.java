@@ -120,6 +120,14 @@ public class TeleopInput {
         return drivingJoystick.getTrigger();
     }
 
+    public boolean isForwardDrivingButtonPressed() {
+        return drivingJoystick.getRawButton(4);
+    }
+
+    public boolean isBackwardDrivingButtonPressed() {        
+        return drivingJoystick.getRawButton(5);
+    }
+
     /* ======================== Private methods ======================== */
 
 }
