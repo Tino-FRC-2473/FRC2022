@@ -1,5 +1,6 @@
 package frc.robot.systems;
 
+import edu.wpi.first.hal.SimEnum;
 // WPILib Imports
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
@@ -21,11 +22,14 @@ public class DriveFSMSystem {
     private static final double TELEOP_ANGLE_POWER_RATIO = 90.0;
     private static final double MAX_POWER = 1.0;
     private static final double REDUCED_MAX_POWER = 0.5;
+    private static final double TELEOP_MIN_TURN_POWER = 0.05;
+    private static final double TELEOP_MIN_MOVE_POWER = 0.05;
     private static final double JOYSTICK_INPUT_ADJUSTMENT = 2.0;
     private static final double TURN_ERROR_POWER_RATIO = 360;
     private static final double MIN_TURN_POWER = 0.1;
     private static final double TURN_ERROR_THRESHOLD_DEGREE = 1.0;
-    private static final double TELEOP_ACCELERATION_CONSTANT = 10;
+    private static final double TELEOP_ACCELERATION_CONSTANT = 0.05;
+    private static final double TELEOP_ACCELERATION_MIN = 0.1;
     private static final double COUNTS_PER_MOTOR_REVOLUTION = 42;
     private static final double GEAR_RATIO = 26.0 * 4.67 / 12.0;
     private static final double REVOLUTIONS_PER_INCH
@@ -320,6 +324,8 @@ public class DriveFSMSystem {
 
         double joystickY = input.getDrivingJoystickY();
         double steerAngle = input.getSteerAngle();
+        double currentLeftPower = frontLeftMotor.get();
+        double currentRightPower = frontRightMotor.get();
 
 
         // double adjustedInput = Math.pow(joystickY, JOYSTICK_INPUT_ADJUSTMENT);
@@ -332,37 +338,51 @@ public class DriveFSMSystem {
         double targetLeftPower = 0;
         double targetRightPower = 0;
 
-        if (input.getTriggerPressed()) {
-            if (steerAngle < -0.05) {
-                targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
-                targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
-            } else if (steerAngle > 0.05) {
-                targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
-                targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
-            } else {
-                targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
-                targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
-            }
+        if (steerAngle > 0) {
+            targetRightPower *= Math.cos(Math.PI * (Math.abs((steerAngle) / 2)));
         } else {
-            if (steerAngle < -0.05) {
-                targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
-                targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
-            } else if (steerAngle > 0.05) {
-                targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
-                targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
-            } else {
-                targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
-                targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
-            }
+            targetLeftPower *= Math.cos(Math.PI * (Math.abs((steerAngle) / 2)));
         }
+
+        if (input.getTriggerPressed()) {
+            targetLeftPower *= MAX_POWER;
+            targetRightPower *= MAX_POWER;
+        } else {
+            targetLeftPower *= REDUCED_MAX_POWER;
+            targetRightPower *= REDUCED_MAX_POWER;
+        }
+
+        // if (input.getTriggerPressed()) {
+        //     if (steerAngle < -0.05) {
+        //         targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
+        //         targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
+        //     } else if (steerAngle > 0.05) {
+        //         targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
+        //         targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
+        //     } else {
+        //         targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
+        //         targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
+        //     }
+        // } else {
+        //     if (steerAngle < -0.05) {
+        //         targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
+        //         targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
+        //     } else if (steerAngle > 0.05) {
+        //         targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
+        //         targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
+        //     } else {
+        //         targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
+        //         targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
+        //     }
+        // }
 
         System.out.println("Trigger Pressed? : " + input.getTriggerPressed());
 
         // leftPower += (targetLeftPower - leftPower) / TELEOP_ACCELERATION_CONSTANT;
         // rightPower += (targetRightPower - rightPower) / TELEOP_ACCELERATION_CONSTANT;
 
-        if (Math.abs(joystickY) < 0.05) {
-            if (Math.abs(steerAngle) > 0.05) {
+        if (Math.abs(joystickY) < TELEOP_MIN_MOVE_POWER) {
+            if (Math.abs(steerAngle) > TELEOP_MIN_TURN_POWER) {
                 leftPower = -steerAngle;
                 rightPower = -steerAngle;
             } else {
@@ -373,6 +393,16 @@ public class DriveFSMSystem {
 			leftPower = targetLeftPower;
 			rightPower = targetRightPower;
 		}
+
+        //acceleration
+        // double dLeftPower = targetLeftPower - currentLeftPower;
+        // double dRightPower = targetRightPower - currentRightPower;
+        // if (Math.abs(dLeftPower) > TELEOP_ACCELERATION_MIN) {
+        //     leftPower = currentLeftPower + dLeftPower * TELEOP_ACCELERATION_CONSTANT;
+        // }
+        // if(Math.abs(dRightPower) > TELEOP_ACCELERATION_MIN) {
+        //     rightPower = currentRightPower + dRightPower * TELEOP_ACCELERATION_CONSTANT;
+        // }
 
 
         // System.out.println("Driving Stick: " + joystickY);
