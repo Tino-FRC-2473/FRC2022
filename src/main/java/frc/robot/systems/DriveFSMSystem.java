@@ -1,12 +1,16 @@
 package frc.robot.systems;
 
 import edu.wpi.first.hal.SimEnum;
+import edu.wpi.first.wpilibj.ADIS16448_IMU;
 // WPILib Imports
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
+
+import org.ejml.dense.row.linsol.qr.AdjLinearSolverQr_DDRM;
+
 import com.kauailabs.navx.frc.AHRS;
 
 // Robot Imports
@@ -20,7 +24,7 @@ public class DriveFSMSystem {
     public static final double WHEEL_DIAMETER_INCHES = 6.00;
     public static final double ERR_THRESHOLD_STRAIGHT_IN = 0.1;
     private static final double TELEOP_ANGLE_POWER_RATIO = 90.0;
-    private static final double MAX_POWER = 0.5;
+    private static final double MAX_POWER = 0.75;
     private static final double REDUCED_MAX_POWER = 0.5;
     private static final double TELEOP_MIN_TURN_POWER = 0.05;
     private static final double TELEOP_MIN_MOVE_POWER = 0.05;
@@ -51,7 +55,7 @@ public class DriveFSMSystem {
     private boolean finishedMovingStraight;
     private boolean finishedTurning;
     private double forwardStateInitialEncoderPos = -1;
-    private double rawGyroAngle = 0;
+    private double gyroAngle = 0;
     private double robotXPosLine = 0;
     private double robotYPosLine = 0;
     private double prevEncoderPosLine = 0;
@@ -63,6 +67,7 @@ public class DriveFSMSystem {
     private double rightPower = 0;
     private Timer timer;
     private double currentTime = 0;
+    private boolean isDrivingForward = true;
 
     // Hardware devices should be owned by one and only one system. They must
     // be private to their owner system and may not be used elsewhere.
@@ -72,7 +77,8 @@ public class DriveFSMSystem {
     private CANSparkMax frontLeftMotor;
     private CANSparkMax backLeftMotor;
 
-    private AHRS gyro;
+    // private AHRS gyro;
+    private ADIS16448_IMU imu;
 
     /* ======================== Constructor ======================== */
     /**
@@ -92,7 +98,8 @@ public class DriveFSMSystem {
         backLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_BACK_LEFT,
                                             CANSparkMax.MotorType.kBrushless);
 
-        gyro = new AHRS(SPI.Port.kMXP);
+        // gyro = new AHRS(SPI.Port.kMXP);
+        imu = new ADIS16448_IMU();
 
         timer = new Timer();
 
@@ -123,8 +130,9 @@ public class DriveFSMSystem {
         backRightMotor.getEncoder().setPosition(0);
         backLeftMotor.getEncoder().setPosition(0);
 
-        gyro.reset();
-        gyro.zeroYaw();
+        // gyro.reset();
+        // gyro.zeroYaw();
+        imu.reset();
 
         finishedMovingStraight = false;
         finishedTurning = false;
@@ -147,7 +155,7 @@ public class DriveFSMSystem {
         double updatedTime = timer.get();
         //System.out.println("DTime: " + (updatedTime - currentTime));
         currentTime = updatedTime;
-        rawGyroAngle = gyro.getAngle();
+        gyroAngle = getHeading();
         updateLineOdometry();
         updateArcOdometry();
         switch (currentState) {
@@ -314,7 +322,7 @@ public class DriveFSMSystem {
     * @return the gyro heading
     */
     private double getHeading() {
-        return -Math.IEEEremainder(gyro.getAngle(), 360);
+        return 90 - imu.getGyroAngleZ();
     }
 
     private void handleTeleOpState(TeleopInput input) {
@@ -327,9 +335,17 @@ public class DriveFSMSystem {
         double currentLeftPower = frontLeftMotor.get();
         double currentRightPower = frontRightMotor.get();
 
+        if(input.isForwardDrivingButtonPressed()) {
+            isDrivingForward = true;
+        }else if(input.isBackwardDrivingButtonPressed()) {
+            isDrivingForward = false;
+        }
+
+        System.out.println("isDrivingForward: " + isDrivingForward);
 
         // double adjustedInput = Math.pow(joystickY, JOYSTICK_INPUT_ADJUSTMENT);
-        double adjustedInput = (1 - Math.cos(Math.PI * (Math.abs(joystickY) / 2)));
+        double adjustedInput = (1 - Math.cos(Math.PI * (Math.abs(joystickY) / 2.0)));
+        double adjustedSteering = -Math.abs(2 * Math.cos(Math.PI * steerAngle / 2.0 + Math.PI / 2.0)) + 1;
 
         if (joystickY < 0 && adjustedInput > 0) {
             adjustedInput *= -1;
@@ -339,9 +355,22 @@ public class DriveFSMSystem {
         double targetRightPower = 0;
 
         if (steerAngle > 0) {
-            targetRightPower *= Math.cos(Math.PI * (Math.abs((steerAngle) / 2)));
+            targetRightPower = -adjustedInput * adjustedSteering;
+            targetLeftPower = adjustedInput;
         } else {
-            targetLeftPower *= Math.cos(Math.PI * (Math.abs((steerAngle) / 2)));
+            targetLeftPower = adjustedInput * adjustedSteering;
+            targetRightPower = -adjustedInput;
+        }
+
+        //reversible driving (currently set on buttons 5 and 6)
+        if(!isDrivingForward) {
+            if (steerAngle > 0) {
+                targetLeftPower = -adjustedInput * adjustedSteering;
+                targetRightPower = adjustedInput;
+            } else {
+                targetRightPower = adjustedInput * adjustedSteering;
+                targetLeftPower = -adjustedInput;
+            }
         }
 
         if (input.getTriggerPressed()) {
@@ -352,34 +381,18 @@ public class DriveFSMSystem {
             targetRightPower *= REDUCED_MAX_POWER;
         }
 
-        // if (input.getTriggerPressed()) {
-        //     if (steerAngle < -0.05) {
-        //         targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
-        //         targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
-        //     } else if (steerAngle > 0.05) {
-        //         targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
-        //         targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * MAX_POWER;
-        //     } else {
-        //         targetLeftPower = limitPower(adjustedInput) * MAX_POWER;
-        //         targetRightPower = limitPower(-adjustedInput) * MAX_POWER;
-        //     }
-        // } else {
-        //     if (steerAngle < -0.05) {
-        //         targetLeftPower = limitPower(adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
-        //         targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
-        //     } else if (steerAngle > 0.05) {
-        //         targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
-        //         targetRightPower = limitPower(-adjustedInput * Math.cos(Math.PI * (Math.abs((steerAngle) / 2)))) * REDUCED_MAX_POWER;
-        //     } else {
-        //         targetLeftPower = limitPower(adjustedInput) * REDUCED_MAX_POWER;
-        //         targetRightPower = limitPower(-adjustedInput) * REDUCED_MAX_POWER;
-        //     }
-        // }
-
-        System.out.println("Trigger Pressed? : " + input.getTriggerPressed());
-
         // leftPower += (targetLeftPower - leftPower) / TELEOP_ACCELERATION_CONSTANT;
         // rightPower += (targetRightPower - rightPower) / TELEOP_ACCELERATION_CONSTANT;
+
+        //acceleration
+        double dLeftPower = targetLeftPower - currentLeftPower;
+        double dRightPower = targetRightPower - currentRightPower;
+        if (Math.abs(dLeftPower) > TELEOP_ACCELERATION_MIN) {
+            leftPower = currentLeftPower + dLeftPower * TELEOP_ACCELERATION_CONSTANT;
+        }
+        if(Math.abs(dRightPower) > TELEOP_ACCELERATION_MIN) {
+            rightPower = currentRightPower + dRightPower * TELEOP_ACCELERATION_CONSTANT;
+        }
 
         if (Math.abs(joystickY) < TELEOP_MIN_MOVE_POWER) {
             if (Math.abs(steerAngle) > TELEOP_MIN_TURN_POWER) {
@@ -394,16 +407,8 @@ public class DriveFSMSystem {
 			rightPower = targetRightPower;
 		}
 
-        //acceleration
-        // double dLeftPower = targetLeftPower - currentLeftPower;
-        // double dRightPower = targetRightPower - currentRightPower;
-        // if (Math.abs(dLeftPower) > TELEOP_ACCELERATION_MIN) {
-        //     leftPower = currentLeftPower + dLeftPower * TELEOP_ACCELERATION_CONSTANT;
-        // }
-        // if(Math.abs(dRightPower) > TELEOP_ACCELERATION_MIN) {
-        //     rightPower = currentRightPower + dRightPower * TELEOP_ACCELERATION_CONSTANT;
-        // }
-
+        System.out.println("Ecoder left: " + frontLeftMotor.getEncoder().getPosition());
+        System.out.println("Encoder right: " + frontRightMotor.getEncoder().getPosition());
 
         // System.out.println("Driving Stick: " + joystickY);
         // System.out.println("Steering Wheel: " + steerAngle);
@@ -422,6 +427,13 @@ public class DriveFSMSystem {
         frontLeftMotor.set(leftPower);
         backRightMotor.set(rightPower);
         backLeftMotor.set(leftPower);
+
+        //check if voltage can be negative
+        // frontRightMotor.setVoltage(rightPower * 12);
+        // frontLeftMotor.setVoltage(leftPower * 12);
+        // backRightMotor.setVoltage(rightPower * 12);
+        // backLeftMotor.setVoltage(leftPower * 12);
+        
     }
 
     private double limitPower(double number) {
@@ -435,7 +447,7 @@ public class DriveFSMSystem {
     }
 
     private void updateLineOdometry() {
-        double adjustedAngle = 90 - rawGyroAngle;
+        double adjustedAngle = gyroAngle;
         double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
             + frontRightMotor.getEncoder().getPosition()) / 2.0);
         double dEncoder = (currentEncoderPos - prevEncoderPosLine) / REVOLUTIONS_PER_INCH;
@@ -450,7 +462,7 @@ public class DriveFSMSystem {
     }
 
     private void updateArcOdometry() {
-        double adjustedAngle = 90 - rawGyroAngle;
+        double adjustedAngle = gyroAngle;
         double theta = Math.abs(adjustedAngle - prevGyroAngle);
         double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
             + frontRightMotor.getEncoder().getPosition()) / 2.0);
