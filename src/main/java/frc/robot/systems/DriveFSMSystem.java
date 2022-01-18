@@ -15,7 +15,7 @@ import com.kauailabs.navx.frc.AHRS;
 
 // Robot Imports
 import frc.robot.TeleopInput;
-import frc.robot.drive.ArcadeDrive;
+import frc.robot.drive.DriveModes;
 import frc.robot.drive.DrivePower;
 import frc.robot.drive.Functions;
 import frc.robot.HardwareMap;
@@ -318,30 +318,28 @@ public class DriveFSMSystem {
             isDrivingForward = false;
         }
 
-        DrivePower targetPower = ArcadeDrive.drive(joystickY, steerAngle, currentLeftPower, 
+        DrivePower targetPower = DriveModes.arcadedrive(joystickY, steerAngle, currentLeftPower, 
         currentRightPower, isDrivingForward);
-
-        double targetLeftPower = targetPower.getLeftPower();
-        double targetRightPower = targetPower.getRightPower();
 
         //multiple speed modes
         if (input.getTriggerPressed()) {
-            targetLeftPower *= Constants.MAX_POWER;
-            targetRightPower *= Constants.MAX_POWER;
+            targetPower.scale(Constants.MAX_POWER);
         } else {
-            targetLeftPower *= Constants.REDUCED_MAX_POWER;
-            targetRightPower *= Constants.REDUCED_MAX_POWER;
+            targetPower.scale(Constants.REDUCED_MAX_POWER);
         }
 
+        DrivePower power;
+
         //acceleration
-        leftPower = Functions.accelerate(targetLeftPower, currentLeftPower);
-        rightPower = Functions.accelerate(targetRightPower, currentRightPower);
+        power = Functions.accelerate(targetPower, new DrivePower(currentLeftPower, currentRightPower));
 
         //turning in place
         if (Math.abs(joystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
-            leftPower = Functions.turnInPlace(joystickY, steerAngle);
-            rightPower = Functions.turnInPlace(joystickY, steerAngle);
+            power = Functions.turnInPlace(joystickY, steerAngle);
         }
+
+        leftPower = power.getLeftPower();
+        rightPower = power.getRightPower();
 
         System.out.println("Ecoder left: " + frontLeftMotor.getEncoder().getPosition());
         System.out.println("Encoder right: " + frontRightMotor.getEncoder().getPosition());

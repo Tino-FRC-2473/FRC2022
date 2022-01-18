@@ -10,6 +10,12 @@ public class DrivePower {
         this.rightPower = rightPower;
     }
 
+    public DrivePower scale(double scalar) {
+        leftPower *= scalar;
+        rightPower *= scalar;
+        return this;
+    }
+
     public double getLeftPower() {
         return leftPower;
     }
