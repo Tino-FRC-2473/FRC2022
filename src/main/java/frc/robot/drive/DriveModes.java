@@ -1,7 +1,7 @@
 package frc.robot.drive;
 
-public class ArcadeDrive {
-    public static DrivePower drive(double joystickY, double steerAngle, 
+public class DriveModes {
+    public static DrivePower arcadedrive(double joystickY, double steerAngle, 
     double currentLeftPower, double currentRightPower, boolean isDrivingForward) {
 
         double adjustedInput = Functions.calcForwardPower(joystickY);
