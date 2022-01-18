@@ -28,7 +28,7 @@ public class PurePursuit {
             double numPoints = Math.ceil(v.getMagnitude() / SPACING);
             v = v.normalize().multiplyByScalar(SPACING);
 
-            for (int i = 0; i < (int) numPoints; i++) {
+            for (int j = 0; j < (int) numPoints; j++) {
                 // add (vector * i + startPoint) to pathPoints arraylist
             }
             // need to consider point order when choosing closest point (in case of looped path) 
