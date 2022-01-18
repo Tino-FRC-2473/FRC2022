@@ -15,11 +15,11 @@ import com.kauailabs.navx.frc.AHRS;
 
 // Robot Imports
 import frc.robot.TeleopInput;
+import frc.robot.drive.ArcadeDrive;
+import frc.robot.drive.DrivePower;
+import frc.robot.drive.Functions;
 import frc.robot.HardwareMap;
 import frc.robot.Constants;
-import frc.robot.drivemodes.ArcadeDrive;
-import frc.robot.drivemodes.Functions;
-import frc.robot.drivemodes.DrivePower;
 
 public class DriveFSMSystem {
     // FSM state definitions
@@ -114,7 +114,7 @@ public class DriveFSMSystem {
         finishedMovingStraight = false;
         finishedTurning = false;
 
-        currentState = FSMState.FORWARD_STATE_10_IN;
+        currentState = FSMState.TELEOP_STATE;
 
         timer.reset();
 		timer.start();
@@ -145,7 +145,7 @@ public class DriveFSMSystem {
                 break;
 
             case FORWARD_STATE_10_IN:
-                handleForwardOrBackwardState(input, 60);
+                handleForwardOrBackwardState(input, 30);
                 break;
 
             case TURN_STATE:
@@ -221,16 +221,12 @@ public class DriveFSMSystem {
     */
 	private void handleForwardOrBackwardState(TeleopInput input,
 	double inches) {
-        if(inches > 0){
-            inches = inches * 1.392;
-        }else{
-            inches = inches * 1.554;
-        }
 		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
-		System.out.println("currrentPosTicks: " + currrentPosTicks);
-		// if (forwardStateInitialEncoderPos == -1) {
-		// 	forwardStateInitialEncoderPos = currrentPosTicks;
-		// }
+		//System.out.println("currrentPosTicks: " + currrentPosTicks);
+		// printing as 0
+		if (forwardStateInitialEncoderPos == -1) {
+			forwardStateInitialEncoderPos = currrentPosTicks;
+		}
 		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
 		double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
 		double currentPosInches = (positionRev * Math.PI * Constants.WHEEL_DIAMETER_INCHES) / Constants.GEAR_RATIO;
@@ -254,8 +250,8 @@ public class DriveFSMSystem {
 		// double speed = speedMultipler * error;
 
 		if (speed >= 0.1) {
-            // To adjust the speed of the robot, play around with the front decimal. It represents the max power
-			setPowerForAllMotors(0.25 * (-Math.pow((2.8 * Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2) + 0.6));
+			// make this 0.7ish if this is too fast
+			setPowerForAllMotors(0.1);
 		} else if (speed <= -0.1) {
 			// goes in here everytime (wheels moving backwards)
 			setPowerForAllMotors(-0.1);
