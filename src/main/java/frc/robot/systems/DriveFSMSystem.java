@@ -62,7 +62,7 @@ public class DriveFSMSystem {
     private double prevEncoderPosArc = 0;
     private double robotXPosArc = 0;
     private double robotYPosArc = 0;
-    // private double prevGyroAngle = 0;
+    private double prevGyroAngle = 0;
     private double leftPower = 0;
     private double rightPower = 0;
     private Timer timer;
