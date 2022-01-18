@@ -16,30 +16,12 @@ import com.kauailabs.navx.frc.AHRS;
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
+import frc.robot.Constants;
+import frc.robot.drivemodes.ArcadeDrive;
+import frc.robot.drivemodes.Functions;
+import frc.robot.drivemodes.DrivePower;
 
 public class DriveFSMSystem {
-    /* ======================== Constants ======================== */
-	public static final double KP_MOVE_STRAIGHT = 0.05;
-	private static final double PROPORTION_MAX_POWER = 0.5;
-    public static final double WHEEL_DIAMETER_INCHES = 6.00;
-    public static final double ERR_THRESHOLD_STRAIGHT_IN = 0.1;
-    private static final double TELEOP_ANGLE_POWER_RATIO = 90.0;
-    private static final double MAX_POWER = 0.75;
-    private static final double REDUCED_MAX_POWER = 0.5;
-    private static final double TELEOP_MIN_TURN_POWER = 0.05;
-    private static final double TELEOP_MIN_MOVE_POWER = 0.05;
-    private static final double JOYSTICK_INPUT_ADJUSTMENT = 2.0;
-    private static final double TURN_ERROR_POWER_RATIO = 360;
-    private static final double MIN_TURN_POWER = 0.1;
-    private static final double TURN_ERROR_THRESHOLD_DEGREE = 1.0;
-    private static final double TELEOP_ACCELERATION_CONSTANT = 0.05;
-    private static final double TELEOP_ACCELERATION_MIN = 0.1;
-    private static final double COUNTS_PER_MOTOR_REVOLUTION = 42;
-    private static final double GEAR_RATIO = 26.0 * 4.67 / 12.0;
-    private static final double REVOLUTIONS_PER_INCH
-        = GEAR_RATIO / (Math.PI * WHEEL_DIAMETER_INCHES);
-    private static final double ODOMETRY_MIN_THETA = 1.0;
-
     // FSM state definitions
     public enum FSMState {
         START_STATE,
@@ -47,8 +29,6 @@ public class DriveFSMSystem {
         TURN_STATE,
         TELEOP_STATE
     }
-
-    private static final float MOTOR_RUN_POWER = 0.1f;
 
     /* ======================== Private variables ======================== */
     private FSMState currentState;
@@ -252,12 +232,12 @@ public class DriveFSMSystem {
 		}
 		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
 		double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
-		double currentPosInches = (positionRev * Math.PI * WHEEL_DIAMETER_INCHES) / GEAR_RATIO;
+		double currentPosInches = (positionRev * Math.PI * Constants.WHEEL_DIAMETER_INCHES) / Constants.GEAR_RATIO;
 		double error = inches - currentPosInches;
 		//System.out.println("Error: " + error);
 		// Error is yeilding a negative number. About -16.8 almost every time. Sometimes
 		// it's -14.2ish
-		if (error < ERR_THRESHOLD_STRAIGHT_IN) {
+		if (error < Constants.ERR_THRESHOLD_STRAIGHT_IN) {
 			//System.out.println("im here");
 			finishedMovingStraight = true;
             setPowerForAllMotors(0);
@@ -268,7 +248,7 @@ public class DriveFSMSystem {
 		// speed multipler if it is dependent on the inches 
 		// double speedMultipler = inches / 100;
 		
-		double speed = KP_MOVE_STRAIGHT * error;
+		double speed = Constants.KP_MOVE_STRAIGHT * error;
 		//System.out.println("speed: " + speed);
 		// double speed = speedMultipler * error;
 
@@ -302,13 +282,13 @@ public class DriveFSMSystem {
     */
     private void handleTurnState(TeleopInput input, double degrees) {
         double error = degrees - getHeading();
-        if (error <= TURN_ERROR_THRESHOLD_DEGREE) {
+        if (error <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
             finishedTurning = true;
             return;
         }
-        double power = error / TURN_ERROR_POWER_RATIO;
-        if (Math.abs(power) < MIN_TURN_POWER) {
-            power = MIN_TURN_POWER * power < 0 ? -1 : 1;
+        double power = error / Constants.TURN_ERROR_POWER_RATIO;
+        if (Math.abs(power) < Constants.MIN_TURN_POWER) {
+            power = Constants.MIN_TURN_POWER * power < 0 ? -1 : 1;
         }
 
         frontLeftMotor.set(power);
@@ -341,67 +321,30 @@ public class DriveFSMSystem {
             isDrivingForward = false;
         }
 
-        System.out.println("isDrivingForward: " + isDrivingForward);
+        DrivePower targetPower = ArcadeDrive.drive(joystickY, steerAngle, currentLeftPower, 
+        currentRightPower, isDrivingForward);
 
-        double adjustedInput = (1 - Math.cos(Math.PI * (Math.abs(joystickY) / 2.0)));
-        double adjustedSteering = -Math.abs(2 * Math.cos(Math.PI * steerAngle / 2.0 + Math.PI / 2.0)) + 1;
+        double targetLeftPower = targetPower.getLeftPower();
+        double targetRightPower = targetPower.getRightPower();
 
-        if (joystickY < 0 && adjustedInput > 0) {
-            adjustedInput *= -1;
-        }
-
-        double targetLeftPower = 0;
-        double targetRightPower = 0;
-
-        if (steerAngle > 0) {
-            targetRightPower = -adjustedInput * adjustedSteering;
-            targetLeftPower = adjustedInput;
-        } else {
-            targetLeftPower = adjustedInput * adjustedSteering;
-            targetRightPower = -adjustedInput;
-        }
-
-        //reversible driving (currently set on buttons 5 and 6)
-        if(!isDrivingForward) {
-            if (steerAngle > 0) {
-                targetLeftPower = -adjustedInput * adjustedSteering;
-                targetRightPower = adjustedInput;
-            } else {
-                targetRightPower = adjustedInput * adjustedSteering;
-                targetLeftPower = -adjustedInput;
-            }
-        }
-
+        //multiple speed modes
         if (input.getTriggerPressed()) {
-            targetLeftPower *= MAX_POWER;
-            targetRightPower *= MAX_POWER;
+            targetLeftPower *= Constants.MAX_POWER;
+            targetRightPower *= Constants.MAX_POWER;
         } else {
-            targetLeftPower *= REDUCED_MAX_POWER;
-            targetRightPower *= REDUCED_MAX_POWER;
+            targetLeftPower *= Constants.REDUCED_MAX_POWER;
+            targetRightPower *= Constants.REDUCED_MAX_POWER;
         }
 
         //acceleration
-        double dLeftPower = targetLeftPower - currentLeftPower;
-        double dRightPower = targetRightPower - currentRightPower;
-        if (Math.abs(dLeftPower) > TELEOP_ACCELERATION_MIN) {
-            leftPower = currentLeftPower + dLeftPower * TELEOP_ACCELERATION_CONSTANT;
-        }
-        if(Math.abs(dRightPower) > TELEOP_ACCELERATION_MIN) {
-            rightPower = currentRightPower + dRightPower * TELEOP_ACCELERATION_CONSTANT;
-        }
+        leftPower = Functions.accelerate(targetLeftPower, currentLeftPower);
+        rightPower = Functions.accelerate(targetRightPower, currentRightPower);
 
-        if (Math.abs(joystickY) < TELEOP_MIN_MOVE_POWER) {
-            if (Math.abs(steerAngle) > TELEOP_MIN_TURN_POWER) {
-                leftPower = -steerAngle;
-                rightPower = -steerAngle;
-            } else {
-                leftPower = 0;
-                rightPower = 0;
-            }
-        } else {
-			leftPower = targetLeftPower;
-			rightPower = targetRightPower;
-		}
+        //turning in place
+        if (Math.abs(joystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+            leftPower = Functions.turnInPlace(joystickY, steerAngle);
+            rightPower = Functions.turnInPlace(joystickY, steerAngle);
+        }
 
         System.out.println("Ecoder left: " + frontLeftMotor.getEncoder().getPosition());
         System.out.println("Encoder right: " + frontRightMotor.getEncoder().getPosition());
@@ -433,7 +376,7 @@ public class DriveFSMSystem {
         double adjustedAngle = gyroAngle;
         double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
             + frontRightMotor.getEncoder().getPosition()) / 2.0);
-        double dEncoder = (currentEncoderPos - prevEncoderPosLine) / REVOLUTIONS_PER_INCH;
+        double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
         double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
         double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
         robotXPosLine += dX;
@@ -449,9 +392,9 @@ public class DriveFSMSystem {
         double theta = Math.abs(adjustedAngle - prevGyroAngle);
         double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
             + frontRightMotor.getEncoder().getPosition()) / 2.0);
-        double arcLength = (currentEncoderPos - prevEncoderPosArc) / REVOLUTIONS_PER_INCH;
-        if (Math.abs(theta) < ODOMETRY_MIN_THETA) {
-            theta = ODOMETRY_MIN_THETA;
+        double arcLength = (currentEncoderPos - prevEncoderPosArc) / Constants.REVOLUTIONS_PER_INCH;
+        if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
+            theta = Constants.ODOMETRY_MIN_THETA;
         }
         double radius = 180 * arcLength / (Math.PI * theta);
         double alpha = prevGyroAngle - 90;
