@@ -35,7 +35,7 @@ public class DriveFSMSystem {
     private static final double TELEOP_ACCELERATION_CONSTANT = 0.05;
     private static final double TELEOP_ACCELERATION_MIN = 0.1;
     private static final double COUNTS_PER_MOTOR_REVOLUTION = 42;
-    private static final double GEAR_RATIO = 26.0 * 4.67 / 12.0;
+    private static final double GEAR_RATIO = 84.0 * 4.67 / 60.0;
     private static final double REVOLUTIONS_PER_INCH
         = GEAR_RATIO / (Math.PI * WHEEL_DIAMETER_INCHES);
     private static final double ODOMETRY_MIN_THETA = 1.0;
@@ -62,7 +62,7 @@ public class DriveFSMSystem {
     private double prevEncoderPosArc = 0;
     private double robotXPosArc = 0;
     private double robotYPosArc = 0;
-    private double prevGyroAngle = 0;
+    // private double prevGyroAngle = 0;
     private double leftPower = 0;
     private double rightPower = 0;
     private Timer timer;
@@ -137,7 +137,7 @@ public class DriveFSMSystem {
         finishedMovingStraight = false;
         finishedTurning = false;
 
-        currentState = FSMState.TELEOP_STATE;
+        currentState = FSMState.FORWARD_STATE_10_IN;
 
         timer.reset();
 		timer.start();
@@ -168,7 +168,7 @@ public class DriveFSMSystem {
                 break;
 
             case FORWARD_STATE_10_IN:
-                handleForwardOrBackwardState(input, 30);
+                handleForwardOrBackwardState(input, 60);
                 break;
 
             case TURN_STATE:
@@ -244,37 +244,38 @@ public class DriveFSMSystem {
     */
 	private void handleForwardOrBackwardState(TeleopInput input,
 	double inches) {
+        if(inches > 0){
+            inches = inches * 1.392;
+        }else{
+            inches = inches * 1.554;
+        }
 		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
-		//System.out.println("currrentPosTicks: " + currrentPosTicks);
-		// printing as 0
-		if (forwardStateInitialEncoderPos == -1) {
-			forwardStateInitialEncoderPos = currrentPosTicks;
-		}
+		System.out.println("currrentPosTicks: " + currrentPosTicks);
+		// if (forwardStateInitialEncoderPos == -1) {
+		// 	forwardStateInitialEncoderPos = currrentPosTicks;
+		// }
 		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
 		double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
 		double currentPosInches = (positionRev * Math.PI * WHEEL_DIAMETER_INCHES) / GEAR_RATIO;
 		double error = inches - currentPosInches;
-		//System.out.println("Error: " + error);
-		// Error is yeilding a negative number. About -16.8 almost every time. Sometimes
-		// it's -14.2ish
-		if (error < ERR_THRESHOLD_STRAIGHT_IN) {
-			//System.out.println("im here");
+        System.out.println("Inches: " + inches);
+		System.out.println("Error: " + error);
+
+        // Try This Next Time:
+		if ((inches > 0 && error < ERR_THRESHOLD_STRAIGHT_IN) || (inches < 0 && error > -ERR_THRESHOLD_STRAIGHT_IN)) {
+			System.out.println("im here");
 			finishedMovingStraight = true;
             setPowerForAllMotors(0);
             return;
 		}
-		// another version of KP_MOVE_STRAIGHT which is dependent on the inches moved
-		// double speedMultipler = 0.1; 
-		// speed multipler if it is dependent on the inches 
-		// double speedMultipler = inches / 100;
-		
+        
 		double speed = KP_MOVE_STRAIGHT * error;
 		//System.out.println("speed: " + speed);
 		// double speed = speedMultipler * error;
 
 		if (speed >= 0.1) {
-			// make this 0.7ish if this is too fast
-			setPowerForAllMotors(0.1);
+            // To adjust the speed of the robot, play around with the front decimal. It represents the max power
+			setPowerForAllMotors(0.25 * (-Math.pow((2.8 * Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2) + 0.6));
 		} else if (speed <= -0.1) {
 			// goes in here everytime (wheels moving backwards)
 			setPowerForAllMotors(-0.1);
