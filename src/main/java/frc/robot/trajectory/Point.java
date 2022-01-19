@@ -15,4 +15,10 @@ public class Point {
     public double getY() {
         return y;
     }
+
+    public Point addVector (Vector v) {
+        double newX = x + v.getXMag();
+        double newY = y + v.getYMag();
+        return new Point(newX, newY);
+    }
 }

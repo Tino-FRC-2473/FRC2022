@@ -19,6 +19,7 @@ public class PurePursuit {
     }
 
     private void pointInjection() {
+        ArrayList<Point> newPoints = new ArrayList<>();
         for (int i = 1; i < pathPoints.size(); i++){
             Point startPoint = pathPoints.get(i - 1);
             Point endPoint = pathPoints.get(i);
@@ -29,7 +30,9 @@ public class PurePursuit {
             v = v.normalize().multiplyByScalar(SPACING);
 
             for (int j = 0; j < (int) numPoints; j++) {
-                // add (vector * i + startPoint) to pathPoints arraylist
+                v = v.multiplyByScalar(j);
+                Point toInject = startPoint.addVector(v);
+                newPoints.add(toInject);
             }
             // need to consider point order when choosing closest point (in case of looped path) 
         }
