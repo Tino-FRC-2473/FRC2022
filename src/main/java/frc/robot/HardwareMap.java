@@ -15,4 +15,5 @@ public final class HardwareMap {
 	// Pneumatics channel numbers
 	public static final int PCM_CHANNEL_INTAKE_CYLINDER_FORWARD = 1;
 	public static final int PCM_CHANNEL_INTAKE_CYLINDER_REVERSE = 2;
+	public static final int PUSH_BOT_SOLENOID = 3;
 }

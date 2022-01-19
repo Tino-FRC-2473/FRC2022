@@ -3,28 +3,30 @@ package frc.robot.systems;
 // WPILib Imports
 
 // Third party Hardware Imports
-import com.revrobotics.CANSparkMax;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
 
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
 
-public class FSMSystem {
+public class BlueMech {
 	/* ======================== Constants ======================== */
 	// FSM state definitions
 	public enum FSMState {
-		START_STATE,
-		OTHER_STATE
+		IDLE,
+		FIRING
 	}
 
-	private static final float MOTOR_RUN_POWER = 0.1f;
+	private static final int PUSH_TIME = 3;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
 
-	// Hardware devices should be owned by one and only one system. They must
-	// be private to their owner system and may not be used elsewhere.
-	private CANSparkMax exampleMotor;
+	private Solenoid push;
+
+	private double pushCommandTime;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -32,10 +34,9 @@ public class FSMSystem {
 	 * one-time initialization or configuration of hardware required. Note
 	 * the constructor is called only once when the robot boots.
 	 */
-	public FSMSystem() {
+	public BlueMech() {
 		// Perform hardware init
-		exampleMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_SHOOTER,
-										CANSparkMax.MotorType.kBrushless);
+		push = new Solenoid(PneumaticsModuleType.CTREPCM, HardwareMap.PUSH_BOT_SOLENOID);
 
 		// Reset state machine
 		reset();
@@ -58,7 +59,7 @@ public class FSMSystem {
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
 	public void reset() {
-		currentState = FSMState.START_STATE;
+		currentState = FSMState.IDLE;
 
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
@@ -71,12 +72,12 @@ public class FSMSystem {
 	 */
 	public void update(TeleopInput input) {
 		switch (currentState) {
-			case START_STATE:
-				handleStartState(input);
+			case IDLE:
+				handleIdleState(input);
 				break;
 
-			case OTHER_STATE:
-				handleOtherState(input);
+			case FIRING:
+				handleFiringState(input);
 				break;
 
 			default:
@@ -97,15 +98,21 @@ public class FSMSystem {
 	 */
 	private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
-			case START_STATE:
-				if (input != null) {
-					return FSMState.OTHER_STATE;
+			case IDLE:
+				if (input != null && input.isShooterButtonPressed()) {
+					pushCommandTime = Timer.getFPGATimestamp();
+
+					return FSMState.FIRING;
 				} else {
-					return FSMState.START_STATE;
+					return FSMState.IDLE;
 				}
 
-			case OTHER_STATE:
-				return FSMState.OTHER_STATE;
+			case FIRING:
+				if (Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME) {
+					return FSMState.IDLE;
+				} else {
+					return FSMState.FIRING;
+				}
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -114,19 +121,19 @@ public class FSMSystem {
 
 	/* ------------------------ FSM state handlers ------------------------ */
 	/**
-	 * Handle behavior in START_STATE.
+	 * Handle behavior in IDLE.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleStartState(TeleopInput input) {
-		exampleMotor.set(0);
+	private void handleIdleState(TeleopInput input) {
+		push.set(false);
 	}
 	/**
-	 * Handle behavior in OTHER_STATE.
+	 * Handle behavior in FIRING.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleOtherState(TeleopInput input) {
-		exampleMotor.set(MOTOR_RUN_POWER);
+	private void handleFiringState(TeleopInput input) {
+		push.set(true);
 	}
 }
