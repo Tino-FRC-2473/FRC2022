@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class PurePursuit {
     
+    ArrayList<Point> keyPoints = new ArrayList<>();
     ArrayList<Point> pathPoints = new ArrayList<>();
 
     // in inches
@@ -11,7 +12,7 @@ public class PurePursuit {
 
 
     public PurePursuit(ArrayList<Point> initialPoints) {
-        pathPoints = initialPoints;
+        keyPoints = initialPoints;
     }
 
     public void pathGen() {
@@ -19,10 +20,9 @@ public class PurePursuit {
     }
 
     private void pointInjection() {
-        ArrayList<Point> newPoints = new ArrayList<>();
-        for (int i = 1; i < pathPoints.size(); i++){
-            Point startPoint = pathPoints.get(i - 1);
-            Point endPoint = pathPoints.get(i);
+        for (int i = 1; i < keyPoints.size(); i++){
+            Point startPoint = keyPoints.get(i - 1);
+            Point endPoint = keyPoints.get(i);
 
             Vector v = new Vector (startPoint, endPoint);
 
@@ -32,9 +32,13 @@ public class PurePursuit {
             for (int j = 0; j < (int) numPoints; j++) {
                 v = v.multiplyByScalar(j);
                 Point toInject = startPoint.addVector(v);
-                newPoints.add(toInject);
+                pathPoints.add(toInject);
             }
             // need to consider point order when choosing closest point (in case of looped path) 
         }
+    }
+
+    private Point findClosestPoint() {
+        
     }
 }
