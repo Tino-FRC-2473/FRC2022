@@ -11,10 +11,9 @@ import edu.wpi.first.cameraserver.CameraServer;
 // import edu.wpi.first.cscore.CvSink;
 // import edu.wpi.first.cscore.CvSource;
 // import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+
 // Systems
 import frc.robot.systems.FSMSystem;
-
-
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -25,6 +24,8 @@ public class Robot extends TimedRobot {
 
 	// Systems
 	private FSMSystem fsmSystem;
+	
+	// Constants
 	private final int CAMERA_BRIGHTNESS = 25;
 	private final int FPS = 15;
 
