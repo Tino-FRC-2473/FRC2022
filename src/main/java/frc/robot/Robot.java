@@ -8,6 +8,14 @@ import edu.wpi.first.wpilibj.TimedRobot;
 
 // Systems
 import frc.robot.systems.FSMSystem;
+// import edu.wpi.first.cscore.CvSink;
+// import edu.wpi.first.cscore.CvSource;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cameraserver.CameraServer;
+// import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+// import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -30,6 +38,20 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		fsmSystem = new FSMSystem();
+
+		UsbCamera frontCam = CameraServer.startAutomaticCapture("Front Camera", 0);
+		frontCam.setBrightness(25);
+		frontCam.setFPS(15);
+		frontCam.setResolution(160, 120);
+
+		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
+		rearCam.setBrightness(25);
+		rearCam.setFPS(15);
+		rearCam.setResolution(160, 120);
+
+		// CvSink cvSinkDriver = CameraServer.getVideo(frontCam);
+		// CvSource outputStreamDriver = CameraServer.putVideo("Front Camera", 120, 160);
+
 	}
 
 	@Override
@@ -40,6 +62,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousPeriodic() {
+		updateShuffleboardVisualizations();
 		fsmSystem.update(null);
 	}
 
@@ -51,6 +74,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
+		updateShuffleboardVisualizations();
 		fsmSystem.update(input);
 	}
 
@@ -61,7 +85,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void disabledPeriodic() {
-
+		updateShuffleboardVisualizations();
 	}
 
 	@Override
@@ -86,4 +110,8 @@ public class Robot extends TimedRobot {
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
 	public void robotPeriodic() { }
+
+	public void updateShuffleboardVisualizations() {
+		SmartDashboard.updateValues();
+	}
 }
