@@ -5,16 +5,15 @@ package frc.robot;
 
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
-
-// Systems
-import frc.robot.systems.FSMSystem;
-// import edu.wpi.first.cscore.CvSink;
-// import edu.wpi.first.cscore.CvSource;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
+// import edu.wpi.first.cscore.CvSink;
+// import edu.wpi.first.cscore.CvSource;
 // import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-// import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// Systems
+import frc.robot.systems.FSMSystem;
+
 
 
 /**
@@ -26,6 +25,8 @@ public class Robot extends TimedRobot {
 
 	// Systems
 	private FSMSystem fsmSystem;
+	private final int CAMERA_BRIGHTNESS = 25;
+	private final int FPS = 15;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -40,18 +41,12 @@ public class Robot extends TimedRobot {
 		fsmSystem = new FSMSystem();
 
 		UsbCamera frontCam = CameraServer.startAutomaticCapture("Front Camera", 0);
-		frontCam.setBrightness(25);
-		frontCam.setFPS(15);
-		frontCam.setResolution(160, 120);
+		frontCam.setBrightness(CAMERA_BRIGHTNESS);
+		frontCam.setFPS(FPS);
 
-		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
-		rearCam.setBrightness(25);
-		rearCam.setFPS(15);
-		rearCam.setResolution(160, 120);
-
-		// CvSink cvSinkDriver = CameraServer.getVideo(frontCam);
-		// CvSource outputStreamDriver = CameraServer.putVideo("Front Camera", 120, 160);
-
+		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 1);
+		rearCam.setBrightness(CAMERA_BRIGHTNESS);
+		rearCam.setFPS(FPS);
 	}
 
 	@Override
@@ -111,7 +106,8 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() { }
 
+	/* Update Shuffleboard visualizations */
 	public void updateShuffleboardVisualizations() {
-		SmartDashboard.updateValues();
+		Shuffleboard.update();
 	}
 }
