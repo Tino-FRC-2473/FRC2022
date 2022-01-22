@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 // Systems
 import frc.robot.systems.FSMSystem;
 import frc.robot.systems.DriveFSMSystem;
+import frc.robot.systems.TestGyroFSMSystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -18,8 +19,7 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 
 	// Systems
-	private FSMSystem fsmSystem;
-	private DriveFSMSystem driveFsmSystem;
+	private TestGyroFSMSystem test;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -31,30 +31,29 @@ public class Robot extends TimedRobot {
 		input = new TeleopInput();
 
 		// Instantiate all systems here
-		fsmSystem = new FSMSystem();
-		driveFsmSystem = new DriveFSMSystem();
+		test = new TestGyroFSMSystem();
 	}
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
-		fsmSystem.reset();
+		test.reset();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
-		driveFsmSystem.reset();
+		
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		driveFsmSystem.reset();
+		test.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		driveFsmSystem.update(input);
+		test.update(input);
 	}
 
 	@Override
