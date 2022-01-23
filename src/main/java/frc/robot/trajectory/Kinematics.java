@@ -4,23 +4,17 @@ import frc.robot.Constants;
 
 public class Kinematics {
 
-    public Point updateLineOdometry(double gyroAngle, double leftEncoderPos, 
-    double rightEncoderPos, double prevEncoderPos, Point robotPos) {
-        double currentEncoderPos = ((-leftEncoderPos
-            + rightEncoderPos) / 2.0);
+    public static Point updateLineOdometry(double gyroAngle, double currentEncoderPos, double prevEncoderPos, Point robotPos) {
+        // double currentEncoderPos = ((-leftEncoderPos + rightEncoderPos) / 2.0);
         double dEncoder = (currentEncoderPos - prevEncoderPos) / Constants.REVOLUTIONS_PER_INCH;
         double dX = dEncoder * Math.cos(Math.toRadians(gyroAngle));
         double dY = dEncoder * Math.sin(Math.toRadians(gyroAngle));
-        return new Point(robotPos.x + dX, robotPos.y + dY);
 
-        //System.out.println("Raw Encoder Value: " + currentEncoderPos);
-        //System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
+        return new Point(robotPos.x + dX, robotPos.y + dY);
     }
 
-    public Point updateArcOdometry(double gyroAngle, double prevGyroAngle, double leftEncoderPos, 
-    double rightEncoderPos, double prevEncoderPos, Point robotPos) {
+    public static Point updateArcOdometry(double gyroAngle, double prevGyroAngle, double currentEncoderPos, double prevEncoderPos, Point robotPos) {
         double theta = Math.abs(gyroAngle - prevGyroAngle);
-        double currentEncoderPos = ((-leftEncoderPos + rightEncoderPos) / 2.0);
         double arcLength = (currentEncoderPos - prevEncoderPos) / Constants.REVOLUTIONS_PER_INCH;
         if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
             theta = Constants.ODOMETRY_MIN_THETA;
@@ -34,8 +28,6 @@ public class Kinematics {
         double robotNewYPos = circleY + radius * Math.sin(Math.toRadians(beta));
 
         return new Point(robotNewXPos, robotNewYPos);
-        //System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
-
     }
 
     public static Point inversekinematics(double gyroHeading, Point robotPos, Point targetPos) {
