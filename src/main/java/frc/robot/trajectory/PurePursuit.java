@@ -56,6 +56,7 @@ public class PurePursuit {
         }
         int indexOfMin = tempDistances.indexOf(Collections.min(tempDistances));
         lastClosestPointIndex += indexOfMin;
+        return pathPoints.get(lastClosestPointIndex < pathPoints.size() ? lastClosestPointIndex : pathPoints.size() - 1);
     }
 
     private void calculateCurvature() {
