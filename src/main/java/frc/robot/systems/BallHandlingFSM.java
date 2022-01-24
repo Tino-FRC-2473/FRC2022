@@ -36,7 +36,8 @@ public class BallHandlingFSM {
 	 */
 	public BallHandlingFSM() {
 		// Perform hardware init
-		pushSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM, HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID);
+		pushSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM, 
+		HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID);
 
 		// Reset state machine
 		reset();
