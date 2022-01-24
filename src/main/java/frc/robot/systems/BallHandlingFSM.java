@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.Timer;
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
 
-public class BlueMech {
+public class BallHandlingFSM {
 	/* ======================== Constants ======================== */
 	// FSM state definitions
 	public enum FSMState {
@@ -19,12 +19,12 @@ public class BlueMech {
 		FIRING
 	}
 
-	private static final int PUSH_TIME = 3;
+	private static final int PUSH_TIME_SECONDS = 3;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
 
-	private Solenoid push;
+	private Solenoid pushSolenoid;
 
 	private double pushCommandTime;
 
@@ -34,9 +34,9 @@ public class BlueMech {
 	 * one-time initialization or configuration of hardware required. Note
 	 * the constructor is called only once when the robot boots.
 	 */
-	public BlueMech() {
+	public BallHandlingFSM() {
 		// Perform hardware init
-		push = new Solenoid(PneumaticsModuleType.CTREPCM, HardwareMap.PUSH_BOT_SOLENOID);
+		pushSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM, HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID);
 
 		// Reset state machine
 		reset();
@@ -108,7 +108,7 @@ public class BlueMech {
 				}
 
 			case FIRING:
-				if (Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME) {
+				if (Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
 					return FSMState.IDLE;
 				} else {
 					return FSMState.FIRING;
@@ -126,7 +126,7 @@ public class BlueMech {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIdleState(TeleopInput input) {
-		push.set(false);
+		pushSolenoid.set(false);
 	}
 	/**
 	 * Handle behavior in FIRING.
@@ -134,6 +134,6 @@ public class BlueMech {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleFiringState(TeleopInput input) {
-		push.set(true);
+		pushSolenoid.set(true);
 	}
 }
