@@ -13,6 +13,8 @@ import frc.robot.TeleopInput;
 import frc.robot.drive.DriveModes;
 import frc.robot.drive.DrivePower;
 import frc.robot.drive.Functions;
+import frc.robot.trajectory.Kinematics;
+import frc.robot.trajectory.Point;
 import frc.robot.HardwareMap;
 import frc.robot.Constants;
 
@@ -27,24 +29,26 @@ public class DriveFSMSystem {
 		TELEOP_STATE
 	}
 
-	/* ======================== Private variables ======================== */
-	private FSMState currentState;
-	private boolean finishedMovingStraight;
-	private boolean finishedTurning;
-	private double forwardStateInitialEncoderPos = -1;
-	private double gyroAngle = 0;
-	private double robotXPosLine = 0;
-	private double robotYPosLine = 0;
-	private double prevEncoderPosLine = 0;
-	private double prevEncoderPosArc = 0;
-	private double robotXPosArc = 0;
-	private double robotYPosArc = 0;
-	private double prevGyroAngle = 0;
-	private double leftPower = 0;
-	private double rightPower = 0;
-	private Timer timer;
-	private double currentTime = 0;
-	private boolean isDrivingForward = true;
+    /* ======================== Private variables ======================== */
+    private FSMState currentState;
+    private boolean finishedMovingStraight;
+    private boolean finishedTurning;
+    private double forwardStateInitialEncoderPos = -1;
+    private double gyroAngle = 0;
+    private Point robotPosLine = new Point(0, 0);
+    // private double robotXPosLine = 0;
+    // private double robotYPosLine = 0;
+    private double prevEncoderPosLine = 0;
+    private double prevEncoderPosArc = 0;
+    private Point robotPosArc = new Point(0, 0);
+    // private double robotXPosArc = 0;
+    // private double robotYPosArc = 0;
+    private double prevGyroAngle = 0;
+    private double leftPower = 0;
+    private double rightPower = 0;
+    private Timer timer;
+    private double currentTime = 0;
+    private boolean isDrivingForward = true;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -392,29 +396,52 @@ public class DriveFSMSystem {
 		robotXPosLine += dX;
 		robotYPosLine += dY;
 
-		prevEncoderPosLine = currentEncoderPos;
-		System.out.println("line odo: (" + robotXPosLine + ", " + robotYPosLine + ")");
-	}
+    public Point updateLineOdometry() {
+       robotPosLine = Kinematics.updateLineOdometry(gyroAngle, frontLeftMotor.getEncoder().getPosition(), frontRightMotor.getEncoder().getPosition(), prevEncoderPosLine, robotPosLine);
 
-	private void updateArcOdometry() {
-		double adjustedAngle = gyroAngle;
-		double theta = Math.abs(adjustedAngle - prevGyroAngle);
-		double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
-		double arcLength = (currentEncoderPos - prevEncoderPosArc) / Constants.REVOLUTIONS_PER_INCH;
-		if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
-			theta = Constants.ODOMETRY_MIN_THETA;
-		}
-		double radius = 180 * arcLength / (Math.PI * theta);
-		double alpha = prevGyroAngle - 90;
-		double circleX = robotXPosArc + radius * Math.cos(Math.toRadians(alpha));
-		double circleY = robotYPosArc + radius * Math.sin(Math.toRadians(alpha));
-		double beta = alpha + 180 - theta;
-		robotXPosArc = circleX + radius * Math.cos(Math.toRadians(beta));
-		robotYPosArc = circleY + radius * Math.sin(Math.toRadians(beta));
+       prevEncoderPosLine = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
 
-		prevGyroAngle = adjustedAngle;
-		prevEncoderPosArc = currentEncoderPos;
-		System.out.println("arc odo: (" + robotXPosArc + ", " + robotYPosArc + ")");
-	}
+       return robotPosLine;
+        // double adjustedAngle = gyroAngle;
+        // double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+        //     + frontRightMotor.getEncoder().getPosition()) / 2.0);
+        // double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
+        // double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
+        // double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
+        // robotXPosLine += dX;
+        // robotYPosLine += dY;
+
+        // prevEncoderPosLine = currentEncoderPos;
+        //System.out.println("Raw Encoder Value: " + currentEncoderPos);
+        //System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
+    }
+
+    public Point updateArcOdometry() {
+        robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle, frontLeftMotor.getEncoder().getPosition(), frontRightMotor.getEncoder().getPosition(), prevEncoderPosArc, robotPosArc);
+
+        prevGyroAngle = gyroAngle;
+        prevEncoderPosArc = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
+
+        return robotPosArc;
+        // double adjustedAngle = gyroAngle;
+        // double theta = Math.abs(adjustedAngle - prevGyroAngle);
+        // double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+        //     + frontRightMotor.getEncoder().getPosition()) / 2.0);
+        // double arcLength = (currentEncoderPos - prevEncoderPosArc) / Constants.REVOLUTIONS_PER_INCH;
+        // if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
+        //     theta = Constants.ODOMETRY_MIN_THETA;
+        // }
+        // double radius = 180 * arcLength / (Math.PI * theta);
+        // double alpha = prevGyroAngle - 90;
+        // double circleX = robotXPosArc + radius * Math.cos(Math.toRadians(alpha));
+        // double circleY = robotYPosArc + radius * Math.sin(Math.toRadians(alpha));
+        // double beta = alpha + 180 - theta;
+        // robotXPosArc = circleX + radius * Math.cos(Math.toRadians(beta));
+        // robotYPosArc = circleY + radius * Math.sin(Math.toRadians(beta));
+
+        // prevGyroAngle = adjustedAngle;
+        // prevEncoderPosArc = currentEncoderPos;
+        //System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
+
+    }
 }

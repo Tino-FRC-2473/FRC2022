@@ -21,4 +21,8 @@ public class Point {
         double newY = y + v.getYMag();
         return new Point(newX, newY);
     }
+
+    public static double findDistance(Point a, Point b){
+        return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+    }
 }
