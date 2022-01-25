@@ -444,4 +444,8 @@ public class DriveFSMSystem {
         //System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
 
     }
+
+    public Point getRobotPosArc() {
+        return robotPosArc;
+    }
 }

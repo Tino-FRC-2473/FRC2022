@@ -59,13 +59,25 @@ public class PurePursuit {
         return pathPoints.get(lastClosestPointIndex < pathPoints.size() ? lastClosestPointIndex : pathPoints.size() - 1);
     }
 
-    private void calculateCurvature() {
+    private double calculateCurvature() {
+        Point robotPos = fsmSystem.getRobotPosArc();
+        double robotHeading = fsmSystem.getHeading();
+
         // prevent OOB errors
         int lookaheadPointIndex = lastClosestPointIndex + lookaheadDistance;
         Point lookaheadPoint = lookaheadPointIndex < pathPoints.size() ? pathPoints.get(lookaheadPointIndex) : pathPoints.get(pathPoints.size() - 1);
         double distanceToLookahead = Point.findDistance(fsmSystem.updateArcOdometry(), lookaheadPoint);
-        // double curvature = 
-        // double side = 
-        // return double signedCurvature = curvature * side
+        
+        // x is the horizontal distance to the lookahead point, a is -tan(robot angle), b = 1, c = tan(robot angle) * robot x - robot y
+        double a = -Math.tan(robotHeading);
+        double b = 1.0;
+        double c = (Math.tan(robotHeading) * robotPos.x) - robotPos.y;
+        double x = Math.abs(a * lookaheadPoint.x + b * lookaheadPoint.y + c) / Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+
+
+        double curvature = (2 * x) / Math.pow(distanceToLookahead, 2);
+        double side = Math.signum(Math.sin(robotHeading * (lookaheadPoint.x - robotPos.x) - Math.cos(robotHeading * (lookaheadPoint.y - robotPos.y))));
+
+        return curvature * side;
     }
 }
