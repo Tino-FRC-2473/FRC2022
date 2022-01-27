@@ -310,7 +310,8 @@ public class DriveFSMSystem {
             return;
         }
 
-        double joystickY = input.getDrivingJoystickY();
+        double leftJoystickY = input.getLeftJoystickY();
+        double rightJoystickY = input.getDrivingJoystickY();
         double steerAngle = input.getSteerAngle();
         double currentLeftPower = frontLeftMotor.get();
         double currentRightPower = frontRightMotor.get();
@@ -321,8 +322,10 @@ public class DriveFSMSystem {
             isDrivingForward = false;
         }
 
-        DrivePower targetPower = DriveModes.arcadedrive(joystickY, steerAngle, currentLeftPower, 
-        currentRightPower, isDrivingForward);
+        // DrivePower targetPower = DriveModes.arcadedrive(joystickY, steerAngle, currentLeftPower, 
+        // currentRightPower, isDrivingForward);
+
+        DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
         //multiple speed modes
         if (input.getTriggerPressed()) {
@@ -337,14 +340,14 @@ public class DriveFSMSystem {
         power = Functions.accelerate(targetPower, new DrivePower(currentLeftPower, currentRightPower));
 
         //turning in place
-        if (Math.abs(joystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
-            power = Functions.turnInPlace(joystickY, steerAngle);
-        }
+        // if (Math.abs(joystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+        //     power = Functions.turnInPlace(joystickY, steerAngle);
+        // }
 
         leftPower = power.getLeftPower();
         rightPower = power.getRightPower();
 
-        System.out.println("Ecoder left: " + frontLeftMotor.getEncoder().getPosition());
+        System.out.println("Encoder left: " + frontLeftMotor.getEncoder().getPosition());
         System.out.println("Encoder right: " + frontRightMotor.getEncoder().getPosition());
 
         frontRightMotor.set(rightPower);

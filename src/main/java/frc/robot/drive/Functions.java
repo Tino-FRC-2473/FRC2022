@@ -26,7 +26,8 @@ public class Functions {
     }
 
     public static double calcSteeringPower(double steeringInput) {
-        return (-Math.abs(2 * Math.cos(Math.PI * steeringInput / 2.0 + Math.PI / 2.0)) + 1);
+        //return (-Math.abs(2 * Math.cos(Math.PI * steeringInput / 2.0 + Math.PI / 2.0)) + 1);
+        return 1 - Math.abs(2 * steeringInput);
     }
 
     public static DrivePower turnInPlace(double joystickInput, double steeringInput) {

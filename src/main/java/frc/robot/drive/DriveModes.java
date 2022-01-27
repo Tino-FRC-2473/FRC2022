@@ -35,4 +35,27 @@ public class DriveModes {
 
         return new DrivePower(targetLeftPower, targetRightPower);
     }
+
+    public static DrivePower tankDrive(double leftJoystickY, double rightJoystickY){
+        
+        double leftAdjustedInput = Functions.calcForwardPower(leftJoystickY);
+        double rightAdjustedInput = Functions.calcForwardPower(rightJoystickY);
+
+        if (leftJoystickY < 0 && leftAdjustedInput > 0) {
+            leftAdjustedInput *= -1;
+        }
+
+        if (rightJoystickY < 0 && rightAdjustedInput > 0) {
+            rightAdjustedInput *= -1;
+        }
+
+        double targetLeftPower = leftAdjustedInput;
+        double targetRightPower = -rightAdjustedInput;
+        
+        if (targetLeftPower + targetRightPower < 0.05) {
+            targetRightPower = -leftAdjustedInput;
+        }
+
+        return new DrivePower(targetLeftPower, targetRightPower);
+    }
 }
