@@ -52,9 +52,9 @@ public class DriveModes {
         double targetLeftPower = leftAdjustedInput;
         double targetRightPower = -rightAdjustedInput;
         
-        if (targetLeftPower + targetRightPower < 0.05) {
-            targetRightPower = -leftAdjustedInput;
-        }
+        // if (targetLeftPower + targetRightPower < 0.05) {
+        //     targetRightPower = -leftAdjustedInput;
+        // }
 
         return new DrivePower(targetLeftPower, targetRightPower);
     }
