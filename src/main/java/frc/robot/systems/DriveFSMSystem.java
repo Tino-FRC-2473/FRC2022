@@ -57,8 +57,7 @@ public class DriveFSMSystem {
     private CANSparkMax frontLeftMotor;
     private CANSparkMax backLeftMotor;
 
-    // private AHRS gyro;
-    private ADIS16448_IMU imu;
+    private AHRS gyro;
 
     /* ======================== Constructor ======================== */
     /**
@@ -78,8 +77,7 @@ public class DriveFSMSystem {
         backLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_BACK_LEFT,
                                             CANSparkMax.MotorType.kBrushless);
 
-        // gyro = new AHRS(SPI.Port.kMXP);
-        imu = new ADIS16448_IMU();
+        gyro = new AHRS(SPI.Port.kMXP);
 
         timer = new Timer();
 
@@ -110,9 +108,8 @@ public class DriveFSMSystem {
         backRightMotor.getEncoder().setPosition(0);
         backLeftMotor.getEncoder().setPosition(0);
 
-        // gyro.reset();
-        // gyro.zeroYaw();
-        imu.reset();
+        gyro.reset();
+        gyro.zeroYaw();
 
         finishedMovingStraight = false;
         finishedTurning = false;
@@ -136,8 +133,12 @@ public class DriveFSMSystem {
         //System.out.println("DTime: " + (updatedTime - currentTime));
         currentTime = updatedTime;
         gyroAngle = getHeading();
+        System.out.println("gyro angle: " + gyroAngle);
         updateLineOdometry();
         updateArcOdometry();
+        System.out.println("left motor: " + frontLeftMotor.getEncoder().getPosition());
+        System.out.println("right motor: " + frontRightMotor.getEncoder().getPosition());
+
         switch (currentState) {
             case START_STATE:
                 handleStartState(input);
@@ -302,7 +303,7 @@ public class DriveFSMSystem {
     * @return the gyro heading
     */
     private double getHeading() {
-        return 90 - imu.getGyroAngleZ();
+        return 90 - gyro.getYaw();
     }
 
     private void handleTeleOpState(TeleopInput input) {
@@ -322,10 +323,10 @@ public class DriveFSMSystem {
             isDrivingForward = false;
         }
 
-        // DrivePower targetPower = DriveModes.arcadedrive(joystickY, steerAngle, currentLeftPower, 
-        // currentRightPower, isDrivingForward);
+        DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY, steerAngle, currentLeftPower, 
+        currentRightPower, isDrivingForward);
 
-        DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
+        // DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
         //multiple speed modes
         if (input.getTriggerPressed()) {
@@ -340,9 +341,9 @@ public class DriveFSMSystem {
         power = Functions.accelerate(targetPower, new DrivePower(currentLeftPower, currentRightPower));
 
         //turning in place
-        // if (Math.abs(joystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
-        //     power = Functions.turnInPlace(joystickY, steerAngle);
-        // }
+        if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+            power = Functions.turnInPlace(rightJoystickY, steerAngle);
+        }
 
         leftPower = power.getLeftPower();
         rightPower = power.getRightPower();
@@ -384,8 +385,8 @@ public class DriveFSMSystem {
         robotYPosLine += dY;
 
         prevEncoderPosLine = currentEncoderPos;
-        //System.out.println("Raw Encoder Value: " + currentEncoderPos);
-        //System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
+        System.out.println("Raw Encoder Value: " + currentEncoderPos);
+        System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
     }
 
     private void updateArcOdometry() {
@@ -407,7 +408,7 @@ public class DriveFSMSystem {
 
         prevGyroAngle = adjustedAngle;
         prevEncoderPosArc = currentEncoderPos;
-        //System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
+        System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
 
     }
 }

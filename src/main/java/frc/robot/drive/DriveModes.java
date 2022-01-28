@@ -1,5 +1,7 @@
 package frc.robot.drive;
 
+import frc.robot.Constants;
+
 public class DriveModes {
     public static DrivePower arcadedrive(double joystickY, double steerAngle, 
     double currentLeftPower, double currentRightPower, boolean isDrivingForward) {
@@ -41,6 +43,12 @@ public class DriveModes {
         double leftAdjustedInput = Functions.calcForwardPower(leftJoystickY);
         double rightAdjustedInput = Functions.calcForwardPower(rightJoystickY);
 
+        //if the left and right joysticks are close to the same value
+        //make the power equal (makes driving straight easier)
+        if (Math.abs(leftAdjustedInput - rightAdjustedInput) < 0.05) {
+            rightAdjustedInput = leftAdjustedInput;
+        }
+
         if (leftJoystickY < 0 && leftAdjustedInput > 0) {
             leftAdjustedInput *= -1;
         }
@@ -52,9 +60,13 @@ public class DriveModes {
         double targetLeftPower = leftAdjustedInput;
         double targetRightPower = -rightAdjustedInput;
         
-        // if (targetLeftPower + targetRightPower < 0.05) {
-        //     targetRightPower = -leftAdjustedInput;
-        // }
+        //check if the resulting power will be too low
+        if(Math.abs(targetLeftPower) < Constants.TELEOP_MIN_MOVE_POWER) {
+            targetLeftPower = 0;
+        }
+        if(Math.abs(targetRightPower) < Constants.TELEOP_MIN_MOVE_POWER) {
+            targetRightPower = 0;
+        }
 
         return new DrivePower(targetLeftPower, targetRightPower);
     }
