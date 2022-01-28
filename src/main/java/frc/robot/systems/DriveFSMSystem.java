@@ -397,9 +397,10 @@ public class DriveFSMSystem {
 		robotYPosLine += dY;
 
     public Point updateLineOdometry() {
-       robotPosLine = Kinematics.updateLineOdometry(gyroAngle, frontLeftMotor.getEncoder().getPosition(), frontRightMotor.getEncoder().getPosition(), prevEncoderPosLine, robotPosLine);
 
-       prevEncoderPosLine = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
+        double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
+        robotPosLine = Kinematics.updateLineOdometry(gyroAngle, newEncoderPos, prevEncoderPosLine, robotPosLine);
+        prevEncoderPosLine = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
 
        return robotPosLine;
         // double adjustedAngle = gyroAngle;
@@ -417,10 +418,11 @@ public class DriveFSMSystem {
     }
 
     public Point updateArcOdometry() {
-        robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle, frontLeftMotor.getEncoder().getPosition(), frontRightMotor.getEncoder().getPosition(), prevEncoderPosArc, robotPosArc);
+        double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
+        robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle, newEncoderPos, prevEncoderPosArc, robotPosArc);
 
         prevGyroAngle = gyroAngle;
-        prevEncoderPosArc = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
+        prevEncoderPosArc = newEncoderPos;
 
         return robotPosArc;
         // double adjustedAngle = gyroAngle;
