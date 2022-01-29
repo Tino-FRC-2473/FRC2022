@@ -44,7 +44,7 @@ public class TeleopInput {
     // control mapping is hidden from other classes.
 
     /* ------------------------ Left Joystick ------------------------ */
-    
+
     /**
      * Get Y axis of Left Joystick.
      * @return Axis value
@@ -65,7 +65,7 @@ public class TeleopInput {
 
     /* ------------------------ Wheel ------------------------ */
     /**
-     * Get Angle of the steering Wheel.
+     * Get Angle of the steering Wheel from -1 to 1.
      * @return Angle
      */
     public double getSteerAngle() {

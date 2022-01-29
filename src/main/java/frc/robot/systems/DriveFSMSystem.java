@@ -114,7 +114,7 @@ public class DriveFSMSystem {
         finishedMovingStraight = false;
         finishedTurning = false;
 
-        currentState = FSMState.TELEOP_STATE;
+        currentState = FSMState.TURN_STATE;
 
         timer.reset();
 		timer.start();
@@ -149,7 +149,7 @@ public class DriveFSMSystem {
                 break;
 
             case TURN_STATE:
-                handleTurnState(input, 90); // test 90 degrees
+                handleTurnState(input, 180); // test 180 degrees
                 break;
 
             default:
@@ -276,19 +276,19 @@ public class DriveFSMSystem {
     */
     private void handleTurnState(TeleopInput input, double degrees) {
         double error = degrees - getHeading();
-        if (error <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
+        if (Math.abs(error) <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
             finishedTurning = true;
             return;
         }
         double power = error / Constants.TURN_ERROR_POWER_RATIO;
         if (Math.abs(power) < Constants.MIN_TURN_POWER) {
-            power = Constants.MIN_TURN_POWER * power < 0 ? -1 : 1;
+            power = Constants.MIN_TURN_POWER * (power < 0 ? -1 : 1);
         }
 
-        // frontLeftMotor.set(power);
-        // frontRightMotor.set(-power);
-        // backLeftMotor.set(power);
-        // backRightMotor.set(-power);
+        frontLeftMotor.set(power);
+        frontRightMotor.set(power);
+        backLeftMotor.set(power);
+        backRightMotor.set(power);
     }
 
     /**
