@@ -7,6 +7,8 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.cameraserver.CameraServer;
 // import edu.wpi.first.cscore.CvSink;
 // import edu.wpi.first.cscore.CvSource;
@@ -29,6 +31,8 @@ public class Robot extends TimedRobot {
 	private final int CAMERA_BRIGHTNESS = 25;
 	private final int FPS = 15;
 
+	NetworkTableEntry cameraSelection;
+
 	/**
 	 * This function is run when the robot is first started up and should be used for any
 	 * initialization code.
@@ -44,6 +48,8 @@ public class Robot extends TimedRobot {
 		UsbCamera frontCam = CameraServer.startAutomaticCapture("Front Camera", 0);
 		frontCam.setBrightness(CAMERA_BRIGHTNESS);
 		frontCam.setFPS(FPS);
+
+		cameraSelection = NetworkTableInstance.getDefault().getTable("").getEntry("Camera Selection");
 
 		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 1);
 		rearCam.setBrightness(CAMERA_BRIGHTNESS);
