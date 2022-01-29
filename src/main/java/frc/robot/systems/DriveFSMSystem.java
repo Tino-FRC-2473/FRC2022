@@ -130,14 +130,10 @@ public class DriveFSMSystem {
      */
     public void update(TeleopInput input) {
         double updatedTime = timer.get();
-        //System.out.println("DTime: " + (updatedTime - currentTime));
         currentTime = updatedTime;
         gyroAngle = getHeading();
-        System.out.println("gyro angle: " + gyroAngle);
         updateLineOdometry();
         updateArcOdometry();
-        System.out.println("left motor: " + frontLeftMotor.getEncoder().getPosition());
-        System.out.println("right motor: " + frontRightMotor.getEncoder().getPosition());
 
         switch (currentState) {
             case START_STATE:
@@ -226,18 +222,15 @@ public class DriveFSMSystem {
 	private void handleForwardOrBackwardState(TeleopInput input,
 	double inches) {
 		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
-		//System.out.println("currrentPosTicks: " + currrentPosTicks);
-		// printing as 0
+
 		if (forwardStateInitialEncoderPos == -1) {
 			forwardStateInitialEncoderPos = currrentPosTicks;
 		}
-		// double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
-		double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
+
+        double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
 		double currentPosInches = (positionRev * Math.PI * Constants.WHEEL_DIAMETER_INCHES) / Constants.GEAR_RATIO;
 		double error = inches - currentPosInches;
-		//System.out.println("Error: " + error);
-		// Error is yeilding a negative number. About -16.8 almost every time. Sometimes
-		// it's -14.2ish
+
 		if (error < Constants.ERR_THRESHOLD_STRAIGHT_IN) {
 			//System.out.println("im here");
 			finishedMovingStraight = true;
@@ -355,23 +348,7 @@ public class DriveFSMSystem {
         frontLeftMotor.set(leftPower);
         backRightMotor.set(rightPower);
         backLeftMotor.set(leftPower);
-
-        //check if voltage can be negative
-        // frontRightMotor.setVoltage(rightPower * 12);
-        // frontLeftMotor.setVoltage(leftPower * 12);
-        // backRightMotor.setVoltage(rightPower * 12);
-        // backLeftMotor.setVoltage(leftPower * 12);
         
-    }
-
-    private double limitPower(double number) {
-        if (number > 1) {
-            return 1;
-        }
-        if (number < -1) {
-            return -1;
-        }
-        return number;
     }
 
     private void updateLineOdometry() {
@@ -385,8 +362,6 @@ public class DriveFSMSystem {
         robotYPosLine += dY;
 
         prevEncoderPosLine = currentEncoderPos;
-        System.out.println("Raw Encoder Value: " + currentEncoderPos);
-        System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
     }
 
     private void updateArcOdometry() {
@@ -408,7 +383,5 @@ public class DriveFSMSystem {
 
         prevGyroAngle = adjustedAngle;
         prevEncoderPosArc = currentEncoderPos;
-        System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
-
     }
 }
