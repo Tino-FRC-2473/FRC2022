@@ -80,7 +80,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {
-
+		updateShuffleboardVisualizations();
 	}
 
 	/* Simulation mode handlers, only used for simulation testing  */
