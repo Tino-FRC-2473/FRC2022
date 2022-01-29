@@ -13,7 +13,7 @@ public class Constants {
     public static final double TELEOP_MIN_MOVE_POWER = 0.05;
     public static final double JOYSTICK_INPUT_ADJUSTMENT = 2.0;
     public static final double TURN_ERROR_POWER_RATIO = 360;
-    public static final double MIN_TURN_POWER = 0.1;
+    public static final double MIN_TURN_POWER = 0.0625;
     public static final double TURN_ERROR_THRESHOLD_DEGREE = 1.0;
     public static final double TELEOP_ACCELERATION_CONSTANT = 0.05;
     public static final double TELEOP_ACCELERATION_MIN = 0.1;
