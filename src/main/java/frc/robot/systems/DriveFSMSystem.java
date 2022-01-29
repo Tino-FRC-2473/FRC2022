@@ -399,22 +399,22 @@ public class DriveFSMSystem {
     public Point updateLineOdometry() {
 
         double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
-        robotPosLine = Kinematics.updateLineOdometry(gyroAngle, newEncoderPos, prevEncoderPosLine, robotPosLine);
-        prevEncoderPosLine = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
+    //     robotPosLine = Kinematics.updateLineOdometry(gyroAngle, newEncoderPos, prevEncoderPosLine, robotPosLine);
+    //     prevEncoderPosLine = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
 
-       return robotPosLine;
-        // double adjustedAngle = gyroAngle;
-        // double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-        //     + frontRightMotor.getEncoder().getPosition()) / 2.0);
-        // double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
-        // double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
-        // double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
-        // robotXPosLine += dX;
-        // robotYPosLine += dY;
+    //    return robotPosLine;
+        double adjustedAngle = gyroAngle;
+        double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+            + frontRightMotor.getEncoder().getPosition()) / 2.0);
+        double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
+        double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
+        double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
+        robotPosLine.addX(dX);
+        robotPosLine.addY(dY);
 
-        // prevEncoderPosLine = currentEncoderPos;
-        //System.out.println("Raw Encoder Value: " + currentEncoderPos);
-        //System.out.println("Line: (" + robotXPosLine + ", " + robotYPosLine + ")");
+        prevEncoderPosLine = currentEncoderPos;
+        System.out.println("line odo: (" + robotPosLine.getX() + ", " + robotPosLine.getY() + ")");
+        return robotPosLine;
     }
 
     public Point updateArcOdometry() {

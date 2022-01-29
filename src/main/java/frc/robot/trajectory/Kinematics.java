@@ -26,7 +26,7 @@ public class Kinematics {
         double beta = alpha + 180 - theta;
         double robotNewXPos = circleX + radius * Math.cos(Math.toRadians(beta));
         double robotNewYPos = circleY + radius * Math.sin(Math.toRadians(beta));
-
+        
         return new Point(robotNewXPos, robotNewYPos);
     }
 
