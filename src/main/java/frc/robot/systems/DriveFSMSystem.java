@@ -26,6 +26,8 @@ public class DriveFSMSystem {
     public enum FSMState {
         START_STATE,
         FORWARD_STATE_10_IN,
+        BACK_TO_TARMAC,
+        BACK_TO_HUB,
         TURN_STATE,
         TELEOP_STATE
     }
@@ -114,7 +116,7 @@ public class DriveFSMSystem {
         finishedMovingStraight = false;
         finishedTurning = false;
 
-        currentState = FSMState.TURN_STATE;
+        currentState = FSMState.TELEOP_STATE;
 
         timer.reset();
 		timer.start();
@@ -132,6 +134,7 @@ public class DriveFSMSystem {
         double updatedTime = timer.get();
         currentTime = updatedTime;
         gyroAngle = getHeading();
+        System.out.println("gyro angle: " + gyroAngle);
         updateLineOdometry();
         updateArcOdometry();
 
@@ -145,11 +148,19 @@ public class DriveFSMSystem {
                 break;
 
             case FORWARD_STATE_10_IN:
-                handleForwardOrBackwardState(input, 30);
+                handleForwardOrBackwardState(input, 55.44);
+                break;
+
+            case BACK_TO_TARMAC:
+                handleForwardOrBackwardState(input, -83.577);
+                break;
+
+            case BACK_TO_HUB:
+                handleForwardOrBackwardState(input, -23.128);
                 break;
 
             case TURN_STATE:
-                handleTurnState(input, 180); // test 180 degrees
+                handleTurnState(input, 69.125);
                 break;
 
             default:
@@ -184,17 +195,35 @@ public class DriveFSMSystem {
                 if (finishedMovingStraight) {
                     finishedMovingStraight = false;
                     forwardStateInitialEncoderPos = -1;
-                    return FSMState.TELEOP_STATE;
+                    return FSMState.BACK_TO_TARMAC;
                 } else {
                     return FSMState.FORWARD_STATE_10_IN;
                 }
 
+                case BACK_TO_TARMAC:
+                    if (finishedMovingStraight) {
+                        finishedMovingStraight = false;
+                        forwardStateInitialEncoderPos = -1;
+                        return FSMState.TURN_STATE;
+                    } else {
+                        return FSMState.BACK_TO_TARMAC;
+                    }
+
             case TURN_STATE:
                 if (finishedTurning) {
                     finishedTurning = false;
-                    return FSMState.TELEOP_STATE;
+                    return FSMState.BACK_TO_HUB;
                 } else {
                     return FSMState.TURN_STATE;
+                }
+
+            case BACK_TO_HUB:
+                if (finishedMovingStraight) {
+                    finishedMovingStraight = false;
+                    forwardStateInitialEncoderPos = -1;
+                    return FSMState.TELEOP_STATE;
+                } else {
+                    return FSMState.BACK_TO_HUB;
                 }
 
             default:
@@ -220,42 +249,44 @@ public class DriveFSMSystem {
     * when the state/handler method was first initiated
     */
 	private void handleForwardOrBackwardState(TeleopInput input,
-	double inches) {
-		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
+    double inches) {
 
-		if (forwardStateInitialEncoderPos == -1) {
-			forwardStateInitialEncoderPos = currrentPosTicks;
-		}
-
+        double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
+        System.out.println("currrentPosTicks: " + currrentPosTicks);
+        if (forwardStateInitialEncoderPos == -1) {
+            forwardStateInitialEncoderPos = currrentPosTicks;
+        }
+        // double positionRev = frontLeftMotor.getEncoder().getPosition() - forwardStateInitialEncoderPos;
         double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
-		double currentPosInches = (positionRev * Math.PI * Constants.WHEEL_DIAMETER_INCHES) / Constants.GEAR_RATIO;
-		double error = inches - currentPosInches;
+        double currentPosInches = (positionRev * Math.PI * Constants.WHEEL_DIAMETER_INCHES) / Constants.GEAR_RATIO;
+        double error = inches - currentPosInches;
+        System.out.println("Inches: " + inches);
+        System.out.println("Error: " + error);
 
-		if (error < Constants.ERR_THRESHOLD_STRAIGHT_IN) {
-			//System.out.println("im here");
-			finishedMovingStraight = true;
+        // Try This Next Time:
+        if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN) || 
+        (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
+            System.out.println("im here");
+            finishedMovingStraight = true;
+            forwardStateInitialEncoderPos = -1;
             setPowerForAllMotors(0);
             return;
-		}
-		// another version of KP_MOVE_STRAIGHT which is dependent on the inches moved
-		// double speedMultipler = 0.1; 
-		// speed multipler if it is dependent on the inches 
-		// double speedMultipler = inches / 100;
-		
-		double speed = Constants.KP_MOVE_STRAIGHT * error;
-		//System.out.println("speed: " + speed);
-		// double speed = speedMultipler * error;
+        }
 
-		if (speed >= 0.1) {
-			// make this 0.7ish if this is too fast
-			setPowerForAllMotors(0.1);
-		} else if (speed <= -0.1) {
-			// goes in here everytime (wheels moving backwards)
-			setPowerForAllMotors(-0.1);
-		} else {
-			setPowerForAllMotors(speed);
-		}
-	}
+        double speed = Constants.KP_MOVE_STRAIGHT * error;
+        //System.out.println("speed: " + speed);
+        // double speed = speedMultipler * error;
+
+        if (speed >= 0.1) {
+            // To adjust the speed of the robot, play around with the front decimal. It represents the max power
+            setPowerForAllMotors(0.25 * (-Math.pow((2.8 * Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2) + 0.6));
+        } else if (speed <= -0.1) {
+            // goes in here everytime (wheels moving backwards)
+            setPowerForAllMotors(-0.1);
+        } else {
+            setPowerForAllMotors(speed);
+        }
+    }
 
     /**
     * Sets power for all motors.
@@ -275,6 +306,7 @@ public class DriveFSMSystem {
     * @param degrees The final angle of the robot after the desired turn
     */
     private void handleTurnState(TeleopInput input, double degrees) {
+        System.out.println("angle: " + gyroAngle);
         double error = degrees - getHeading();
         if (Math.abs(error) <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
             finishedTurning = true;
@@ -296,7 +328,9 @@ public class DriveFSMSystem {
     * @return the gyro heading
     */
     private double getHeading() {
-        return 90 - gyro.getYaw();
+        double angle = 90 - gyro.getYaw();
+        if(angle < 0) angle += 360;
+        return angle;
     }
 
     private void handleTeleOpState(TeleopInput input) {
@@ -362,6 +396,7 @@ public class DriveFSMSystem {
         robotYPosLine += dY;
 
         prevEncoderPosLine = currentEncoderPos;
+        System.out.println("line odo: (" + robotXPosLine + ", " + robotYPosLine + ")");
     }
 
     private void updateArcOdometry() {
@@ -383,5 +418,6 @@ public class DriveFSMSystem {
 
         prevGyroAngle = adjustedAngle;
         prevEncoderPosArc = currentEncoderPos;
+        System.out.println("arc odo: (" + robotXPosArc + ", " + robotYPosArc + ")");
     }
 }
