@@ -22,11 +22,10 @@ public class Functions {
     }
 
     public static double calcForwardPower(double joystickInput) {
-        return (1 - Math.cos(Math.PI * (Math.abs(joystickInput) / 2.0)));
+        return (1 - Math.cos(Math.PI * joystickInput / 2.0));
     }
 
     public static double calcSteeringPower(double steeringInput) {
-        //return (-Math.abs(2 * Math.cos(Math.PI * steeringInput / 2.0 + Math.PI / 2.0)) + 1);
         return 1 - Math.abs(2 * steeringInput);
     }
 

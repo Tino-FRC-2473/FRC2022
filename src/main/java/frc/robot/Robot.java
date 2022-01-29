@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 
 // Systems
-import frc.robot.systems.FSMSystem;
 import frc.robot.systems.DriveFSMSystem;
 
 /**
@@ -18,7 +17,6 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 
 	// Systems
-	private FSMSystem fsmSystem;
 	private DriveFSMSystem driveFsmSystem;
 
 	/**
@@ -31,19 +29,18 @@ public class Robot extends TimedRobot {
 		input = new TeleopInput();
 
 		// Instantiate all systems here
-		fsmSystem = new FSMSystem();
 		driveFsmSystem = new DriveFSMSystem();
 	}
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
-		fsmSystem.reset();
+		driveFsmSystem.reset();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
-		driveFsmSystem.reset();
+		driveFsmSystem.update(input);
 	}
 
 	@Override
