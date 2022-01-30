@@ -16,15 +16,17 @@ public class BallHandlingFSM {
 	// FSM state definitions
 	public enum FSMState {
 		IDLE,
-		FIRING
+		FIRING,
+		RETRACTING
 	}
 
-	private static final int PUSH_TIME_SECONDS = 3;
+	private static final double PUSH_TIME_SECONDS = 3;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
 
 	private Solenoid pushSolenoid;
+	private Solenoid pullSolenoid;
 
 	private double pushCommandTime;
 
@@ -38,6 +40,8 @@ public class BallHandlingFSM {
 		// Perform hardware init
 		pushSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM,
 		HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID);
+		pullSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM,
+		HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
 
 		// Reset state machine
 		reset();
@@ -62,6 +66,8 @@ public class BallHandlingFSM {
 	public void reset() {
 		currentState = FSMState.IDLE;
 
+		pushCommandTime = -1;
+
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
 	}
@@ -79,6 +85,10 @@ public class BallHandlingFSM {
 
 			case FIRING:
 				handleFiringState(input);
+				break;
+
+			case RETRACTING:
+				handleRetractingState(input);
 				break;
 
 			default:
@@ -100,20 +110,23 @@ public class BallHandlingFSM {
 	private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case IDLE:
-				if (input != null && input.isShooterButtonPressed()) {
+				if (input != null && pushCommandTime != -1 && input.isShooterButtonPressed()) {
 					pushCommandTime = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
+				} else if (pushCommandTime != -1 && Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
+					pushCommandTime = -1;
+
+					return FSMState.RETRACTING;
 				} else {
 					return FSMState.IDLE;
 				}
 
 			case FIRING:
-				if (Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
-					return FSMState.IDLE;
-				} else {
-					return FSMState.FIRING;
-				}
+				return FSMState.IDLE;
+
+			case RETRACTING:
+				return FSMState.IDLE;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -128,6 +141,7 @@ public class BallHandlingFSM {
 	 */
 	private void handleIdleState(TeleopInput input) {
 		pushSolenoid.set(false);
+		pullSolenoid.set(false);
 	}
 	/**
 	 * Handle behavior in FIRING.
@@ -136,5 +150,15 @@ public class BallHandlingFSM {
 	 */
 	private void handleFiringState(TeleopInput input) {
 		pushSolenoid.set(true);
+		pullSolenoid.set(false);
+	}
+	/**
+	 * Handle behavior in RETRACTING.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleRetractingState(TeleopInput input) {
+		pushSolenoid.set(false);
+		pullSolenoid.set(true);
 	}
 }
