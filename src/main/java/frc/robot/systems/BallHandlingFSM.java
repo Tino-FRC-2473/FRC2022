@@ -115,7 +115,7 @@ public class BallHandlingFSM {
 
 					return FSMState.FIRING;
 				} else if (pushCommandTime != -1
-				&& Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
+					&& Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
 					pushCommandTime = -1;
 
 					return FSMState.RETRACTING;
