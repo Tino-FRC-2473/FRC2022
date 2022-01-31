@@ -52,6 +52,20 @@ public class TeleopInput {
     public double getLeftJoystickY() {
         return leftJoystick.getY();
     }
+    /**
+	 * Get the value of the shooter button.
+	 * @return True if button is pressed
+	 */
+	public boolean isShooterButtonPressed() {
+		return leftJoystick.getRawButton(1);
+	}
+	/**
+	 * Get the value of the intake button.
+	 * @return True if button is pressed
+	 */
+	public boolean isIntakeButtonPressed() {
+		return leftJoystick.getRawButton(2);
+	}
 
     /* ------------------------ Right Joystick ------------------------ */
 
