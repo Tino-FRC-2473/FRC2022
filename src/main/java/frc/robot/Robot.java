@@ -28,10 +28,10 @@ public class Robot extends TimedRobot {
 	private FSMSystem fsmSystem;
 	
 	// Constants
-	private final int CAMERA_BRIGHTNESS = 25;
-	private final int FPS = 15;
+	private final int cameraBrightness = 25;
+	private final int fps = 15;
 
-	NetworkTableEntry cameraSelection;
+	NetworkTableEntry camSelection;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -46,14 +46,14 @@ public class Robot extends TimedRobot {
 		fsmSystem = new FSMSystem();
 
 		UsbCamera frontCam = CameraServer.startAutomaticCapture("Front Camera", 0);
-		frontCam.setBrightness(CAMERA_BRIGHTNESS);
-		frontCam.setFPS(FPS);
+		frontCam.setBrightness(cameraBrightness);
+		frontCam.setFPS(fps);
 
-		cameraSelection = NetworkTableInstance.getDefault().getTable("").getEntry("Camera Selection");
+		camSelection = NetworkTableInstance.getDefault().getTable("").getEntry("Camera Selection");
 
 		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 1);
-		rearCam.setBrightness(CAMERA_BRIGHTNESS);
-		rearCam.setFPS(FPS);
+		rearCam.setBrightness(cameraBrightness);
+		rearCam.setFPS(fps);
 	}
 
 	@Override
