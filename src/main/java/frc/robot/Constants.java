@@ -24,6 +24,9 @@ public class Constants {
 		= GEAR_RATIO * ENCODER_CONSTANT / (Math.PI * WHEEL_DIAMETER_INCHES);
 	public static final double ODOMETRY_MIN_THETA = 1.0;
 	public static final double MOTOR_RUN_POWER = 0.1;
+	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.25;
+	public static final double MOTOR_INITAL_POWER_ACCELERATION = 0.6;
+	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
 	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.05;
 
 
