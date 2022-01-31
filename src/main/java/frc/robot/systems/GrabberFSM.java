@@ -1,5 +1,6 @@
 package frc.robot.systems;
 
+<<<<<<< HEAD
 // WPILib Imports
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -12,6 +13,12 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 
+=======
+import com.revrobotics.CANSparkMax;
+
+import edu.wpi.first.wpilibj.Joystick;
+// Third party Hardware Imports
+>>>>>>> Set up the Gradle and Cleaned up imports!
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
