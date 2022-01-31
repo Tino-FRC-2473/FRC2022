@@ -1,4 +1,4 @@
-package frc.robot.drivemodes;
+package frc.robot.drive;
 
 public class DrivePower {
 

@@ -37,7 +37,7 @@ public class DriveFSMSystem {
     private boolean finishedMovingStraight;
     private boolean finishedTurning;
     private double forwardStateInitialEncoderPos = -1;
-    // private double rawGyroAngle = 0;
+    private double gyroAngle = 0;
     private double robotXPosLine = 0;
     private double robotYPosLine = 0;
     private double prevEncoderPosLine = 0;
