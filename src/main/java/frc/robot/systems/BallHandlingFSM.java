@@ -67,7 +67,6 @@ public class BallHandlingFSM {
 		currentState = FSMState.IDLE;
 
 		pushCommandTime = -1;
-
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
 	}
@@ -90,7 +89,6 @@ public class BallHandlingFSM {
 			case RETRACTING:
 				handleRetractingState(input);
 				break;
-
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
@@ -110,7 +108,7 @@ public class BallHandlingFSM {
 	private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case IDLE:
-				if (input != null && pushCommandTime != -1 && input.isShooterButtonPressed()) {
+				if (input != null && pushCommandTime == -1 && input.isShooterButtonPressed()) {
 					pushCommandTime = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
