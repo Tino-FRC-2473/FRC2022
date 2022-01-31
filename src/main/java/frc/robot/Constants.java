@@ -29,6 +29,11 @@ public class Constants {
 	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
 	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.05;
 
+	//Path constants
+	public static final double RUN_4_LEAVE_TARMAC_DIST = 55.44;
+	public static final double RUN_4_BACK_TO_TARMAC_DIST = -83.577;
+	public static final double RUN_4_TURN_TO_HUB_ANGLE = 69.125;
+	public static final double RUN_4_BACK_TO_HUB_DIST = -23.128;
 
 	//Teleop Input Constants
 	public static final int LEFT_JOYSTICK_PORT = 0;

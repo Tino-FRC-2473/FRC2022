@@ -143,19 +143,19 @@ public class DriveFSMSystem {
 				break;
 
 			case FORWARD_STATE_10_IN:
-				handleForwardOrBackwardState(input, 55.44);
+				handleForwardOrBackwardState(input, Constants.RUN_4_LEAVE_TARMAC_DIST);
 				break;
 
 			case BACK_TO_TARMAC:
-				handleForwardOrBackwardState(input, -83.577);
+				handleForwardOrBackwardState(input, Constants.RUN_4_BACK_TO_TARMAC_DIST);
 				break;
 
 			case BACK_TO_HUB:
-				handleForwardOrBackwardState(input, -23.128);
+				handleForwardOrBackwardState(input, Constants.RUN_4_BACK_TO_HUB_DIST);
 				break;
 
 			case TURN_STATE:
-				handleTurnState(input, 69.125);
+				handleTurnState(input, Constants.RUN_4_TURN_TO_HUB_ANGLE);
 				break;
 
 			default:
