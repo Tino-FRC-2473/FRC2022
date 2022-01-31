@@ -192,7 +192,7 @@ public class GrabberFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleLowIdleState(TeleopInput input) {
-		
+		motor.set(0);
 	}
 
 	/**
