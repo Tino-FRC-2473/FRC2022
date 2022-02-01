@@ -24,10 +24,6 @@ public class PurePursuit {
 		pointInjection();
 	}
 
-	public void pathGen() {
-
-	}
-
 	private void pointInjection() {
 		for (int i = 1; i < keyPoints.size(); i++) {
 			Point startPoint = keyPoints.get(i - 1);

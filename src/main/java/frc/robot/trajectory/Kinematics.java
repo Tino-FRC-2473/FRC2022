@@ -49,8 +49,12 @@ public class Kinematics {
 			mRT = newtargetPos.getY() / newtargetPos.getX();
 		}
 
-		if (mRT != mRT) System.out.println(mRT);
-		if (Math.abs(newtargetPos.getX()) < 0.01) mRT = newtargetPos.getY() / 0.01;
+		if (mRT != mRT) {
+			System.out.println(mRT);
+		}
+		if (Math.abs(newtargetPos.getX()) < 0.01) {
+			mRT = newtargetPos.getY() / 0.01;
+		}
 		Point center = new Point(0, 0);
 
 		//if mRC - mRT is close to 0, center.getX() will have a divide by 0 error
@@ -92,7 +96,7 @@ public class Kinematics {
 		double p_o = 1;
 
 		//find out whether the left or right side is the inner/outer set of wheels
-		double targetAngle = Math.atan2(newtargetPos.getY(), newtargetPos.getX());
+		double targetAngle = Math.toDegrees(Math.atan2(newtargetPos.getY(), newtargetPos.getX()));
 		if (targetAngle - gyroHeading > 0 || targetAngle - gyroHeading < -180) {
 			//left side is the inner side
 			return new Point(p_i, p_o);
