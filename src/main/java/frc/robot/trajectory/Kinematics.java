@@ -95,8 +95,18 @@ public class Kinematics {
 		double p_i = s_i / s_o;
 		double p_o = 1;
 
-		//find out whether the left or right side is the inner/outer set of wheels
 		double targetAngle = Math.toDegrees(Math.atan2(newtargetPos.getY(), newtargetPos.getX()));
+
+		//check if the point it behind the robot
+		// if (Math.abs(targetAngle - gyroHeading) > 90) {
+		// 	if (Math.abs(targetAngle - gyroHeading) > 180) {
+		// 		return new Point(-1.0, 1.0);
+		// 	} else {
+		// 		return new Point(1.0, -1.0);
+		// 	}
+		// }
+
+		//find out whether the left or right side is the inner/outer set of wheels
 		if (targetAngle - gyroHeading > 0 || targetAngle - gyroHeading < -180) {
 			//left side is the inner side
 			return new Point(p_i, p_o);

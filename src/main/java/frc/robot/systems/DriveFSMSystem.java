@@ -15,8 +15,12 @@ import frc.robot.drive.DrivePower;
 import frc.robot.drive.Functions;
 import frc.robot.trajectory.Kinematics;
 import frc.robot.trajectory.Point;
+import frc.robot.trajectory.PurePursuit;
 import frc.robot.HardwareMap;
 import frc.robot.Constants;
+
+// Java Imports
+import java.util.ArrayList;
 
 public class DriveFSMSystem {
 	// FSM state definitions
@@ -26,7 +30,8 @@ public class DriveFSMSystem {
 		BACK_TO_TARMAC,
 		BACK_TO_HUB,
 		TURN_STATE,
-		TELEOP_STATE
+		TELEOP_STATE, 
+		PURE_PURSUIT
 	}
 
 	/* ======================== Private variables ======================== */
@@ -49,6 +54,10 @@ public class DriveFSMSystem {
 	private Timer timer;
 	private double currentTime = 0;
 	private boolean isDrivingForward = true;
+
+	private PurePursuit ppController;
+	private ArrayList<Point> keyPoints = new ArrayList<>();
+	
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -77,6 +86,12 @@ public class DriveFSMSystem {
 											CANSparkMax.MotorType.kBrushless);
 		backLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_BACK_LEFT,
 											CANSparkMax.MotorType.kBrushless);
+
+		keyPoints.add(new Point(0, 0));
+		keyPoints.add(new Point(0, 25));
+		keyPoints.add(new Point(50, 50));
+		keyPoints.add(new Point(50, 110));
+		ppController = new PurePursuit(keyPoints, this);
 
 		gyro = new AHRS(SPI.Port.kMXP);
 
@@ -115,7 +130,7 @@ public class DriveFSMSystem {
 		finishedMovingStraight = false;
 		finishedTurning = false;
 
-		currentState = FSMState.TELEOP_STATE;
+		currentState = FSMState.PURE_PURSUIT;
 
 		timer.reset();
 		timer.start();
@@ -136,6 +151,7 @@ public class DriveFSMSystem {
 		System.out.println("gyro angle: " + gyroAngle);
 		updateLineOdometry();
 		updateArcOdometry();
+		
 
 		switch (currentState) {
 			case START_STATE:
@@ -161,6 +177,10 @@ public class DriveFSMSystem {
 			case TURN_STATE:
 				handleTurnState(input, Constants.RUN_4_TURN_TO_HUB_ANGLE);
 				break;
+
+			case PURE_PURSUIT:
+				handlePurePursuit();
+				break;	
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -224,6 +244,9 @@ public class DriveFSMSystem {
 				} else {
 					return FSMState.BACK_TO_HUB;
 				}
+
+			case PURE_PURSUIT: 
+				return FSMState.PURE_PURSUIT;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -444,5 +467,15 @@ public class DriveFSMSystem {
 
 	public Point getRobotPosArc() {
 		return robotPosArc;
+	}
+
+	private void handlePurePursuit() {
+		Point target = ppController.findLookahead();
+		System.out.println("Target point: " + target.getX() + " " + target.getY());
+		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target);
+		frontLeftMotor.set(-motorSpeeds.getX() / 5);
+		frontRightMotor.set(motorSpeeds.getY() / 5);
+		backLeftMotor.set(-motorSpeeds.getX() / 5);
+		backRightMotor.set(motorSpeeds.getY() / 5);
 	}
 }
