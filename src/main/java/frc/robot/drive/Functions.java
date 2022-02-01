@@ -31,10 +31,14 @@ public class Functions {
 		return new DrivePower(newLeftPower, newRightPower);
 	}
 
-    public static double calcSteeringPower(double steeringInput) {
-        //return (-Math.abs(2 * Math.cos(Math.PI * steeringInput / 2.0 + Math.PI / 2.0)) + 1);
-        return 1 - Math.abs(2 * steeringInput);
-    }
+	/**
+	 * Calculates the adjusted power to set the motor given the joystick input.
+	 * @param joystickInput the joystick input
+	 * @return the adjusted motor power
+	 */
+	public static double calcForwardPower(double joystickInput) {
+		return (1 - Math.cos(Math.PI * joystickInput / 2.0));
+	}
 
 	/**
 	 * Calculates the adjusted steering power to set the motor

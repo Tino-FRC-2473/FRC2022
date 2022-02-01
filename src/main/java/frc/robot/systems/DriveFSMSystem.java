@@ -29,26 +29,26 @@ public class DriveFSMSystem {
 		TELEOP_STATE
 	}
 
-    /* ======================== Private variables ======================== */
-    private FSMState currentState;
-    private boolean finishedMovingStraight;
-    private boolean finishedTurning;
-    private double forwardStateInitialEncoderPos = -1;
-    private double gyroAngle = 0;
-    private Point robotPosLine = new Point(0, 0);
-    // private double robotXPosLine = 0;
-    // private double robotYPosLine = 0;
-    private double prevEncoderPosLine = 0;
-    private double prevEncoderPosArc = 0;
-    private Point robotPosArc = new Point(0, 0);
-    // private double robotXPosArc = 0;
-    // private double robotYPosArc = 0;
-    private double prevGyroAngle = 0;
-    private double leftPower = 0;
-    private double rightPower = 0;
-    private Timer timer;
-    private double currentTime = 0;
-    private boolean isDrivingForward = true;
+	/* ======================== Private variables ======================== */
+	private FSMState currentState;
+	private boolean finishedMovingStraight;
+	private boolean finishedTurning;
+	private double forwardStateInitialEncoderPos = -1;
+	private double gyroAngle = 0;
+	private Point robotPosLine = new Point(0, 0);
+	// private double robotXPosLine = 0;
+	// private double robotYPosLine = 0;
+	private double prevEncoderPosLine = 0;
+	private double prevEncoderPosArc = 0;
+	private Point robotPosArc = new Point(0, 0);
+	// private double robotXPosArc = 0;
+	// private double robotYPosArc = 0;
+	private double prevGyroAngle = 0;
+	private double leftPower = 0;
+	private double rightPower = 0;
+	private Timer timer;
+	private double currentTime = 0;
+	private boolean isDrivingForward = true;
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -325,7 +325,7 @@ public class DriveFSMSystem {
 	* Gets the heading from the gyro.
 	* @return the gyro heading
 	*/
-	private double getHeading() {
+	public double getHeading() {
 		double angle = 90 - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
@@ -386,68 +386,63 @@ public class DriveFSMSystem {
 		backLeftMotor.set(leftPower);
 	}
 
-	private void updateLineOdometry() {
+	public Point updateLineOdometry() {
+
+		double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
+	//     robotPosLine = Kinematics.updateLineOdometry(gyroAngle, newEncoderPos,
+		// prevEncoderPosLine, robotPosLine);
+	//     prevEncoderPosLine = ((-frontLeftMotor.getEncoder().getPosition()
+		// + frontRightMotor.getEncoder().getPosition()) / 2.0);
+
 		double adjustedAngle = gyroAngle;
 		double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
 			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
 		double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
 		double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
 		double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
-		robotXPosLine += dX;
-		robotYPosLine += dY;
+		robotPosLine.addX(dX);
+		robotPosLine.addY(dY);
 
-    public Point updateLineOdometry() {
+		prevEncoderPosLine = currentEncoderPos;
+		System.out.println("line odo: (" + robotPosLine.getX() + ", " + robotPosLine.getY() + ")");
+		return robotPosLine;
+	}
 
-        double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
-    //     robotPosLine = Kinematics.updateLineOdometry(gyroAngle, newEncoderPos, prevEncoderPosLine, robotPosLine);
-    //     prevEncoderPosLine = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
+	public Point updateArcOdometry() {
+		double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
+		robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle,
+			newEncoderPos, prevEncoderPosArc, robotPosArc);
 
-    //    return robotPosLine;
-        double adjustedAngle = gyroAngle;
-        double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-            + frontRightMotor.getEncoder().getPosition()) / 2.0);
-        double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
-        double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
-        double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
-        robotPosLine.addX(dX);
-        robotPosLine.addY(dY);
+		prevGyroAngle = gyroAngle;
+		prevEncoderPosArc = newEncoderPos;
 
-        prevEncoderPosLine = currentEncoderPos;
-        System.out.println("line odo: (" + robotPosLine.getX() + ", " + robotPosLine.getY() + ")");
-        return robotPosLine;
-    }
+		return robotPosArc;
+		// double adjustedAngle = gyroAngle;
+		// double theta = Math.abs(adjustedAngle - prevGyroAngle);
+		// double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+		//     + frontRightMotor.getEncoder().getPosition()) / 2.0);
+		// double arcLength = (currentEncoderPos - prevEncoderPosArc)
+			// / Constants.REVOLUTIONS_PER_INCH;
+		// if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
+		//     theta = Constants.ODOMETRY_MIN_THETA;
+		// }
+		// double radius = 180 * arcLength / (Math.PI * theta);
+		// double alpha = prevGyroAngle - 90;
+		// double circleX = robotXPosArc + radius * Math.cos(Math.toRadians(alpha));
+		// double circleY = robotYPosArc + radius * Math.sin(Math.toRadians(alpha));
+		// double beta = alpha + 180 - theta;
+		// robotXPosArc = circleX + radius * Math.cos(Math.toRadians(beta));
+		// robotYPosArc = circleY + radius * Math.sin(Math.toRadians(beta));
 
-    public Point updateArcOdometry() {
-        double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition() + frontRightMotor.getEncoder().getPosition()) / 2.0);
-        robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle, newEncoderPos, prevEncoderPosArc, robotPosArc);
+		// prevGyroAngle = adjustedAngle;
+		// prevEncoderPosArc = currentEncoderPos;
+		//System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
 
-        prevGyroAngle = gyroAngle;
-        prevEncoderPosArc = newEncoderPos;
+	}
 
-        return robotPosArc;
-        // double adjustedAngle = gyroAngle;
-        // double theta = Math.abs(adjustedAngle - prevGyroAngle);
-        // double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-        //     + frontRightMotor.getEncoder().getPosition()) / 2.0);
-        // double arcLength = (currentEncoderPos - prevEncoderPosArc) / Constants.REVOLUTIONS_PER_INCH;
-        // if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
-        //     theta = Constants.ODOMETRY_MIN_THETA;
-        // }
-        // double radius = 180 * arcLength / (Math.PI * theta);
-        // double alpha = prevGyroAngle - 90;
-        // double circleX = robotXPosArc + radius * Math.cos(Math.toRadians(alpha));
-        // double circleY = robotYPosArc + radius * Math.sin(Math.toRadians(alpha));
-        // double beta = alpha + 180 - theta;
-        // robotXPosArc = circleX + radius * Math.cos(Math.toRadians(beta));
-        // robotYPosArc = circleY + radius * Math.sin(Math.toRadians(beta));
-
-        // prevGyroAngle = adjustedAngle;
-        // prevEncoderPosArc = currentEncoderPos;
-        //System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
-
-    }
-
-    public Point getRobotPosArc() {
-        return robotPosArc;
-    }
+	public Point getRobotPosArc() {
+		return robotPosArc;
+	}
 }
