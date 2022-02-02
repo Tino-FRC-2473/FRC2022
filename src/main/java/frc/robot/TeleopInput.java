@@ -14,6 +14,9 @@ public class TeleopInput {
 	/* ======================== Constants ======================== */
 	private static final int LEFT_JOYSTICK_PORT = 0;
 	private static final int RIGHT_JOYSTICK_PORT = 1;
+	private static final int SHOOTER_BUTTON_INDEX = 1;
+	private static final int INTAKE_BUTTON_INDEX = 2;
+	private static final int TERMINAL_RELEASE_BUTTON_INDEX = 3;
 
 	/* ======================== Private variables ======================== */
 	// Input objects
@@ -57,21 +60,21 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isShooterButtonPressed() {
-		return leftJoystick.getRawButton(1);
+		return leftJoystick.getRawButton(SHOOTER_BUTTON_INDEX);
 	}
 	/**
 	 * Get the value of the intake button.
 	 * @return True if button is pressed
 	 */
 	public boolean isIntakeButtonPressed() {
-		return leftJoystick.getRawButton(2);
+		return leftJoystick.getRawButton(INTAKE_BUTTON_INDEX);
 	}
 	/**
 	 * Get the value of the terminal release button.
 	 * @return True if button is pressed
 	 */
 	public boolean isTerminalReleaseButtonPressed() {
-		return leftJoystick.getRawButton(3);
+		return leftJoystick.getRawButton(TERMINAL_RELEASE_BUTTON_INDEX);
 	}
 
 	/* ------------------------ Right Joystick ------------------------ */
