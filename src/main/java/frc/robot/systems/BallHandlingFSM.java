@@ -28,6 +28,11 @@ public class BallHandlingFSM {
 	private static final double PUSH_TIME_SECONDS = 3;
 
 	private static final double INTAKE_MOTOR_RPM = 5000;
+	private static final double INTAKE_MOTOR_PIDF_P = 0;
+	private static final double INTAKE_MOTOR_PIDF_I = 0;
+	private static final double INTAKE_MOTOR_PIDF_D = 0;
+	private static final double INTAKE_MOTOR_PIDF_FF = 0;
+	private static final double INTAKE_MOTOR_PIDF_IZ = 0;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
@@ -36,20 +41,6 @@ public class BallHandlingFSM {
 	private Solenoid pullSolenoid;
 
 	private CANSparkMax intakeMotor;
-	/**
-	 * INTAKE_PID_CONSTANTS[0] = kP		- Position
-	 * INTAKE_PID_CONSTANTS[1] = kI		- Integral
-	 * INTAKE_PID_CONSTANTS[2] = kD		- Derivative
-	 * INTAKE_PID_CONSTANTS[3] = kF		- Feed-Forward
-	 * INTAKE_PID_CONSTANTS[3] = kIz	- IZone
-	 */
-	private static final double[] INTAKE_PID_CONSTANTS = {
-		0,
-		0,
-		0,
-		0,
-		0
-	};
 
 	private double pushCommandTime;
 
@@ -68,11 +59,11 @@ public class BallHandlingFSM {
 
 		intakeMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_INTAKE,
 						CANSparkMax.MotorType.kBrushless);
-		intakeMotor.getPIDController().setP(INTAKE_PID_CONSTANTS[0]);
-		intakeMotor.getPIDController().setI(INTAKE_PID_CONSTANTS[1]);
-		intakeMotor.getPIDController().setD(INTAKE_PID_CONSTANTS[2]);
-		intakeMotor.getPIDController().setFF(INTAKE_PID_CONSTANTS[3]);
-		intakeMotor.getPIDController().setIZone(INTAKE_PID_CONSTANTS[4]);
+		intakeMotor.getPIDController().setP(INTAKE_MOTOR_PIDF_P);
+		intakeMotor.getPIDController().setI(INTAKE_MOTOR_PIDF_I);
+		intakeMotor.getPIDController().setD(INTAKE_MOTOR_PIDF_D);
+		intakeMotor.getPIDController().setFF(INTAKE_MOTOR_PIDF_FF);
+		intakeMotor.getPIDController().setIZone(INTAKE_MOTOR_PIDF_IZ);
 		intakeMotor.getPIDController().setOutputRange(-1, 1);
 
 		// Reset state machine
