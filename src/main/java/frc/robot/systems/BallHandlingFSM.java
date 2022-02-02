@@ -1,6 +1,7 @@
 package frc.robot.systems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.ControlType;
 
 // WPILib Imports
 
@@ -26,7 +27,7 @@ public class BallHandlingFSM {
 
 	private static final double PUSH_TIME_SECONDS = 3;
 
-	private static final double INTAKE_MOTOR_POWER = 0.5;
+	private static final double INTAKE_MOTOR_RPM = 6000;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
@@ -35,6 +36,20 @@ public class BallHandlingFSM {
 	private Solenoid pullSolenoid;
 
 	private CANSparkMax intakeMotor;
+	/**
+	 * INTAKE_PID_CONSTANTS[0] = kP		- Position
+	 * INTAKE_PID_CONSTANTS[1] = kI		- Integral
+	 * INTAKE_PID_CONSTANTS[2] = kD		- Derivative
+	 * INTAKE_PID_CONSTANTS[3] = kF		- Feed-Forward
+	 * INTAKE_PID_CONSTANTS[3] = kIz	- IZone
+	 */
+	private static final double[] INTAKE_PID_CONSTANTS = {
+		0,
+		0,
+		0,
+		0,
+		0
+	};
 
 	private double pushCommandTime;
 
@@ -53,6 +68,12 @@ public class BallHandlingFSM {
 
 		intakeMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_INTAKE,
 						CANSparkMax.MotorType.kBrushless);
+		intakeMotor.getPIDController().setP(INTAKE_PID_CONSTANTS[0]);
+		intakeMotor.getPIDController().setI(INTAKE_PID_CONSTANTS[1]);
+		intakeMotor.getPIDController().setD(INTAKE_PID_CONSTANTS[2]);
+		intakeMotor.getPIDController().setFF(INTAKE_PID_CONSTANTS[3]);
+		intakeMotor.getPIDController().setIZone(INTAKE_PID_CONSTANTS[4]);
+		intakeMotor.getPIDController().setOutputRange(-1, 1);
 
 		// Reset state machine
 		reset();
@@ -183,7 +204,7 @@ public class BallHandlingFSM {
 	private void handleIdleState(TeleopInput input) {
 		pushSolenoid.set(false);
 		pullSolenoid.set(false);
-		intakeMotor.setVoltage(0);
+		intakeMotor.getPIDController().setReference(0, ControlType.kVelocity);
 	}
 	/**
 	 * Handle behavior in FIRING.
@@ -210,8 +231,8 @@ public class BallHandlingFSM {
 	 */
 	private void handleIntakingState(TeleopInput input) {
 		pushSolenoid.set(false);
-		pullSolenoid.set(true);
-		intakeMotor.setVoltage(INTAKE_MOTOR_POWER);
+		pullSolenoid.set(false);
+		intakeMotor.getPIDController().setReference(INTAKE_MOTOR_RPM, ControlType.kVelocity);
 	}
 	/**
 	 * Handle behavior in RELEASING.
@@ -220,8 +241,8 @@ public class BallHandlingFSM {
 	 */
 	private void handleReleasingState(TeleopInput input) {
 		pushSolenoid.set(false);
-		pullSolenoid.set(true);
-		intakeMotor.setVoltage(-INTAKE_MOTOR_POWER);
+		pullSolenoid.set(false);
+		intakeMotor.getPIDController().setReference(-INTAKE_MOTOR_RPM, ControlType.kVelocity);
 	}
 
 	/**
