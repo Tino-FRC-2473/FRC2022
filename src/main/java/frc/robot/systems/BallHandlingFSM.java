@@ -27,7 +27,7 @@ public class BallHandlingFSM {
 
 	private static final double PUSH_TIME_SECONDS = 3;
 
-	private static final double INTAKE_MOTOR_RPM = 6000;
+	private static final double INTAKE_MOTOR_RPM = 5000;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
@@ -171,24 +171,46 @@ public class BallHandlingFSM {
 				}
 
 			case INTAKING:
-				if (input.isIntakeButtonPressed()) {
+				if (pushCommandTime != -1
+					&& Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
+					pushCommandTime = -1;
+
+					return FSMState.RETRACTING;
+				} else if (input.isIntakeButtonPressed()) {
 					return FSMState.INTAKING;
 				} else {
 					return FSMState.IDLE;
 				}
 
 			case RELEASING:
-				if (input.isTerminalReleaseButtonPressed()) {
+				if (pushCommandTime != -1
+					&& Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
+					pushCommandTime = -1;
+
+					return FSMState.RETRACTING;
+				} else if (input.isTerminalReleaseButtonPressed()) {
 					return FSMState.RELEASING;
 				} else {
 					return FSMState.IDLE;
 				}
 
 			case FIRING:
-				return FSMState.IDLE;
+				if (input.isIntakeButtonPressed()) {
+					return FSMState.INTAKING;
+				} else if (input.isTerminalReleaseButtonPressed()) {
+					return FSMState.RELEASING;
+				} else {
+					return FSMState.IDLE;
+				}
 
 			case RETRACTING:
-				return FSMState.IDLE;
+				if (input.isIntakeButtonPressed()) {
+					return FSMState.INTAKING;
+				} else if (input.isTerminalReleaseButtonPressed()) {
+					return FSMState.RELEASING;
+				} else {
+					return FSMState.IDLE;
+				}
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
