@@ -1,5 +1,7 @@
 package frc.robot.systems;
 
+import com.revrobotics.CANSparkMax;
+
 // WPILib Imports
 
 // Third party Hardware Imports
@@ -17,16 +19,22 @@ public class BallHandlingFSM {
 	public enum FSMState {
 		IDLE,
 		FIRING,
-		RETRACTING
+		RETRACTING,
+		INTAKING,
+		RELEASING
 	}
 
 	private static final double PUSH_TIME_SECONDS = 3;
+
+	private static final double INTAKE_MOTOR_POWER = 0.5;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
 
 	private Solenoid pushSolenoid;
 	private Solenoid pullSolenoid;
+
+	private CANSparkMax intakeMotor;
 
 	private double pushCommandTime;
 
@@ -42,6 +50,9 @@ public class BallHandlingFSM {
 		HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID);
 		pullSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM,
 		HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
+
+		intakeMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_INTAKE,
+						CANSparkMax.MotorType.kBrushless);
 
 		// Reset state machine
 		reset();
@@ -89,6 +100,15 @@ public class BallHandlingFSM {
 			case RETRACTING:
 				handleRetractingState(input);
 				break;
+
+			case INTAKING:
+				handleIntakingState(input);
+				break;
+
+			case RELEASING:
+				handleReleasingState(input);
+				break;
+
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
@@ -106,9 +126,13 @@ public class BallHandlingFSM {
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input) {
+		if (input == null) {
+			return FSMState.IDLE;
+		}
+
 		switch (currentState) {
 			case IDLE:
-				if (input != null && pushCommandTime == -1 && input.isShooterButtonPressed()) {
+				if (pushCommandTime == -1 && input.isShooterButtonPressed()) {
 					pushCommandTime = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
@@ -117,6 +141,24 @@ public class BallHandlingFSM {
 					pushCommandTime = -1;
 
 					return FSMState.RETRACTING;
+				} else if (input.isIntakeButtonPressed()) {
+					return FSMState.INTAKING;
+				} else if (input.isTerminalReleaseButtonPressed()) {
+					return FSMState.RELEASING;
+				} else {
+					return FSMState.IDLE;
+				}
+
+			case INTAKING:
+				if (input.isIntakeButtonPressed()) {
+					return FSMState.INTAKING;
+				} else {
+					return FSMState.IDLE;
+				}
+
+			case RELEASING:
+				if (input.isTerminalReleaseButtonPressed()) {
+					return FSMState.RELEASING;
 				} else {
 					return FSMState.IDLE;
 				}
@@ -141,6 +183,7 @@ public class BallHandlingFSM {
 	private void handleIdleState(TeleopInput input) {
 		pushSolenoid.set(false);
 		pullSolenoid.set(false);
+		intakeMotor.setVoltage(0);
 	}
 	/**
 	 * Handle behavior in FIRING.
@@ -159,5 +202,35 @@ public class BallHandlingFSM {
 	private void handleRetractingState(TeleopInput input) {
 		pushSolenoid.set(false);
 		pullSolenoid.set(true);
+	}
+	/**
+	 * Handle behavior in INTAKING.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleIntakingState(TeleopInput input) {
+		pushSolenoid.set(false);
+		pullSolenoid.set(true);
+		intakeMotor.setVoltage(INTAKE_MOTOR_POWER);
+	}
+	/**
+	 * Handle behavior in RELEASING.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleReleasingState(TeleopInput input) {
+		pushSolenoid.set(false);
+		pullSolenoid.set(true);
+		intakeMotor.setVoltage(-INTAKE_MOTOR_POWER);
+	}
+
+	/**
+	 * Get relavent Spark Max instances for simulation.
+	 * @return All used Spark Max instances to be tested
+	 */
+	public CANSparkMax[] getSparkMaxs() {
+		return new CANSparkMax[]{
+			intakeMotor
+		};
 	}
 }

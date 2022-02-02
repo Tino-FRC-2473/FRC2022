@@ -3,6 +3,10 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVPhysicsSim;
+
+import edu.wpi.first.math.system.plant.DCMotor;
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
 
@@ -78,10 +82,20 @@ public class Robot extends TimedRobot {
 	@Override
 	public void simulationInit() {
 		System.out.println("-------- Simulation Init --------");
+
+		CANSparkMax[] sparkMaxs = ballSystem.getSparkMaxs();
+
+		for (int i = 0; i < sparkMaxs.length; i++) {
+			REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
+		}
+
+		System.out.println("-------- Simulation Init --------");
 	}
 
 	@Override
-	public void simulationPeriodic() { }
+	public void simulationPeriodic() {
+		REVPhysicsSim.getInstance().run();
+	}
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override

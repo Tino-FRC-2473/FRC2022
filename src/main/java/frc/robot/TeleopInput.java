@@ -66,6 +66,13 @@ public class TeleopInput {
 	public boolean isIntakeButtonPressed() {
 		return leftJoystick.getRawButton(2);
 	}
+	/**
+	 * Get the value of the terminal release button.
+	 * @return True if button is pressed
+	 */
+	public boolean isTerminalReleaseButtonPressed() {
+		return leftJoystick.getRawButton(3);
+	}
 
 	/* ------------------------ Right Joystick ------------------------ */
 	/**
