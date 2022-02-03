@@ -130,7 +130,7 @@ public class DriveFSMSystem {
 		finishedMovingStraight = false;
 		finishedTurning = false;
 
-		currentState = FSMState.PURE_PURSUIT;
+		currentState = FSMState.TELEOP_STATE;
 
 		timer.reset();
 		timer.start();
