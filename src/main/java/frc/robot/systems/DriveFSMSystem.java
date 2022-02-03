@@ -30,7 +30,7 @@ public class DriveFSMSystem {
 		BACK_TO_TARMAC,
 		BACK_TO_HUB,
 		TURN_STATE,
-		TELEOP_STATE, 
+		TELEOP_STATE,
 		PURE_PURSUIT
 	}
 
@@ -57,7 +57,6 @@ public class DriveFSMSystem {
 
 	private PurePursuit ppController;
 	private ArrayList<Point> keyPoints = new ArrayList<>();
-	
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -130,7 +129,7 @@ public class DriveFSMSystem {
 		finishedMovingStraight = false;
 		finishedTurning = false;
 
-		currentState = FSMState.PURE_PURSUIT;
+		currentState = FSMState.FORWARD_STATE_10_IN;
 
 		timer.reset();
 		timer.start();
@@ -151,7 +150,6 @@ public class DriveFSMSystem {
 		System.out.println("gyro angle: " + gyroAngle);
 		updateLineOdometry();
 		updateArcOdometry();
-		
 
 		switch (currentState) {
 			case START_STATE:
@@ -180,7 +178,7 @@ public class DriveFSMSystem {
 
 			case PURE_PURSUIT:
 				handlePurePursuit();
-				break;	
+				break;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -245,7 +243,7 @@ public class DriveFSMSystem {
 					return FSMState.BACK_TO_HUB;
 				}
 
-			case PURE_PURSUIT: 
+			case PURE_PURSUIT:
 				return FSMState.PURE_PURSUIT;
 
 			default:
@@ -402,6 +400,7 @@ public class DriveFSMSystem {
 
 		System.out.println("Encoder left: " + frontLeftMotor.getEncoder().getPosition());
 		System.out.println("Encoder right: " + frontRightMotor.getEncoder().getPosition());
+		System.out.println("Angle: " + gyroAngle);
 
 		frontRightMotor.set(rightPower);
 		frontLeftMotor.set(leftPower);

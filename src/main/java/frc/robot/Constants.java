@@ -23,18 +23,18 @@ public class Constants {
 	public static final double REVOLUTIONS_PER_INCH
 		= GEAR_RATIO * ENCODER_CONSTANT / (Math.PI * WHEEL_DIAMETER_INCHES);
 	public static final double ODOMETRY_MIN_THETA = 1.0;
-	public static final double MOTOR_RUN_POWER = 0.1;
-	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.25;
+	public static final double MOTOR_RUN_POWER = 0.2;
+	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.35;
 	public static final double MOTOR_INITAL_POWER_ACCELERATION = 0.6;
 	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
 	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.1;
 	public static final double TRACKWIDTH_IN = 20.72;
 
 	//Path constants
-	public static final double RUN_4_LEAVE_TARMAC_DIST = 55.44;
-	public static final double RUN_4_BACK_TO_TARMAC_DIST = -83.577;
-	public static final double RUN_4_TURN_TO_HUB_ANGLE = 69.125;
-	public static final double RUN_4_BACK_TO_HUB_DIST = -23.128;
+	public static final double RUN_4_LEAVE_TARMAC_DIST = 55.699;
+	public static final double RUN_4_BACK_TO_TARMAC_DIST = -76.050;
+	public static final double RUN_4_TURN_TO_HUB_ANGLE = 240.319;
+	public static final double RUN_4_BACK_TO_HUB_DIST = -9.737;
 
 	//Teleop Input Constants
 	public static final int LEFT_JOYSTICK_PORT = 0;
