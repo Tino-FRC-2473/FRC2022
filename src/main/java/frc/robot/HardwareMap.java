@@ -13,6 +13,5 @@ public final class HardwareMap {
 	public static final int CAN_ID_SPARK_SHOOTER = 5;
 
 	// Pneumatics channel numbers
-	public static final int PCM_CHANNEL_INTAKE_CYLINDER_FORWARD = 1;
-	public static final int PCM_CHANNEL_INTAKE_CYLINDER_REVERSE = 2;
+	public static final int PCM_CHANNEL_PUSH_BOT_SOLENOID = 1;
 }
