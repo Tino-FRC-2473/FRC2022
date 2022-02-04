@@ -4,6 +4,8 @@ import frc.robot.Constants;
 
 public class Kinematics {
 
+	private static boolean keepTurning = false;
+
 	public static Point updateLineOdometry(double gyroAngle, double currentEncoderPos, double prevEncoderPos, Point robotPos) {
 		// double currentEncoderPos = ((-leftEncoderPos + rightEncoderPos) / 2.0);
 		double dEncoder = (currentEncoderPos - prevEncoderPos) / Constants.REVOLUTIONS_PER_INCH;
@@ -30,8 +32,11 @@ public class Kinematics {
 		return new Point(robotNewXPos, robotNewYPos);
 	}
 
-	public static Point inversekinematics(double gyroHeading, Point robotPos, Point targetPos) {
-		Point newtargetPos = new Point(targetPos.getX() - robotPos.getX(), targetPos.getY() - robotPos.getY());
+	public static Point inversekinematics(double gyroHeading, Point robotPos,
+		Point targetPos, boolean isRobotGoingForward) {
+
+		Point newtargetPos = new Point(targetPos.getX() - robotPos.getX(),
+			targetPos.getY() - robotPos.getY());
 
 		double mRC = Math.tan(Math.toRadians(gyroHeading));
 		if (gyroHeading == 0) {
@@ -102,23 +107,57 @@ public class Kinematics {
 
 		//check if the point is behind the robot
 		//or not in front of it (requires the robot to make too large of an arc)
-		if (Math.abs(targetAngle - gyroHeading) > 45) {
-			if (Math.abs(targetAngle - gyroHeading) > 180) {
-				return new Point(1.0, -1.0);
-			} else {
-				return new Point(-1.0, 1.0);
+		System.out.println("target angle: " + targetAngle);
+		if (isRobotGoingForward) {
+			if ((Math.abs(targetAngle - gyroHeading) > 60) &&
+				(Math.abs(targetAngle - gyroHeading) < 305)) {
+				keepTurning = true;
+			}
+			if ((Math.abs(targetAngle - gyroHeading) < 45) ||
+				(Math.abs(targetAngle - gyroHeading) > 315)) {
+				keepTurning = false;
+			}
+			if (keepTurning) {
+				if (targetAngle > gyroHeading && targetAngle - 180 < gyroHeading) {
+					System.out.println("left");
+					return new Point(-0.5, 0.5);
+				} else {
+					System.out.println("right");
+					return new Point(0.5, -0.5);
+				}
+			}
+		} else {
+			if (Math.abs(targetAngle - gyroHeading) < 90) {
+				if (targetAngle - gyroHeading > 0) {
+					return new Point(1.0, -1.0);
+				} else {
+					return new Point(-1.0, 1.0);
+				}
 			}
 		}
 
 		//find out whether the left or right side is the inner/outer set of wheels
 		if (targetAngle - gyroHeading > 0 || targetAngle - gyroHeading < -180) {
 			//left side is the inner side
-			return new Point(p_i, p_o);
+			if (isRobotGoingForward) {
+				return new Point(p_i, p_o);
+			} else {
+				return new Point(-p_i, -p_o);
+			}
 		} else {
 			//right side is the inner side
-			return new Point(p_o, p_i);
+			if (isRobotGoingForward) {
+				return new Point(p_o, p_i);
+			} else {
+				return new Point(-p_o, -p_i);
+			}
 		}
 
+	}
+	public static Point inversekinematics(double gyroHeading, Point robotPos,
+		Point targetPos) {
+
+		return inversekinematics(gyroHeading, robotPos, targetPos, true);
 	}
 	private static double getMagnitude(double a, double b) {
 		return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));

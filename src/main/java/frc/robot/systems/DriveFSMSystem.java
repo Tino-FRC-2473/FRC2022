@@ -40,12 +40,12 @@ public class DriveFSMSystem {
 	private boolean finishedTurning;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	private Point robotPosLine = new Point(0, 0);
+	private Point robotPosLine = new Point(20.5, 60);
 	// private double robotXPosLine = 0;
 	// private double robotYPosLine = 0;
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	private Point robotPosArc = new Point(0, 0);
+	private Point robotPosArc = new Point(20.5, 60);
 	// private double robotXPosArc = 0;
 	// private double robotYPosArc = 0;
 	private double prevGyroAngle = 0;
@@ -87,10 +87,10 @@ public class DriveFSMSystem {
 		backLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_BACK_LEFT,
 											CANSparkMax.MotorType.kBrushless);
 
-		keyPoints.add(new Point(0, 0));
-		keyPoints.add(new Point(0, 25));
-		keyPoints.add(new Point(50, 50));
-		keyPoints.add(new Point(50, 110));
+		keyPoints.add(new Point(20.5, 60));
+		keyPoints.add(new Point(26, 151));
+		keyPoints.add(new Point(110, 88));
+		keyPoints.add(new Point(30, 60));
 		ppController = new PurePursuit(keyPoints, this);
 
 		gyro = new AHRS(SPI.Port.kMXP);
@@ -130,7 +130,7 @@ public class DriveFSMSystem {
 		finishedMovingStraight = false;
 		finishedTurning = false;
 
-		currentState = FSMState.PURE_PURSUIT;
+		currentState = FSMState.TELEOP_STATE;
 
 		timer.reset();
 		timer.start();
@@ -374,8 +374,8 @@ public class DriveFSMSystem {
 		}
 
 		// DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
-			// steerAngle, currentLeftPower,
-		// currentRightPower, isDrivingForward);
+		// 	steerAngle, currentLeftPower,
+		// 	currentRightPower, isDrivingForward);
 
 		DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
@@ -469,8 +469,18 @@ public class DriveFSMSystem {
 		return robotPosArc;
 	}
 
+	public Point getRobotPosLine() {
+		return robotPosLine;
+	}
+
 	private void handlePurePursuit() {
 		Point target = ppController.findLookahead();
+		if (target == null) {
+			frontLeftMotor.set(0);
+			frontRightMotor.set(0);
+			backLeftMotor.set(0);
+			backRightMotor.set(0);
+		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target);
 		frontLeftMotor.set(-motorSpeeds.getX() / 5);
