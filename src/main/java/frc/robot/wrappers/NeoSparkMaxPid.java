@@ -11,7 +11,7 @@ public class NeoSparkMaxPid {
 
 	private final RelativeEncoder encoder;
 
-    private static final int HALL_COUNTS_PER_REV = 42;
+	private static final int HALL_COUNTS_PER_REV = 42;
 
 	/**
 	 * Constructor for Neo motor controlled by Spark Max
@@ -29,7 +29,7 @@ public class NeoSparkMaxPid {
 	public NeoSparkMaxPid(final int canId,  final double p,
 											final double i,
 											final double d,
-											final double f){
+											final double f) {
 		motor = new CANSparkMax(canId,
 						CANSparkMax.MotorType.kBrushless);
 
