@@ -10,9 +10,6 @@ import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.cameraserver.CameraServer;
-// import edu.wpi.first.cscore.CvSink;
-// import edu.wpi.first.cscore.CvSource;
-// import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 
 // Systems
 import frc.robot.systems.FSMSystem;
@@ -26,12 +23,11 @@ public class Robot extends TimedRobot {
 
 	// Systems
 	private FSMSystem fsmSystem;
-	
+	NetworkTableEntry camSelection;
+
 	// Constants
 	private final int cameraBrightness = 25;
 	private final int fps = 15;
-
-	NetworkTableEntry camSelection;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -113,7 +109,10 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() { }
 
-	/* Update Shuffleboard visualizations */
+	/**
+	 * Update Shuffleboard visualizations.
+	 *  
+	 */
 	public void updateShuffleboardVisualizations() {
 		Shuffleboard.update();
 	}
