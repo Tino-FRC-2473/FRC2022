@@ -108,36 +108,37 @@ public class Kinematics {
 		//check if the point is behind the robot
 		//or not in front of it (requires the robot to make too large of an arc)
 		System.out.println("target angle: " + targetAngle);
-		if (isRobotGoingForward) {
-			if ((Math.abs(targetAngle - gyroHeading) > 60) &&
-				(Math.abs(targetAngle - gyroHeading) < 305)) {
-				keepTurning = true;
-			}
-			if ((Math.abs(targetAngle - gyroHeading) < 45) ||
-				(Math.abs(targetAngle - gyroHeading) > 315)) {
-				keepTurning = false;
-			}
-			if (keepTurning) {
-				if (targetAngle > gyroHeading && targetAngle - 180 < gyroHeading) {
-					System.out.println("left");
-					return new Point(-0.5, 0.5);
-				} else {
-					System.out.println("right");
-					return new Point(0.5, -0.5);
-				}
-			}
-		} else {
-			if (Math.abs(targetAngle - gyroHeading) < 90) {
-				if (targetAngle - gyroHeading > 0) {
-					return new Point(1.0, -1.0);
-				} else {
-					return new Point(-1.0, 1.0);
-				}
-			}
-		}
+		// if (isRobotGoingForward) {
+		// 	if ((Math.abs(targetAngle - gyroHeading) > 60) &&
+		// 		(Math.abs(targetAngle - gyroHeading) < 305)) {
+		// 		keepTurning = true;
+		// 	}
+		// 	if ((Math.abs(targetAngle - gyroHeading) < 45) ||
+		// 		(Math.abs(targetAngle - gyroHeading) > 315)) {
+		// 		keepTurning = false;
+		// 	}
+		// 	if (keepTurning) {
+		// 		if (targetAngle > gyroHeading && targetAngle - 180 < gyroHeading) {
+		// 			System.out.println("left");
+		// 			return new Point(-0.5, 0.5);
+		// 		} else {
+		// 			System.out.println("right");
+		// 			return new Point(0.5, -0.5);
+		// 		}
+		// 	}
+		// } else {
+		// 	if (Math.abs(targetAngle - gyroHeading) < 90) {
+		// 		if (targetAngle - gyroHeading > 0) {
+		// 			return new Point(1.0, -1.0);
+		// 		} else {
+		// 			return new Point(-1.0, 1.0);
+		// 		}
+		// 	}
+		// }
 
 		//find out whether the left or right side is the inner/outer set of wheels
-		if (targetAngle - gyroHeading > 0 || targetAngle - gyroHeading < -180) {
+		if ((targetAngle - gyroHeading > 0 && targetAngle - gyroHeading < 180)
+			|| targetAngle - gyroHeading < -180) {
 			//left side is the inner side
 			if (isRobotGoingForward) {
 				return new Point(p_i, p_o);

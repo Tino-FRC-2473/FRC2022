@@ -44,4 +44,7 @@ public class Constants {
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
 
+	//Pure Pursuit Constants
+	public static final double MAX_IN_TO_POINT = 35;
+
 }

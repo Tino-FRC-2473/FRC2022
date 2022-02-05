@@ -30,14 +30,16 @@ public class DriveFSMSystem {
 		BACK_TO_TARMAC,
 		BACK_TO_HUB,
 		TURN_STATE,
-		TELEOP_STATE, 
-		PURE_PURSUIT
+		TELEOP_STATE,
+		PURE_PURSUIT,
+		PURE_PURSUIT_TO_HUB
 	}
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
 	private boolean finishedMovingStraight;
 	private boolean finishedTurning;
+	private boolean finishedPurePursuitPath;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
 	private Point robotPosLine = new Point(20.5, 60);
@@ -56,7 +58,8 @@ public class DriveFSMSystem {
 	private boolean isDrivingForward = true;
 
 	private PurePursuit ppController;
-	private ArrayList<Point> keyPoints = new ArrayList<>();
+	private ArrayList<Point> ballPoints = new ArrayList<>();
+	private ArrayList<Point> pointsToHub = new ArrayList<>();
 	
 
 	// Hardware devices should be owned by one and only one system. They must
@@ -87,11 +90,15 @@ public class DriveFSMSystem {
 		backLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_BACK_LEFT,
 											CANSparkMax.MotorType.kBrushless);
 
-		keyPoints.add(new Point(20.5, 60));
-		keyPoints.add(new Point(26, 151));
-		keyPoints.add(new Point(110, 88));
-		keyPoints.add(new Point(30, 60));
-		ppController = new PurePursuit(keyPoints, this);
+		ballPoints.add(new Point(20.5, 60));
+		ballPoints.add(new Point(26, 151));
+		// ballPoints.add(new Point(26, 100));
+		ballPoints.add(new Point(110, 88));
+		// ballPoints.add(new Point(80, 88));
+		ballPoints.add(new Point(60, 90));
+		pointsToHub.add(new Point(60, 90));
+		pointsToHub.add(new Point(20, 60));
+		ppController = new PurePursuit(ballPoints, this);
 
 		gyro = new AHRS(SPI.Port.kMXP);
 
@@ -129,8 +136,9 @@ public class DriveFSMSystem {
 
 		finishedMovingStraight = false;
 		finishedTurning = false;
+		finishedPurePursuitPath = false;
 
-		currentState = FSMState.TELEOP_STATE;
+		currentState = FSMState.PURE_PURSUIT;
 
 		timer.reset();
 		timer.start();
@@ -151,7 +159,9 @@ public class DriveFSMSystem {
 		System.out.println("gyro angle: " + gyroAngle);
 		updateLineOdometry();
 		updateArcOdometry();
-		
+		System.out.println("is finished: " + finishedPurePursuitPath);
+		System.out.println("current state: " + currentState);
+
 
 		switch (currentState) {
 			case START_STATE:
@@ -180,7 +190,11 @@ public class DriveFSMSystem {
 
 			case PURE_PURSUIT:
 				handlePurePursuit();
-				break;	
+				break;
+
+			case PURE_PURSUIT_TO_HUB:
+				handlePurePursuitBackward();
+				break;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -245,8 +259,19 @@ public class DriveFSMSystem {
 					return FSMState.BACK_TO_HUB;
 				}
 
-			case PURE_PURSUIT: 
+			case PURE_PURSUIT:
+				if (finishedPurePursuitPath) {
+					finishedPurePursuitPath = false;
+					return FSMState.PURE_PURSUIT_TO_HUB;
+				}
 				return FSMState.PURE_PURSUIT;
+
+			case PURE_PURSUIT_TO_HUB:
+				if (finishedPurePursuitPath) {
+					finishedPurePursuitPath = false;
+					return FSMState.TELEOP_STATE;
+				}
+				return FSMState.PURE_PURSUIT_TO_HUB;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -352,6 +377,9 @@ public class DriveFSMSystem {
 		double angle = 90 - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
+		}
+		if (angle > 360) {
+			angle -= 360;
 		}
 		return angle;
 	}
@@ -476,13 +504,31 @@ public class DriveFSMSystem {
 	private void handlePurePursuit() {
 		Point target = ppController.findLookahead();
 		if (target == null) {
+			finishedPurePursuitPath = true;
 			frontLeftMotor.set(0);
 			frontRightMotor.set(0);
 			backLeftMotor.set(0);
 			backRightMotor.set(0);
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
-		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target);
+		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
+		frontLeftMotor.set(-motorSpeeds.getX() / 5);
+		frontRightMotor.set(motorSpeeds.getY() / 5);
+		backLeftMotor.set(-motorSpeeds.getX() / 5);
+		backRightMotor.set(motorSpeeds.getY() / 5);
+	}
+
+	private void handlePurePursuitBackward() {
+		Point target = ppController.findLookahead();
+		if (target == null) {
+			finishedPurePursuitPath = true;
+			frontLeftMotor.set(0);
+			frontRightMotor.set(0);
+			backLeftMotor.set(0);
+			backRightMotor.set(0);
+		}
+		System.out.println("Target point: " + target.getX() + " " + target.getY());
+		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
 		frontLeftMotor.set(-motorSpeeds.getX() / 5);
 		frontRightMotor.set(motorSpeeds.getY() / 5);
 		backLeftMotor.set(-motorSpeeds.getX() / 5);

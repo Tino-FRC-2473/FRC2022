@@ -3,8 +3,7 @@ package frc.robot.trajectory;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.ejml.dense.row.linsol.qr.SolvePseudoInverseQrp_DDRM;
-
+import frc.robot.Constants;
 import frc.robot.systems.DriveFSMSystem;
 
 public class PurePursuit {
@@ -15,7 +14,7 @@ public class PurePursuit {
 	private ArrayList<Point> pathPoints = new ArrayList<>();
 	private int lastClosestPointIndex = 0;
 	// lookahead point is this many points ahead of the closest point
-	private final int lookaheadDistance = 5;
+	private final int lookaheadDistance = 6;
 
 	// in inches
 	private static final double SPACING = 6.0;
@@ -87,7 +86,18 @@ public class PurePursuit {
 			return null;
 		}
 		// prevent OOB errors
-		int lookaheadPointIndex = lastClosestPointIndex + lookaheadDistance;
+		int lookaheadPointIndex = lastClosestPointIndex;
+		for (int i = lastClosestPointIndex + 1;
+			i <= lastClosestPointIndex + lookaheadDistance; i++) {
+
+			if (i >= pathPoints.size()) {
+				break;
+			}
+			double dist = Point.findDistance(pathPoints.get(i), robotPos);
+			if (dist < Constants.MAX_IN_TO_POINT) {
+				lookaheadPointIndex = i;
+			}
+		}
 		Point lookaheadPoint = lookaheadPointIndex < pathPoints.size()
 			? pathPoints.get(lookaheadPointIndex) : pathPoints.get(pathPoints.size() - 1);
 		return lookaheadPoint;
