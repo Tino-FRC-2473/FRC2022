@@ -1,7 +1,6 @@
 package frc.robot.systems;
 
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.ControlType;
 
 // WPILib Imports
 
@@ -12,6 +11,7 @@ import edu.wpi.first.wpilibj.Timer;
 
 // Robot Imports
 import frc.robot.TeleopInput;
+import frc.robot.wrappers.NeoSparkMaxPid;
 import frc.robot.HardwareMap;
 
 public class BallHandlingFSM {
@@ -27,12 +27,7 @@ public class BallHandlingFSM {
 
 	private static final double PUSH_TIME_SECONDS = 3;
 
-	private static final double INTAKE_MOTOR_RPM = 5000;
-	private static final double INTAKE_MOTOR_PIDF_P = 0;
-	private static final double INTAKE_MOTOR_PIDF_I = 0;
-	private static final double INTAKE_MOTOR_PIDF_D = 0;
-	private static final double INTAKE_MOTOR_PIDF_FF = 0;
-	private static final double INTAKE_MOTOR_PIDF_IZ = 0;
+	private static final double INTAKE_MOTOR_RPM = 300;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
@@ -40,9 +35,15 @@ public class BallHandlingFSM {
 	private Solenoid pushSolenoid;
 	private Solenoid pullSolenoid;
 
-	private CANSparkMax intakeMotor;
+	private NeoSparkMaxPid intakeMotor;
 
 	private double pushCommandTime;
+
+	private static final double P = 0;
+	private static final double I = 0;
+	private static final double D = 0;
+	private static final double F = 0;
+	private static final double IZ = 0;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -57,14 +58,12 @@ public class BallHandlingFSM {
 		pullSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM,
 		HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
 
-		intakeMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_INTAKE,
-						CANSparkMax.MotorType.kBrushless);
-		intakeMotor.getPIDController().setP(INTAKE_MOTOR_PIDF_P);
-		intakeMotor.getPIDController().setI(INTAKE_MOTOR_PIDF_I);
-		intakeMotor.getPIDController().setD(INTAKE_MOTOR_PIDF_D);
-		intakeMotor.getPIDController().setFF(INTAKE_MOTOR_PIDF_FF);
-		intakeMotor.getPIDController().setIZone(INTAKE_MOTOR_PIDF_IZ);
-		intakeMotor.getPIDController().setOutputRange(-1, 1);
+		intakeMotor = new NeoSparkMaxPid(HardwareMap.CAN_ID_SPARK_INTAKE,
+						P,
+						I,
+						D,
+						F,
+						IZ);
 
 		// Reset state machine
 		reset();
@@ -217,7 +216,7 @@ public class BallHandlingFSM {
 	private void handleIdleState(TeleopInput input) {
 		pushSolenoid.set(false);
 		pullSolenoid.set(false);
-		intakeMotor.getPIDController().setReference(0, ControlType.kVelocity);
+		intakeMotor.setVelocity(0);
 	}
 	/**
 	 * Handle behavior in FIRING.
@@ -245,7 +244,8 @@ public class BallHandlingFSM {
 	private void handleIntakingState(TeleopInput input) {
 		pushSolenoid.set(false);
 		pullSolenoid.set(false);
-		intakeMotor.getPIDController().setReference(INTAKE_MOTOR_RPM, ControlType.kVelocity);
+		intakeMotor.setVelocity(INTAKE_MOTOR_RPM);
+		System.out.println(intakeMotor.getVelocity());
 	}
 	/**
 	 * Handle behavior in RELEASING.
@@ -255,7 +255,7 @@ public class BallHandlingFSM {
 	private void handleReleasingState(TeleopInput input) {
 		pushSolenoid.set(false);
 		pullSolenoid.set(false);
-		intakeMotor.getPIDController().setReference(-INTAKE_MOTOR_RPM, ControlType.kVelocity);
+		intakeMotor.setVelocity(-INTAKE_MOTOR_RPM);
 	}
 
 	/**
@@ -264,7 +264,7 @@ public class BallHandlingFSM {
 	 */
 	public CANSparkMax[] getSparkMaxs() {
 		return new CANSparkMax[]{
-			intakeMotor
+			intakeMotor.getMotor()
 		};
 	}
 }
