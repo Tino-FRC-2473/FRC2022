@@ -23,13 +23,11 @@ public class NeoSparkMaxPid {
      * @param i     PIDF Integral constant
      * @param d     PIDF Derivative constant
      * @param f     PIDF Feed Forward constant
-     * @param iZ    PIDF I Zone constant
      */
     public NeoSparkMaxPid(final int canId,  final double p,
                                             final double i,
                                             final double d,
-                                            final double f,
-                                            final double iZ){
+                                            final double f){
         motor = new CANSparkMax(canId,
 						CANSparkMax.MotorType.kBrushless);
 
@@ -37,10 +35,10 @@ public class NeoSparkMaxPid {
 		motor.getPIDController().setI(i);
 		motor.getPIDController().setD(d);
 		motor.getPIDController().setFF(f);
-		motor.getPIDController().setIZone(iZ);
+		motor.getPIDController().setIZone(0);
 		motor.getPIDController().setOutputRange(-1, 1);
 
-        encoder = motor.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 1);
+        encoder = motor.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
     }
 
     
@@ -103,24 +101,6 @@ public class NeoSparkMaxPid {
      */
     public double getPosition() {
         return encoder.getPosition();
-    }
-
-    
-    /**
-     * Use PIDF to set the voltage applied to the controller.
-     * @param volts desired voltage to apply to the controller
-     */
-    public void setVoltage(double volts) {
-        motor.getPIDController().setReference(volts, ControlType.kVoltage);
-    }
-
-    
-    /**
-     * Get the raw voltage currently applied to the controller.
-     * @return voltage being applied to the controller
-     */
-    public double getVoltage() {
-        return motor.getBusVoltage();
     }
 
     

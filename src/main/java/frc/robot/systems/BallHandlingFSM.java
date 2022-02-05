@@ -27,7 +27,7 @@ public class BallHandlingFSM {
 
 	private static final double PUSH_TIME_SECONDS = 3;
 
-	private static final double INTAKE_MOTOR_RPM = 300;
+	private static final double INTAKE_MOTOR_RPM = 700;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
@@ -39,11 +39,10 @@ public class BallHandlingFSM {
 
 	private double pushCommandTime;
 
-	private static final double P = 0;
-	private static final double I = 0;
-	private static final double D = 0;
-	private static final double F = 0;
-	private static final double IZ = 0;
+	private static final double P = 0.00006;
+	private static final double I = 0.00000028;
+	private static final double D = 0.000002;
+	private static final double F = 0.00003;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -62,8 +61,7 @@ public class BallHandlingFSM {
 						P,
 						I,
 						D,
-						F,
-						IZ);
+						F);
 
 		// Reset state machine
 		reset();
@@ -140,6 +138,7 @@ public class BallHandlingFSM {
 		if (input == null) {
 			return FSMState.IDLE;
 		}
+		System.out.println("Velocity: " + intakeMotor.getMotorTemperature());
 
 		switch (currentState) {
 			case IDLE:
@@ -166,6 +165,10 @@ public class BallHandlingFSM {
 					pushCommandTime = -1;
 
 					return FSMState.RETRACTING;
+				} else if (pushCommandTime == -1 && input.isShooterButtonPressed()) {
+					pushCommandTime = Timer.getFPGATimestamp();
+
+					return FSMState.FIRING;
 				} else if (input.isIntakeButtonPressed()) {
 					return FSMState.INTAKING;
 				} else {
@@ -178,6 +181,10 @@ public class BallHandlingFSM {
 					pushCommandTime = -1;
 
 					return FSMState.RETRACTING;
+				} else if (pushCommandTime == -1 && input.isShooterButtonPressed()) {
+					pushCommandTime = Timer.getFPGATimestamp();
+
+					return FSMState.FIRING;
 				} else if (input.isTerminalReleaseButtonPressed()) {
 					return FSMState.RELEASING;
 				} else {
@@ -245,7 +252,6 @@ public class BallHandlingFSM {
 		pushSolenoid.set(false);
 		pullSolenoid.set(false);
 		intakeMotor.setVelocity(INTAKE_MOTOR_RPM);
-		System.out.println(intakeMotor.getVelocity());
 	}
 	/**
 	 * Handle behavior in RELEASING.
