@@ -25,7 +25,7 @@ public class BallHandlingFSM {
 		RELEASING
 	}
 
-	private static final double PUSH_TIME_SECONDS = 3;
+	private static final double PUSH_TIME_SECONDS = 1;
 
 	private static final double INTAKE_MOTOR_RPM = 700;
 

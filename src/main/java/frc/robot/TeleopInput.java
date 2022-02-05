@@ -1,7 +1,9 @@
 package frc.robot;
 
+
 // WPILib Imports
 import edu.wpi.first.wpilibj.Joystick;
+
 
 /**
  * Common class for providing driver inputs during Teleop.
@@ -12,16 +14,14 @@ import edu.wpi.first.wpilibj.Joystick;
  */
 public class TeleopInput {
 	/* ======================== Constants ======================== */
-	private static final int LEFT_JOYSTICK_PORT = 0;
-	private static final int RIGHT_JOYSTICK_PORT = 1;
-	private static final int SHOOTER_BUTTON_INDEX = 1;
-	private static final int INTAKE_BUTTON_INDEX = 2;
-	private static final int TERMINAL_RELEASE_BUTTON_INDEX = 3;
 
 	/* ======================== Private variables ======================== */
 	// Input objects
 	private Joystick leftJoystick;
 	private Joystick rightJoystick;
+	private Joystick steeringWheel;
+	private Joystick drivingJoystick;
+
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -30,9 +30,11 @@ public class TeleopInput {
 	 * by WPILib until teleop mode.
 	 */
 	public TeleopInput() {
-		leftJoystick = new Joystick(LEFT_JOYSTICK_PORT);
+		leftJoystick = new Joystick(Constants.LEFT_JOYSTICK_PORT);
+		rightJoystick = new Joystick(Constants.RIGHT_JOYSTICK_PORT);
 
-		rightJoystick = new Joystick(RIGHT_JOYSTICK_PORT);
+		steeringWheel = new Joystick(Constants.STEERING_WHEEL_PORT);
+		drivingJoystick = new Joystick(Constants.DRIVING_JOYSTICK_PORT);
 	}
 
 	/* ======================== Public methods ======================== */
@@ -41,13 +43,7 @@ public class TeleopInput {
 	// control mapping is hidden from other classes.
 
 	/* ------------------------ Left Joystick ------------------------ */
-	/**
-	 * Get X axis of Left Joystick.
-	 * @return Axis value
-	 */
-	public double getLeftJoystickX() {
-		return leftJoystick.getX();
-	}
+
 	/**
 	 * Get Y axis of Left Joystick.
 	 * @return Axis value
@@ -60,37 +56,73 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isShooterButtonPressed() {
-		return leftJoystick.getRawButton(SHOOTER_BUTTON_INDEX);
+		return leftJoystick.getRawButton(Constants.SHOOTER_BUTTON);
 	}
 	/**
 	 * Get the value of the intake button.
 	 * @return True if button is pressed
 	 */
 	public boolean isIntakeButtonPressed() {
-		return leftJoystick.getRawButton(INTAKE_BUTTON_INDEX);
+		return leftJoystick.getRawButton(Constants.INTAKE_BUTTON);
 	}
 	/**
 	 * Get the value of the terminal release button.
 	 * @return True if button is pressed
 	 */
 	public boolean isTerminalReleaseButtonPressed() {
-		return leftJoystick.getRawButton(TERMINAL_RELEASE_BUTTON_INDEX);
+		return leftJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
 	}
 
 	/* ------------------------ Right Joystick ------------------------ */
-	/**
-	 * Get X axis of Right Joystick.
-	 * @return Axis value
-	 */
-	public double getRightJoystickX() {
-		return rightJoystick.getX();
-	}
+
 	/**
 	 * Get Y axis of Right Joystick.
 	 * @return Axis value
 	 */
 	public double getRightJoystickY() {
 		return rightJoystick.getY();
+	}
+
+	/* ------------------------ Wheel ------------------------ */
+	/**
+	 * Get Angle of the steering Wheel from -1 to 1.
+	 * @return Angle
+	 */
+	public double getSteerAngle() {
+		return steeringWheel.getX();
+	}
+
+	/* ------------------------ Driving Joystick ------------------------ */
+	/**
+	 * Get Y value of Driving Joystick.
+	 * @return Y-Axis value
+	 */
+	public double getDrivingJoystickY() {
+		return drivingJoystick.getY();
+	}
+
+	/**
+	 * Get if the Driving Joystick's trigger button is being pressed.
+	 * @return Trigger button's state
+	 */
+	public boolean getTriggerPressed() {
+		return drivingJoystick.getTrigger();
+	}
+
+	/**
+	 * Checks if the forward driving button is pressed.
+	 * @return true if the forward driving button is pressed
+	 */
+	public boolean isForwardDrivingButtonPressed() {
+		return drivingJoystick.getRawButton(Constants.DRIVING_FORWARD_BUTTON);
+	}
+
+	/**
+	 * Checks if the backward driving button is pressed.
+	 * @return true if the backward driving button is pressed
+	 */
+	public boolean isBackwardDrivingButtonPressed() {
+		return drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON);
 	}
 
 	/* ======================== Private methods ======================== */
