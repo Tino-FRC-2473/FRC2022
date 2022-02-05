@@ -11,6 +11,8 @@ public class NeoSparkMaxPid {
 
 	private final RelativeEncoder encoder;
 
+    private static final int HALL_COUNTS_PER_REV = 42;
+
 	/**
 	 * Constructor for Neo motor controlled by Spark Max
 	 * controller wrapping up PIDF algorithms. Defaults
@@ -38,10 +40,10 @@ public class NeoSparkMaxPid {
 		motor.getPIDController().setIZone(0);
 		motor.getPIDController().setOutputRange(-1, 1);
 
-		encoder = motor.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, 42);
+		encoder = motor.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, HALL_COUNTS_PER_REV);
 	}
 
-	
+
 	/**
 	 * Set the internal ticks per revolution to base velocity
 	 * and position calculations on. By default is set to 1.
@@ -61,7 +63,7 @@ public class NeoSparkMaxPid {
 		encoder.setVelocityConversionFactor(ticksPerRevolution);
 	}
 
-	
+
 	/**
 	 * Use PIDF to set the velocity of the motor in revolutions
 	 * per second.
@@ -71,7 +73,7 @@ public class NeoSparkMaxPid {
 		motor.getPIDController().setReference(rpm, ControlType.kVelocity);
 	}
 
-	
+
 	/**
 	 * Get the velocity of the motor in revolutions per second.
 	 * @return velocity of the motor as measured by the encoder
@@ -80,7 +82,7 @@ public class NeoSparkMaxPid {
 		return motor.getEncoder().getVelocity();
 	}
 
-	
+
 	/**
 	 * Set the position of the motor in units of revolutions.
 	 * motor.setPosition(1), will cause the motor to go to the
@@ -93,7 +95,7 @@ public class NeoSparkMaxPid {
 		motor.getPIDController().setReference(position, ControlType.kPosition);
 	}
 
-	
+
 	/**
 	 * Return the revolutions away from the zero position the
 	 * encoder has traveled.
@@ -103,16 +105,16 @@ public class NeoSparkMaxPid {
 		return encoder.getPosition();
 	}
 
-	
+
 	/**
-	 * Set the desired behavior for the motor when idling
+	 * Set the desired behavior for the motor when idling.
 	 * @param mode desired IdleMode for the motor
 	 */
 	public void setIdleMode(CANSparkMax.IdleMode mode) {
 		motor.setIdleMode(mode);
 	}
 
-	
+
 	/**
 	 * Get the current behavior for the motor when idling.
 	 * @return current idle behavior
@@ -121,7 +123,7 @@ public class NeoSparkMaxPid {
 		return motor.getIdleMode();
 	}
 
-	
+
 	/**
 	 * Get the motor temperature in Celcius.
 	 * @return motor temperature in Celcius
@@ -130,7 +132,7 @@ public class NeoSparkMaxPid {
 		return motor.getMotorTemperature();
 	}
 
-	
+
 	/**
 	 * Get the motor object to pass to robot class for simulation.
 	 * @return motor object
