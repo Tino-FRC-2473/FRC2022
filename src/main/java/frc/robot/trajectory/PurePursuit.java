@@ -2,6 +2,8 @@ package frc.robot.trajectory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+
+import frc.robot.Constants;
 import frc.robot.systems.DriveFSMSystem;
 
 public class PurePursuit {
@@ -34,14 +36,15 @@ public class PurePursuit {
 
 			Vector v = new Vector(startPoint, endPoint);
 
-			double numPoints = Math.ceil(v.getMagnitude() / SPACING);
+
+			double numPoints = Math.ceil(Math.abs(v.getMagnitude()) / SPACING);
 
 			v = v.normalize().multiplyByScalar(SPACING);
-			System.out.println("initial v: " + v.getMagnitude());
+
 
 			for (int j = 0; j <= (int) numPoints; j++) {
 				Vector tempV = v.multiplyByScalar(j);
-				System.out.println("v: " + tempV.getMagnitude());
+
 				Point toInject = startPoint.addVector(tempV);
 				pathPoints.add(toInject);
 			}
@@ -50,20 +53,27 @@ public class PurePursuit {
 		}
 	}
 
-	private void findClosestPoint() {
-		// should i limit closest point search to 3 points ahead
-		// (so that in the case of a looped path, we don't end up choosing one of the final points?)
-		Point currentPos = fsmSystem.getRobotPosArc();
+	private Point findClosestPoint() {
+		
+		Point currentPos = fsmSystem.getRobotPosLine();
 
 		ArrayList<Double> tempDistances = new ArrayList<>();
-		for (int i = lastClosestPointIndex; i < pathPoints.size(); i++) {
+
+		for (int i = lastClosestPointIndex; i < lastClosestPointIndex + lookaheadDistance; i++) {
 			double distance = Point.findDistance(currentPos, pathPoints.get(i));
 			tempDistances.add(distance);
 		}
+
+		// check what happens if two or more distances are equal; prevent overlap
 		int indexOfMin = tempDistances.indexOf(Collections.min(tempDistances));
 		lastClosestPointIndex += indexOfMin;
-		// return pathPoints.get(lastClosestPointIndex < pathPoints.size()
-		// 	? lastClosestPointIndex : pathPoints.size() - 1);
+		if (lastClosestPointIndex < pathPoints.size() - 1) {
+			Point closestPoint = pathPoints.get(lastClosestPointIndex);
+			System.out.println("closest point: (" + closestPoint.getX() + ", " + closestPoint.getY() + ")");
+        	return closestPoint;
+        }
+
+        return null;
 	}
 
 	public Point findLookahead() {
@@ -71,8 +81,23 @@ public class PurePursuit {
 		Point robotPos = fsmSystem.getRobotPosArc();
 		double robotHeading = fsmSystem.getHeading();
 
+		if (findClosestPoint() == null) {
+
+			return null;
+		}
 		// prevent OOB errors
-		int lookaheadPointIndex = lastClosestPointIndex + lookaheadDistance;
+		int lookaheadPointIndex = lastClosestPointIndex;
+		for (int i = lastClosestPointIndex + 1;
+			i <= lastClosestPointIndex + lookaheadDistance; i++) {
+
+			if (i >= pathPoints.size()) {
+				break;
+			}
+			double dist = Point.findDistance(pathPoints.get(i), robotPos);
+			if (dist < Constants.MAX_IN_TO_POINT) {
+				lookaheadPointIndex = i;
+			}
+		}
 		Point lookaheadPoint = lookaheadPointIndex < pathPoints.size()
 			? pathPoints.get(lookaheadPointIndex) : pathPoints.get(pathPoints.size() - 1);
 		return lookaheadPoint;

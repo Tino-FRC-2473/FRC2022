@@ -27,7 +27,7 @@ public class Constants {
 	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.35;
 	public static final double MOTOR_INITAL_POWER_ACCELERATION = 0.6;
 	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
-	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.05;
+	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.1;
 	public static final double TRACKWIDTH_IN = 20.72;
 
 	//Path constants
@@ -56,6 +56,9 @@ public class Constants {
 	public static final int DRIVING_JOYSTICK_PORT = 3;
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
+
+	//Pure Pursuit Constants
+	public static final double MAX_IN_TO_POINT = 35;
 
 }
 

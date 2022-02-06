@@ -7,8 +7,8 @@ public class Vector {
 	private double magnitude;
 
 	public Vector(Point a, Point b) {
-		xMag = Math.max(a.getX(), b.getX()) - Math.min(a.getX(), b.getX());
-		yMag = Math.max(a.getY(), b.getY()) - Math.min(a.getY(), b.getY());
+		xMag = b.getX() - a.getX();
+		yMag = b.getY() - a.getY();
 		calcMags();
 	}
 
@@ -20,11 +20,14 @@ public class Vector {
 
 	private void calcMags() {
 		magnitude = Math.sqrt(Math.pow(xMag, 2) + Math.pow(yMag, 2));
+		if ((xMag < 0 && yMag >= 0) || (yMag < 0 && xMag >= 0)) {
+			magnitude = -magnitude;
+		}
 	}
 
 	public Vector normalize() {
-		double newXMag = xMag / magnitude;
-		double newYMag = yMag / magnitude;
+		double newXMag = xMag / Math.abs(magnitude);
+		double newYMag = yMag / Math.abs(magnitude);
 		return new Vector(newXMag, newYMag);
 	}
 
