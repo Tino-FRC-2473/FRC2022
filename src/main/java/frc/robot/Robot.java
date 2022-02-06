@@ -112,7 +112,6 @@ public class Robot extends TimedRobot {
 
 	/**
 	 * Update Shuffleboard visualizations.
-	 * 
 	 */
 	public void updateShuffleboardVisualizations() {
 		Shuffleboard.update();
