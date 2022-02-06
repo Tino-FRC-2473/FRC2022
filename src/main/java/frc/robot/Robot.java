@@ -28,6 +28,8 @@ public class Robot extends TimedRobot {
 	// Constants
 	private final int cameraBrightness = 25;
 	private final int fps = 15;
+	private final int camWidth = 320;
+	private final int camHeight = 240;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -41,22 +43,14 @@ public class Robot extends TimedRobot {
 		// Instantiate all systems here
 		fsmSystem = new FSMSystem();
 
-		// UsbCamera frontCam = CameraServer.startAutomaticCapture("Front Camera", 0);
-		// CvSink cvSinkFront = CameraServer.getVideo(frontCam);
-		// CvSource outputStreamFront = new CvSource("Front Camera", PixelFormat.kMJPEG, 320, 240, 30);
-		// cvSinkFront.setSource(outputStreamFront);
-
-		// frontCam.setBrightness(cameraBrightness);
-		// frontCam.setFPS(fps);
-		// frontCam.setResolution(320, 240);
-
 		UsbCamera driverCam = CameraServer.startAutomaticCapture("Rear Camera", 1);
 		CvSink cvSinkRear = CameraServer.getVideo(driverCam);
-		CvSource outputStreamRear = new CvSource("Rear Camera", PixelFormat.kMJPEG, 320, 240, 30);
+		CvSource outputStreamRear = 
+			new CvSource("Rear Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
 		cvSinkRear.setSource(outputStreamRear);
 		driverCam.setBrightness(cameraBrightness);
 		driverCam.setFPS(fps);
-		driverCam.setResolution(320, 240);
+		driverCam.setResolution(camWidth, camHeight);
 	}
 
 	@Override
