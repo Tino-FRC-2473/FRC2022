@@ -45,7 +45,7 @@ public class Robot extends TimedRobot {
 
 		UsbCamera driverCam = CameraServer.startAutomaticCapture("Rear Camera", 1);
 		CvSink cvSinkRear = CameraServer.getVideo(driverCam);
-		CvSource outputStreamRear = 
+		CvSource outputStreamRear =
 			new CvSource("Rear Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
 		cvSinkRear.setSource(outputStreamRear);
 		driverCam.setBrightness(cameraBrightness);
@@ -112,7 +112,7 @@ public class Robot extends TimedRobot {
 
 	/**
 	 * Update Shuffleboard visualizations.
-	 *  
+	 * 
 	 */
 	public void updateShuffleboardVisualizations() {
 		Shuffleboard.update();
