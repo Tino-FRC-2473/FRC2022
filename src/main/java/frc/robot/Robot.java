@@ -6,9 +6,10 @@ package frc.robot;
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.cameraserver.CameraServer;
 
 // Systems
@@ -23,7 +24,6 @@ public class Robot extends TimedRobot {
 
 	// Systems
 	private FSMSystem fsmSystem;
-	NetworkTableEntry camSelection;
 
 	// Constants
 	private final int cameraBrightness = 25;
@@ -41,15 +41,22 @@ public class Robot extends TimedRobot {
 		// Instantiate all systems here
 		fsmSystem = new FSMSystem();
 
-		UsbCamera frontCam = CameraServer.startAutomaticCapture("Front Camera", 0);
-		frontCam.setBrightness(cameraBrightness);
-		frontCam.setFPS(fps);
+		// UsbCamera frontCam = CameraServer.startAutomaticCapture("Front Camera", 0);
+		// CvSink cvSinkFront = CameraServer.getVideo(frontCam);
+		// CvSource outputStreamFront = new CvSource("Front Camera", PixelFormat.kMJPEG, 320, 240, 30);
+		// cvSinkFront.setSource(outputStreamFront);
 
-		camSelection = NetworkTableInstance.getDefault().getTable("").getEntry("Camera Selection");
+		// frontCam.setBrightness(cameraBrightness);
+		// frontCam.setFPS(fps);
+		// frontCam.setResolution(320, 240);
 
-		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 1);
-		rearCam.setBrightness(cameraBrightness);
-		rearCam.setFPS(fps);
+		UsbCamera driverCam = CameraServer.startAutomaticCapture("Rear Camera", 1);
+		CvSink cvSinkRear = CameraServer.getVideo(driverCam);
+		CvSource outputStreamRear = new CvSource("Rear Camera", PixelFormat.kMJPEG, 320, 240, 30);
+		cvSinkRear.setSource(outputStreamRear);
+		driverCam.setBrightness(cameraBrightness);
+		driverCam.setFPS(fps);
+		driverCam.setResolution(320, 240);
 	}
 
 	@Override
