@@ -161,19 +161,19 @@ public class DriveFSMSystem {
 				break;
 
 			case FORWARD_STATE_10_IN:
-				handleForwardOrBackwardState(input, Constants.RUN_4_LEAVE_TARMAC_DIST);
+				handleForwardOrBackwardState(input, Constants.RUN_1_LEAVE_TARMAC_DIST);
 				break;
 
 			case BACK_TO_TARMAC:
-				handleForwardOrBackwardState(input, Constants.RUN_4_BACK_TO_TARMAC_DIST);
+				handleForwardOrBackwardState(input, Constants.RUN_1_BACK_TO_TARMAC_DIST);
 				break;
 
 			case BACK_TO_HUB:
-				handleForwardOrBackwardState(input, Constants.RUN_4_BACK_TO_HUB_DIST);
+				handleForwardOrBackwardState(input, Constants.RUN_1_BACK_TO_HUB_DIST);
 				break;
 
 			case TURN_STATE:
-				handleTurnState(input, Constants.RUN_4_TURN_TO_HUB_ANGLE);
+				handleTurnState(input, Constants.RUN_1_TURN_TO_HUB_ANGLE);
 				break;
 
 			case PURE_PURSUIT:
@@ -281,7 +281,9 @@ public class DriveFSMSystem {
 		System.out.println("Inches: " + inches);
 		System.out.println("Error: " + error);
 
-		// Try This Next Time:
+		// Checks if either the encoder value is equal to the inches required (reached destination)
+		// or checks if the robot has hit a wall (encoder value is not chaning but motor power is
+	// not zero)
 		if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN)
 			|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
 			System.out.println("im here");

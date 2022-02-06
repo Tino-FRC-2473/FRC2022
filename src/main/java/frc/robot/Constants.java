@@ -27,14 +27,27 @@ public class Constants {
 	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.35;
 	public static final double MOTOR_INITAL_POWER_ACCELERATION = 0.6;
 	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
-	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.1;
+	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.05;
 	public static final double TRACKWIDTH_IN = 20.72;
 
 	//Path constants
-	public static final double RUN_4_LEAVE_TARMAC_DIST = 55.699;
-	public static final double RUN_4_BACK_TO_TARMAC_DIST = -76.050;
-	public static final double RUN_4_TURN_TO_HUB_ANGLE = 240.319;
-	public static final double RUN_4_BACK_TO_HUB_DIST = -9.737;
+	// For Run 1 the start angle is 26.73
+	public static final double RUN_1_LEAVE_TARMAC_DIST = 42.686;
+	public static final double RUN_1_BACK_TO_TARMAC_DIST = -104.186;
+	public static final double RUN_1_TURN_TO_HUB_ANGLE = 90;
+	public static final double RUN_1_BACK_TO_HUB_DIST = -4.950;
+
+	// For Run 2 the start angle is 90
+	public static final double RUN_2_LEAVE_TARMAC_DIST = 55.699;
+	public static final double RUN_2_BACK_TO_TARMAC_DIST = -76.050;
+	public static final double RUN_2_TURN_TO_HUB_ANGLE = 240.319;
+	public static final double RUN_2_BACK_TO_HUB_DIST = -9.737;
+
+	// For Run 3 the start angle is 315
+	public static final double RUN_3_LEAVE_TARMAC_DIST = 55.699;
+	public static final double RUN_3_BACK_TO_TARMAC_DIST = -73.195;
+	public static final double RUN_3_TURN_TO_HUB_ANGLE = 339.125;
+	public static final double RUN_3_BACK_TO_HUB_DIST = -49.306;
 
 	//Teleop Input Constants
 	public static final int LEFT_JOYSTICK_PORT = 0;
@@ -45,3 +58,4 @@ public class Constants {
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
 
 }
+
