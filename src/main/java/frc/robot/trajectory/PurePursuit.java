@@ -1,14 +1,10 @@
 package frc.robot.trajectory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import frc.robot.Constants;
-import frc.robot.systems.DriveFSMSystem;
 
 public class PurePursuit {
-
-	private DriveFSMSystem fsmSystem;
 
 	private ArrayList<Point> keyPoints = new ArrayList<>();
 	private ArrayList<Point> pathPoints = new ArrayList<>();
@@ -19,10 +15,8 @@ public class PurePursuit {
 	// in inches
 	private static final double SPACING = 6.0;
 
-
-	public PurePursuit(ArrayList<Point> initialPoints, DriveFSMSystem fsmSystem) {
+	public PurePursuit(ArrayList<Point> initialPoints) {
 		keyPoints = initialPoints;
-		this.fsmSystem = fsmSystem;
 		pointInjection();
 		for (Point p : pathPoints) {
 			System.out.println("(" + p.getX() + ", " + p.getY() + ")");
@@ -36,11 +30,9 @@ public class PurePursuit {
 
 			Vector v = new Vector(startPoint, endPoint);
 
-
 			double numPoints = Math.ceil(Math.abs(v.getMagnitude()) / SPACING);
 
 			v = v.normalize().multiplyByScalar(SPACING);
-
 
 			for (int j = 0; j <= (int) numPoints; j++) {
 				Vector tempV = v.multiplyByScalar(j);
@@ -48,43 +40,57 @@ public class PurePursuit {
 				Point toInject = startPoint.addVector(tempV);
 				pathPoints.add(toInject);
 			}
-			// need to consider point order when choosing closest point
-			// (in case of looped path)
 		}
 	}
 
-	private Point findClosestPoint() {
-		
-		Point currentPos = fsmSystem.getRobotPosLine();
-
+	private Point findClosestPoint(Point currentPos) {
+		// temporary list of distances from robot to each path point
 		ArrayList<Double> tempDistances = new ArrayList<>();
 
+		// store distances from robot to each path point in temp list
 		for (int i = lastClosestPointIndex; i < lastClosestPointIndex + lookaheadDistance; i++) {
 			double distance = Point.findDistance(currentPos, pathPoints.get(i));
 			tempDistances.add(distance);
 		}
 
-		// check what happens if two or more distances are equal; prevent overlap
-		int indexOfMin = tempDistances.indexOf(Collections.min(tempDistances));
+		/* find the point closest to the robot (and if 2+ points are the same distance away,
+		choose the point that is further along the path) */
+		double closestDistance = Double.MAX_VALUE;
+		int indexOfMin = 0;
+		for (int i = 0; i < tempDistances.size(); i++) {
+			if (tempDistances.get(i) <= closestDistance && i >= indexOfMin) {
+				closestDistance = tempDistances.get(i);
+				indexOfMin = i;
+			}
+		}
+
+		/* since we're only looking at points ahead of the robot, we have to add index of
+		closest point to index of previous closest point (to get the index of the closest
+		point in the overall list) */
 		lastClosestPointIndex += indexOfMin;
+
+		/* make sure the index we chose is within bounds of the list of path points
+		(and not the last point) */
 		if (lastClosestPointIndex < pathPoints.size() - 1) {
 			Point closestPoint = pathPoints.get(lastClosestPointIndex);
-			System.out.println("closest point: (" + closestPoint.getX() + ", " + closestPoint.getY() + ")");
-        	return closestPoint;
-        }
+			System.out.println("closest point: (" + closestPoint.getX() + ", "
+				+ closestPoint.getY() + ")");
+			return closestPoint;
+		}
 
-        return null;
+		// if the point is the last point (or OOB) return null
+		return null;
 	}
 
-	public Point findLookahead() {
-		findClosestPoint();
-		Point robotPos = fsmSystem.getRobotPosArc();
-		double robotHeading = fsmSystem.getHeading();
+	public Point findLookahead(Point robotPos, double robotHeading) {
+		// update index of closest point
+		findClosestPoint(robotPos);
 
-		if (findClosestPoint() == null) {
-
+		// if the closest point is the last point (or OOB) return null
+		if (findClosestPoint(robotPos) == null) {
 			return null;
 		}
+
 		// prevent OOB errors
 		int lookaheadPointIndex = lastClosestPointIndex;
 		for (int i = lastClosestPointIndex + 1;
@@ -102,31 +108,4 @@ public class PurePursuit {
 			? pathPoints.get(lookaheadPointIndex) : pathPoints.get(pathPoints.size() - 1);
 		return lookaheadPoint;
 	}
-
-	// private double calculateCurvature() {
-	//     Point robotPos = fsmSystem.getRobotPosArc();
-	//     double robotHeading = fsmSystem.getHeading();
-
-	//     // prevent OOB errors
-	//     int lookaheadPointIndex = lastClosestPointIndex + lookaheadDistance;
-	//     Point lookaheadPoint = lookaheadPointIndex < pathPoints.size()
-	//         ? pathPoints.get(lookaheadPointIndex) : pathPoints.get(pathPoints.size() - 1);
-	//     double distanceToLookahead = Point.findDistance(fsmSystem.updateArcOdometry(),
-	//         lookaheadPoint);
-
-	//     // x is the horizontal distance to the lookahead point,
-	//     // a is -tan(robot angle), b = 1, c = tan(robot angle) * robot.getX() - robot.getY()
-	//     double a = -Math.tan(robotHeading);
-	//     double b = 1.0;
-	//     double c = (Math.tan(robotHeading) * robotPos.getX()) - robotPos.getY();
-	//     double x = Math.abs(a * lookaheadPoint.getX() + b * lookaheadPoint.getY() + c)
-	//         / Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
-
-
-	//     double curvature = (2 * x) / Math.pow(distanceToLookahead, 2);
-	//     double side = Math.signum(Math.sin(robotHeading * (lookaheadPoint.getX() - robotPos.getX())
-	//         - Math.cos(robotHeading * (lookaheadPoint.getY() - robotPos.getY()))));
-
-	//     return curvature * side;
-	// }
 }

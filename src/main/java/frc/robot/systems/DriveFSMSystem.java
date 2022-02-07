@@ -60,7 +60,7 @@ public class DriveFSMSystem {
 	private PurePursuit ppController;
 	private ArrayList<Point> ballPoints = new ArrayList<>();
 	private ArrayList<Point> pointsToHub = new ArrayList<>();
-	
+
 
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
@@ -98,7 +98,7 @@ public class DriveFSMSystem {
 		ballPoints.add(new Point(60, 90));
 		pointsToHub.add(new Point(60, 90));
 		pointsToHub.add(new Point(20, 60));
-		ppController = new PurePursuit(ballPoints, this);
+		ppController = new PurePursuit(ballPoints);
 
 		gyro = new AHRS(SPI.Port.kMXP);
 
@@ -505,7 +505,7 @@ public class DriveFSMSystem {
 	}
 
 	private void handlePurePursuit() {
-		Point target = ppController.findLookahead();
+		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
 			frontLeftMotor.set(0);
@@ -522,7 +522,7 @@ public class DriveFSMSystem {
 	}
 
 	private void handlePurePursuitBackward() {
-		Point target = ppController.findLookahead();
+		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
 			frontLeftMotor.set(0);
