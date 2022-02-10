@@ -14,8 +14,6 @@ import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.cameraserver.CameraServer;
-// import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-// import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
@@ -53,6 +51,8 @@ public class Robot extends TimedRobot {
         rearCam.setBrightness(cameraBrightness);
         rearCam.setFPS(fps);
         rearCam.setResolution(320, 240);
+
+
 	}
 
 	@Override
