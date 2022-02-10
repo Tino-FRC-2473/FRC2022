@@ -117,6 +117,14 @@ public class TeleopInput {
 		return drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON);
 	}
 
+	/**
+     * Checks if the top button of the driving joystick is released.
+     * @return true if the top driving button is released
+     */
+    public boolean getTopPressed() {
+        return drivingJoystick.getRawButton(3);
+    }
+
 	/* ======================== Private methods ======================== */
 
 }
