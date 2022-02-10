@@ -9,6 +9,15 @@ import edu.wpi.first.wpilibj.TimedRobot;
 // Systems
 import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.BallHandlingFSM;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.CvSource;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoMode.PixelFormat;
+import edu.wpi.first.cameraserver.CameraServer;
+// import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+// import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -21,6 +30,9 @@ public class Robot extends TimedRobot {
 	private DriveFSMSystem driveFsmSystem;
 	private BallHandlingFSM ballSystem;
 
+	// Constants
+	private final int fps = 30;
+	private final int cameraBrightness = 15;
 	/**
 	 * This function is run when the robot is first started up and should be used for any
 	 * initialization code.
@@ -33,6 +45,14 @@ public class Robot extends TimedRobot {
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
+
+        UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 1);
+        CvSink cvSinkRear = CameraServer.getVideo(rearCam);
+        CvSource outputStreamRear = new CvSource("Rear Camera", PixelFormat.kMJPEG, 320, 240, 30);
+        cvSinkRear.setSource(outputStreamRear);
+        rearCam.setBrightness(cameraBrightness);
+        rearCam.setFPS(fps);
+        rearCam.setResolution(320, 240);
 	}
 
 	@Override
@@ -46,6 +66,7 @@ public class Robot extends TimedRobot {
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
 		ballSystem.update(null);
+		updateShuffleboardVisualizations();
 	}
 
 	@Override
@@ -61,6 +82,7 @@ public class Robot extends TimedRobot {
 		ballSystem.update(input);
 		driveFsmSystem.update(input);
 		ballSystem.update(input);
+		updateShuffleboardVisualizations();
 	}
 
 	@Override
@@ -70,7 +92,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void disabledPeriodic() {
-
+		updateShuffleboardVisualizations();
 	}
 
 	@Override
@@ -80,7 +102,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {
-		updateShuffleboardVisualizations();
+
 	}
 
 	/* Simulation mode handlers, only used for simulation testing  */
@@ -95,4 +117,8 @@ public class Robot extends TimedRobot {
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
 	public void robotPeriodic() { }
+
+	public void updateShuffleboardVisualizations() {
+		SmartDashboard.updateValues();
+	}
 }
