@@ -38,7 +38,7 @@ public class Robot extends TimedRobot {
 
 	// Constants
 	private final int fps = 30;
-	private final int cameraBrightness = 15;
+	private final int cameraBrightness = 25;
 	/**
 	 * This function is run when the robot is first started up and should be used for any
 	 * initialization code.
