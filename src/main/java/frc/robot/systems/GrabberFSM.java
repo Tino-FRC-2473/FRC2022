@@ -118,7 +118,7 @@ public class GrabberFSM {
 
 		switch (currentState) {
 			case LOW_IDLE:
-				if (input != null){
+				if (input != null) {
 					if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
 						return FSMState.ASCENDING;
 					} else {
@@ -128,7 +128,7 @@ public class GrabberFSM {
 				return currentState;
 
 			case ASCENDING:
-				if (input != null){
+				if (input != null) {
 					if (isAtUpperThresh) {
 						return FSMState.MID_IDLE;
 					} else if (!input.isAscendingButtonPressed()
@@ -175,19 +175,16 @@ public class GrabberFSM {
 			case MID_IDLE:
 				if (input != null) {
 					if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
-                        return  FSMState.DESCENDING;
-                    } else {
-                        return  FSMState.MID_IDLE;
-                    }
-                }
-                return currentState;
+						return  FSMState.DESCENDING;
+					} else {
+						return  FSMState.MID_IDLE;
+					}
+				}
+				return currentState;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
-        
 		}
-
-        
 	}
 
 	/* ------------------------ FSM state handlers ------------------------ */
@@ -209,7 +206,7 @@ public class GrabberFSM {
 		motor.set(0);
 	}
 
-    /**
+	/**
 	 * Handle behavior in CONTROL.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
@@ -218,7 +215,7 @@ public class GrabberFSM {
 		motor.set(0);
 	}
 
-    /**
+	/**
 	 * Handle behavior in ASCENDING.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
@@ -227,7 +224,7 @@ public class GrabberFSM {
 		motor.set(POWER);
 	}
 
-    /**
+	/**
 	 * Handle behavior in DESCENDING.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
