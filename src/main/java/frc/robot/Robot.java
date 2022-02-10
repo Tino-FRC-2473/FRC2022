@@ -39,6 +39,8 @@ public class Robot extends TimedRobot {
 	// Constants
 	private final int fps = 30;
 	private final int cameraBrightness = 25;
+	private final int camWidth = 320;
+	private final int camHeight = 240;
 	/**
 	 * This function is run when the robot is first started up and should be used for any
 	 * initialization code.
@@ -56,13 +58,12 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 
-        UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 1);
-        CvSink cvSinkRear = CameraServer.getVideo(rearCam);
-        CvSource outputStreamRear = new CvSource("Rear Camera", PixelFormat.kMJPEG, 320, 240, 30);
-        cvSinkRear.setSource(outputStreamRear);
-        rearCam.setBrightness(cameraBrightness);
-        rearCam.setFPS(fps);
-        rearCam.setResolution(320, 240);
+		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
+		CvSink cvSinkRear = CameraServer.getVideo(rearCam);
+		CvSource outputStreamRear = 
+			new CvSource("Rear Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
+		cvSinkRear.setSource(outputStreamRear);
+		rearCam.setBrightness(cameraBrightness);
 	}
 
 	@Override
@@ -138,6 +139,9 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotPeriodic() { }
 
+	/**
+	 * Updates shuffleboard values
+	 */
 	public void updateShuffleboardVisualizations() {
 		SmartDashboard.updateValues();
 	}
