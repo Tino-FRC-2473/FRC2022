@@ -30,7 +30,7 @@ public class Robot extends TimedRobot {
 
 	// Constants
 	private final int fps = 30;
-	private final int cameraBrightness = 15;
+	private final int cameraBrightness = 25;
 	/**
 	 * This function is run when the robot is first started up and should be used for any
 	 * initialization code.
@@ -51,8 +51,6 @@ public class Robot extends TimedRobot {
         rearCam.setBrightness(cameraBrightness);
         rearCam.setFPS(fps);
         rearCam.setResolution(320, 240);
-
-
 	}
 
 	@Override
@@ -102,7 +100,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {
-
+		updateShuffleboardVisualizations();
 	}
 
 	/* Simulation mode handlers, only used for simulation testing  */
