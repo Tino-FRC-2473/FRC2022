@@ -4,7 +4,7 @@ public class Constants {
 	//Drive Constants
 	public static final double KP_MOVE_STRAIGHT = 0.05;
 	public static final double PROPORTION_MAX_POWER = 0.5;
-	public static final double WHEEL_DIAMETER_INCHES = 7.65;
+	public static final double WHEEL_DIAMETER_INCHES = 4.0; //7.65
 	public static final double ERR_THRESHOLD_STRAIGHT_IN = 0.1;
 	public static final double TELEOP_ANGLE_POWER_RATIO = 90.0;
 	public static final double MAX_POWER = 1;
@@ -19,7 +19,7 @@ public class Constants {
 	public static final double TELEOP_ACCELERATION_MIN = 0.1;
 	public static final double ENCODER_CONSTANT = 1.0799;
 	public static final double COUNTS_PER_MOTOR_REVOLUTION = 42;
-	public static final double GEAR_RATIO = 26.0 * 4.67 / 12.0;
+	public static final double GEAR_RATIO = 8.0; //26.0 * 4.67 / 12.0;
 	public static final double REVOLUTIONS_PER_INCH
 		= GEAR_RATIO * ENCODER_CONSTANT / (Math.PI * WHEEL_DIAMETER_INCHES);
 	public static final double ODOMETRY_MIN_THETA = 1.0;

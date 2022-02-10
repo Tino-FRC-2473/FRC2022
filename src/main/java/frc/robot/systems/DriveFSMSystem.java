@@ -65,10 +65,8 @@ public class DriveFSMSystem {
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
 
-	private CANSparkMax frontRightMotor;
-	private CANSparkMax backRightMotor;
-	private CANSparkMax frontLeftMotor;
-	private CANSparkMax backLeftMotor;
+	private CANSparkMax rightMotor;
+	private CANSparkMax leftMotor;
 
 	private AHRS gyro;
 
@@ -81,13 +79,9 @@ public class DriveFSMSystem {
 	public DriveFSMSystem() {
 		// Perform hardware init
 
-		frontRightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_FRONT_RIGHT,
+		rightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_RIGHT,
 											CANSparkMax.MotorType.kBrushless);
-		frontLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_FRONT_LEFT,
-											CANSparkMax.MotorType.kBrushless);
-		backRightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_BACK_RIGHT,
-											CANSparkMax.MotorType.kBrushless);
-		backLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_BACK_LEFT,
+		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
 											CANSparkMax.MotorType.kBrushless);
 
 		ballPoints.add(new Point(20.5, 60));
@@ -126,10 +120,8 @@ public class DriveFSMSystem {
 	 */
 	public void reset() {
 
-		frontRightMotor.getEncoder().setPosition(0);
-		frontLeftMotor.getEncoder().setPosition(0);
-		backRightMotor.getEncoder().setPosition(0);
-		backLeftMotor.getEncoder().setPosition(0);
+		rightMotor.getEncoder().setPosition(0);
+		leftMotor.getEncoder().setPosition(0);
 
 		gyro.reset();
 		gyro.zeroYaw();
@@ -138,7 +130,7 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.FORWARD_STATE_10_IN;
+		currentState = FSMState.TELEOP_STATE;
 
 		timer.reset();
 		timer.start();
@@ -296,7 +288,7 @@ public class DriveFSMSystem {
 	private void handleForwardOrBackwardState(TeleopInput input,
 		double inches) {
 
-		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
+		double currrentPosTicks = -leftMotor.getEncoder().getPosition();
 		System.out.println("currrentPosTicks: " + currrentPosTicks);
 		if (forwardStateInitialEncoderPos == -1) {
 			forwardStateInitialEncoderPos = currrentPosTicks;
@@ -341,10 +333,9 @@ public class DriveFSMSystem {
 	* @param power The power to set all the motors to
 	*/
 	private void setPowerForAllMotors(double power) {
-		frontLeftMotor.set(-power);
-		frontRightMotor.set(power);
-		backLeftMotor.set(-power);
-		backRightMotor.set(power);
+		leftMotor.set(-power);
+		rightMotor.set(power);
+
 	}
 
 	/**
@@ -365,10 +356,9 @@ public class DriveFSMSystem {
 			power = Constants.MIN_TURN_POWER * (power < 0 ? -1 : 1);
 		}
 
-		frontLeftMotor.set(power);
-		frontRightMotor.set(power);
-		backLeftMotor.set(power);
-		backRightMotor.set(power);
+		leftMotor.set(power);
+		rightMotor.set(power);
+
 	}
 
 	/**
@@ -394,8 +384,8 @@ public class DriveFSMSystem {
 		double leftJoystickY = input.getLeftJoystickY();
 		double rightJoystickY = input.getDrivingJoystickY();
 		double steerAngle = input.getSteerAngle();
-		double currentLeftPower = frontLeftMotor.get();
-		double currentRightPower = frontRightMotor.get();
+		double currentLeftPower = leftMotor.get();
+		double currentRightPower = rightMotor.get();
 
 		if (input.isForwardDrivingButtonPressed()) {
 			isDrivingForward = true;
@@ -430,28 +420,27 @@ public class DriveFSMSystem {
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
 
-		System.out.println("Encoder left: " + frontLeftMotor.getEncoder().getPosition());
-		System.out.println("Encoder right: " + frontRightMotor.getEncoder().getPosition());
+		System.out.println("Encoder left: " + leftMotor.getEncoder().getPosition());
+		System.out.println("Encoder right: " + rightMotor.getEncoder().getPosition());
 		System.out.println("Angle: " + gyroAngle);
 
-		frontRightMotor.set(rightPower);
-		frontLeftMotor.set(leftPower);
-		backRightMotor.set(rightPower);
-		backLeftMotor.set(leftPower);
+		rightMotor.set(rightPower);
+		leftMotor.set(leftPower);
+
 	}
 
 	public Point updateLineOdometry() {
 
-		double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
+		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
+			+ rightMotor.getEncoder().getPosition()) / 2.0);
 	//     robotPosLine = Kinematics.updateLineOdometry(gyroAngle, newEncoderPos,
 		// prevEncoderPosLine, robotPosLine);
-	//     prevEncoderPosLine = ((-frontLeftMotor.getEncoder().getPosition()
-		// + frontRightMotor.getEncoder().getPosition()) / 2.0);
+	//     prevEncoderPosLine = ((-leftMotor.getEncoder().getPosition()
+		// + rightMotor.getEncoder().getPosition()) / 2.0);
 
 		double adjustedAngle = gyroAngle;
-		double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
+		double currentEncoderPos = ((-leftMotor.getEncoder().getPosition()
+			+ rightMotor.getEncoder().getPosition()) / 2.0);
 		double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
 		double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
 		double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
@@ -464,8 +453,8 @@ public class DriveFSMSystem {
 	}
 
 	public Point updateArcOdometry() {
-		double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
+		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
+			+ rightMotor.getEncoder().getPosition()) / 2.0);
 		robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle,
 			newEncoderPos, prevEncoderPosArc, robotPosArc);
 
@@ -475,8 +464,8 @@ public class DriveFSMSystem {
 		return robotPosArc;
 		// double adjustedAngle = gyroAngle;
 		// double theta = Math.abs(adjustedAngle - prevGyroAngle);
-		// double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
-		//     + frontRightMotor.getEncoder().getPosition()) / 2.0);
+		// double currentEncoderPos = ((-leftMotor.getEncoder().getPosition()
+		//     + rightMotor.getEncoder().getPosition()) / 2.0);
 		// double arcLength = (currentEncoderPos - prevEncoderPosArc)
 			// / Constants.REVOLUTIONS_PER_INCH;
 		// if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
@@ -508,33 +497,29 @@ public class DriveFSMSystem {
 		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
-			frontLeftMotor.set(0);
-			frontRightMotor.set(0);
-			backLeftMotor.set(0);
-			backRightMotor.set(0);
+			leftMotor.set(0);
+			rightMotor.set(0);
+
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
-		frontLeftMotor.set(-motorSpeeds.getX() / 5);
-		frontRightMotor.set(motorSpeeds.getY() / 5);
-		backLeftMotor.set(-motorSpeeds.getX() / 5);
-		backRightMotor.set(motorSpeeds.getY() / 5);
+		leftMotor.set(-motorSpeeds.getX() / 5);
+		rightMotor.set(motorSpeeds.getY() / 5);
+
 	}
 
 	private void handlePurePursuitBackward() {
 		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
-			frontLeftMotor.set(0);
-			frontRightMotor.set(0);
-			backLeftMotor.set(0);
-			backRightMotor.set(0);
+			leftMotor.set(0);
+			rightMotor.set(0);
+
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
-		frontLeftMotor.set(-motorSpeeds.getX() / 5);
-		frontRightMotor.set(motorSpeeds.getY() / 5);
-		backLeftMotor.set(-motorSpeeds.getX() / 5);
-		backRightMotor.set(motorSpeeds.getY() / 5);
+		leftMotor.set(-motorSpeeds.getX() / 5);
+		rightMotor.set(motorSpeeds.getY() / 5);
+
 	}
 }
