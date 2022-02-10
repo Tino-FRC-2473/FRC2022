@@ -33,6 +33,7 @@ public class Robot extends TimedRobot {
 	private final int cameraBrightness = 25;
 	private final int camWidth = 320;
 	private final int camHeight = 240;
+	
 	/**
 	 * This function is run when the robot is first started up and should be used for any
 	 * initialization code.
@@ -48,7 +49,7 @@ public class Robot extends TimedRobot {
 
 		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
 		CvSink cvSinkRear = CameraServer.getVideo(rearCam);
-		CvSource outputStreamRear = 
+		CvSource outputStreamRear =
 			new CvSource("Rear Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
 		cvSinkRear.setSource(outputStreamRear);
 		rearCam.setBrightness(cameraBrightness);
@@ -118,7 +119,7 @@ public class Robot extends TimedRobot {
 	public void robotPeriodic() { }
 
 	/**
-	 * Updates shuffleboard values
+	 * Updates shuffleboard values.
 	 */
 	public void updateShuffleboardVisualizations() {
 		SmartDashboard.updateValues();
