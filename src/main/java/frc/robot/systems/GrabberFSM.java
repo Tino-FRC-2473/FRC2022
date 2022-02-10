@@ -24,10 +24,10 @@ public class GrabberFSM {
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
-    private Joystick joystick;
-    private CANSparkMax motor;
-    private static final int THRESHOLD = 100;
-    private double power = 0.1;
+	private Joystick joystick;
+	private CANSparkMax motor;
+	private static final int THRESHOLD = 100;
+	private double power = 0.3; 
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -82,18 +82,18 @@ public class GrabberFSM {
 			case ASCENDING:
 				handleAscendingState(input);
 				break;
-            
-            case DESCENDING:
+				
+			case DESCENDING:
                 handleDescendingState(input);
-                break;
-            
-            case CONTROL:
-                handleControlState(input);
-                break;
-            
-            case MID_IDLE:
-                handleMidIdleState(input);
-                break;
+				break;
+				
+			case CONTROL:
+				handleControlState(input);
+				break;
+
+			case MID_IDLE:
+				handleMidIdleState(input);
+				break;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -111,65 +111,65 @@ public class GrabberFSM {
 	 *        the robot is in autonomous mode.
 	 * @return FSM state for the next iteration
 	 */
-	private FSMState nextState(TeleopInput input){
-        boolean isAtLowerThresh = motor.getEncoder().getPosition() < 0;
-        boolean isAtUpperThresh = motor.getEncoder().getPosition() > THRESHOLD;
+	private FSMState nextState(TeleopInput input) {
+    	boolean isAtLowerThresh = motor.getEncoder().getPosition() < 0;
+    	boolean isAtUpperThresh = motor.getEncoder().getPosition() > THRESHOLD;
 
 
 		switch (currentState) {
 			case LOW_IDLE:
-				if(input != null){
-                    if(input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
-                        return FSMState.ASCENDING;
-                    } else{
-                        return FSMState.LOW_IDLE;
-                    }
-                }
-                return currentState;
-
+				if (input != null){
+                	if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
+                    	return FSMState.ASCENDING;
+                	} else {
+                    	return FSMState.LOW_IDLE;
+                	}
+            	}
+				return currentState;
+				
 			case ASCENDING:
-				if(input != null){
-                    if(isAtUpperThresh){
-                        return FSMState.MID_IDLE;
-                    }else if(!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()){
-                        return FSMState.DESCENDING;
-                    }else if(input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()){
-                        return FSMState.ASCENDING;
-                    } else{
-                        return FSMState.CONTROL;
-                    }
-                }
+				if (input != null){
+                	if (isAtUpperThresh) {
+                    	return FSMState.MID_IDLE;
+                	} else if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
+                    	return FSMState.DESCENDING;
+                    }else if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
+                    	return FSMState.ASCENDING;
+                    } else {
+                    	return FSMState.CONTROL;
+                	}
+            	}
 				return currentState;
             
             case DESCENDING:
-                if(input != null){
-                    if(isAtLowerThresh){
+                if (input != null) {
+                    if (isAtLowerThresh) {
                         return FSMState.LOW_IDLE;
-                    }else if(!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()){
+                    } else if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
                         return FSMState.DESCENDING;
-                    }else if(input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()){
+                    } else if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
                         return FSMState.ASCENDING;
-                    } else{
+                    } else {
                         return FSMState.CONTROL;
                     }
                 }
                 return currentState;
             
             case CONTROL: 
-                if(input != null){
-                    if(input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()){
+                if (input != null) {
+                    if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
                         return FSMState.ASCENDING;
-                    }else if(!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()){
+                    } else if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
                         return FSMState.DESCENDING;
-                    } else{
+                    } else {
                         return FSMState.CONTROL;
                     }
                 }
                 return currentState;
             
             case MID_IDLE:
-                if(input != null){
-                    if(!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()){
+                if (input != null) {
+                    if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
                         return  FSMState.DESCENDING;
                     } else {
                         return  FSMState.MID_IDLE;
