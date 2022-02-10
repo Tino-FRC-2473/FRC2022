@@ -2,15 +2,9 @@ package frc.robot.systems;
 
 // WPILib Imports
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Solenoid;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.PS4Controller.Button;
-import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 
 // Third Party Hardware Imports
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
 
 // Robot Imports
 import frc.robot.TeleopInput;

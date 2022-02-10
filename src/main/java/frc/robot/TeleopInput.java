@@ -69,14 +69,14 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isAscendingButtonPressed() {
-		return leftJoystick.getRawButton(3);
+		return rightJoystick.getRawButton(1);
 	}
 	/**
 	 * Get the value of the descending button.
 	 * @return True if button is pressed
 	 */
 	public boolean isDescendingButtonPressed() {
-		return leftJoystick.getRawButton(4);
+		return rightJoystick.getRawButton(2);
 	}
 
 	/* ------------------------ Right Joystick ------------------------ */
