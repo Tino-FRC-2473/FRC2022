@@ -159,21 +159,22 @@ public class GrabberFSM {
 				}
 				return currentState;
 
-            case CONTROL: 
-                if (input != null) {
-                    if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
-                        return FSMState.ASCENDING;
-                    } else if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
-                        return FSMState.DESCENDING;
-                    } else {
-                        return FSMState.CONTROL;
-                    }
-                }
-                return currentState;
-            
-            case MID_IDLE:
-                if (input != null) {
-                    if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
+			case CONTROL:
+				if (input != null) {
+					if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
+						return FSMState.ASCENDING;
+					} else if (!input.isAscendingButtonPressed()
+						&& input.isDescendingButtonPressed()) {
+						return FSMState.DESCENDING;
+					} else {
+						return FSMState.CONTROL;
+					}
+				}
+				return currentState;
+
+			case MID_IDLE:
+				if (input != null) {
+					if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
                         return  FSMState.DESCENDING;
                     } else {
                         return  FSMState.MID_IDLE;
