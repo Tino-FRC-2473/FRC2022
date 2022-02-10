@@ -1,7 +1,6 @@
 package frc.robot.systems;
 
 // WPILib Imports
-import edu.wpi.first.wpilibj.Joystick;
 
 // Third Party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -24,7 +23,6 @@ public class GrabberFSM {
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
-	private Joystick joystick;
 	private CANSparkMax motor;
 	private static final int THRESHOLD = 100;
 	private static final double POWER = 0.3;
@@ -37,8 +35,6 @@ public class GrabberFSM {
 	 */
 	public GrabberFSM() {
 		// Perform hardware init
-		joystick = new Joystick(HardwareMap.CAN_ID_JOYSTICK);
-
 		motor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_SHOOTER, CANSparkMax.MotorType.kBrushless);
 
 		// Reset state machine
