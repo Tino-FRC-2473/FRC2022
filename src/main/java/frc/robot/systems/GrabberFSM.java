@@ -27,7 +27,7 @@ public class GrabberFSM {
 	private Joystick joystick;
 	private CANSparkMax motor;
 	private static final int THRESHOLD = 100;
-	private double power = 0.3; 
+	private static final double POWER = 0.3;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -39,7 +39,7 @@ public class GrabberFSM {
 		// Perform hardware init
 		joystick = new Joystick(HardwareMap.CAN_ID_JOYSTICK);
 
-        motor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_SHOOTER, CANSparkMax.MotorType.kBrushless);
+		motor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_SHOOTER, CANSparkMax.MotorType.kBrushless);
 
 		// Reset state machine
 		reset();
@@ -82,11 +82,11 @@ public class GrabberFSM {
 			case ASCENDING:
 				handleAscendingState(input);
 				break;
-				
+
 			case DESCENDING:
-                handleDescendingState(input);
+				handleDescendingState(input);
 				break;
-				
+
 			case CONTROL:
 				handleControlState(input);
 				break;
@@ -112,49 +112,53 @@ public class GrabberFSM {
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input) {
-    	boolean isAtLowerThresh = motor.getEncoder().getPosition() < 0;
-    	boolean isAtUpperThresh = motor.getEncoder().getPosition() > THRESHOLD;
+		boolean isAtLowerThresh = motor.getEncoder().getPosition() < 0;
+		boolean isAtUpperThresh = motor.getEncoder().getPosition() > THRESHOLD;
 
 
 		switch (currentState) {
 			case LOW_IDLE:
 				if (input != null){
-                	if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
-                    	return FSMState.ASCENDING;
-                	} else {
-                    	return FSMState.LOW_IDLE;
-                	}
-            	}
+					if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
+						return FSMState.ASCENDING;
+					} else {
+						return FSMState.LOW_IDLE;
+					}
+				}
 				return currentState;
-				
+
 			case ASCENDING:
 				if (input != null){
-                	if (isAtUpperThresh) {
-                    	return FSMState.MID_IDLE;
-                	} else if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
-                    	return FSMState.DESCENDING;
-                    }else if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
-                    	return FSMState.ASCENDING;
-                    } else {
-                    	return FSMState.CONTROL;
-                	}
-            	}
+					if (isAtUpperThresh) {
+						return FSMState.MID_IDLE;
+					} else if (!input.isAscendingButtonPressed()
+						&& input.isDescendingButtonPressed()) {
+						return FSMState.DESCENDING;
+					} else if (input.isAscendingButtonPressed()
+						&& !input.isDescendingButtonPressed()) {
+						return FSMState.ASCENDING;
+					} else {
+						return FSMState.CONTROL;
+					}
+				}
 				return currentState;
-            
-            case DESCENDING:
-                if (input != null) {
-                    if (isAtLowerThresh) {
-                        return FSMState.LOW_IDLE;
-                    } else if (!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()) {
-                        return FSMState.DESCENDING;
-                    } else if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
-                        return FSMState.ASCENDING;
-                    } else {
-                        return FSMState.CONTROL;
-                    }
-                }
-                return currentState;
-            
+
+			case DESCENDING:
+				if (input != null) {
+					if (isAtLowerThresh) {
+						return FSMState.LOW_IDLE;
+					} else if (!input.isAscendingButtonPressed()
+						&& input.isDescendingButtonPressed()) {
+						return FSMState.DESCENDING;
+					} else if (input.isAscendingButtonPressed()
+						&& !input.isDescendingButtonPressed()) {
+						return FSMState.ASCENDING;
+					} else {
+						return FSMState.CONTROL;
+					}
+				}
+				return currentState;
+
             case CONTROL: 
                 if (input != null) {
                     if (input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
@@ -219,7 +223,7 @@ public class GrabberFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleAscendingState(TeleopInput input) {
-		motor.set(power);
+		motor.set(POWER);
 	}
 
     /**
@@ -228,6 +232,6 @@ public class GrabberFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleDescendingState(TeleopInput input) {
-		motor.set(-power);
+		motor.set(-POWER);
 	}
 }
