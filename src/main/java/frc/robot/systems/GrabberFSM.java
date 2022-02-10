@@ -1,6 +1,5 @@
 package frc.robot.systems;
 
-<<<<<<< HEAD
 // WPILib Imports
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -13,12 +12,6 @@ import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 
-=======
-import com.revrobotics.CANSparkMax;
-
-import edu.wpi.first.wpilibj.Joystick;
-// Third party Hardware Imports
->>>>>>> Set up the Gradle and Cleaned up imports!
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.HardwareMap;
@@ -29,9 +22,9 @@ public class GrabberFSM {
 	public enum FSMState {
 		LOW_IDLE,
 		ASCENDING,
-        CONTROL,
-        DESCENDING,
-        MID_IDLE
+    	CONTROL,
+    	DESCENDING,
+    	MID_IDLE
 	}
 
 
@@ -39,7 +32,7 @@ public class GrabberFSM {
 	private FSMState currentState;
     private Joystick joystick;
     private CANSparkMax motor;
-    private static final int thresh = 100;
+    private static final int THRESHOLD = 100;
     private double power = 0.1;
 
 	/* ======================== Constructor ======================== */
@@ -125,72 +118,70 @@ public class GrabberFSM {
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input){
-        boolean isAscendingButtonPressed = joystick.getRawButton(0);
-        boolean isDescendingButtonPressed = joystick.getRawButton(1);
         boolean isAtLowerThresh = motor.getEncoder().getPosition() < 0;
-        boolean isAtUpperThresh = motor.getEncoder().getPosition() > thresh;
+        boolean isAtUpperThresh = motor.getEncoder().getPosition() > THRESHOLD;
 
 
 		switch (currentState) {
 			case LOW_IDLE:
 				if(input != null){
-                    if(isAscendingButtonPressed && !isDescendingButtonPressed){
+                    if(input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()) {
                         return FSMState.ASCENDING;
                     } else{
                         return FSMState.LOW_IDLE;
                     }
                 }
-                return FSMState.LOW_IDLE;
+                return currentState;
 
 			case ASCENDING:
 				if(input != null){
                     if(isAtUpperThresh){
                         return FSMState.MID_IDLE;
-                    }else if(!isAscendingButtonPressed && isDescendingButtonPressed){
+                    }else if(!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()){
                         return FSMState.DESCENDING;
-                    }else if(isAscendingButtonPressed && !isDescendingButtonPressed){
+                    }else if(input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()){
                         return FSMState.ASCENDING;
                     } else{
                         return FSMState.CONTROL;
                     }
                 }
-				return FSMState.LOW_IDLE;
+				return currentState;
             
             case DESCENDING:
                 if(input != null){
                     if(isAtLowerThresh){
                         return FSMState.LOW_IDLE;
-                    }else if(!isAscendingButtonPressed && isDescendingButtonPressed){
+                    }else if(!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()){
                         return FSMState.DESCENDING;
-                    }else if(isAscendingButtonPressed && !isDescendingButtonPressed){
+                    }else if(input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()){
                         return FSMState.ASCENDING;
                     } else{
                         return FSMState.CONTROL;
                     }
                 }
-                return FSMState.LOW_IDLE;
+                return currentState;
             
             case CONTROL: 
                 if(input != null){
-                    if(isAscendingButtonPressed && !isDescendingButtonPressed){
+                    if(input.isAscendingButtonPressed() && !input.isDescendingButtonPressed()){
                         return FSMState.ASCENDING;
-                    }else if(!isAscendingButtonPressed && isDescendingButtonPressed){
+                    }else if(!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()){
                         return FSMState.DESCENDING;
                     } else{
                         return FSMState.CONTROL;
                     }
                 }
-                return FSMState.LOW_IDLE;
+                return currentState;
             
             case MID_IDLE:
                 if(input != null){
-                    if(!isAscendingButtonPressed && isDescendingButtonPressed){
+                    if(!input.isAscendingButtonPressed() && input.isDescendingButtonPressed()){
                         return  FSMState.DESCENDING;
                     } else {
                         return  FSMState.MID_IDLE;
                     }
                 }
-                return FSMState.LOW_IDLE;
+                return currentState;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());

@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 
 // Systems
 import frc.robot.systems.DriveFSMSystem;
+import frc.robot.systems.GrabberFSM;
 import frc.robot.systems.BallHandlingFSM;
 
 /**
@@ -20,6 +21,7 @@ public class Robot extends TimedRobot {
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
 	private BallHandlingFSM ballSystem;
+	private GrabberFSM grabberSystem;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -33,6 +35,7 @@ public class Robot extends TimedRobot {
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
+		grabberSystem = new GrabberFSM();
 	}
 
 	@Override
@@ -40,12 +43,14 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Autonomous Init --------");
 		driveFsmSystem.reset();
 		ballSystem.reset();
+		grabberSystem.reset();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
 		ballSystem.update(null);
+		grabberSystem.update(null);
 	}
 
 	@Override
@@ -54,6 +59,7 @@ public class Robot extends TimedRobot {
 		ballSystem.reset();
 		driveFsmSystem.reset();
 		ballSystem.reset();
+		grabberSystem.reset();
 	}
 
 	@Override
@@ -61,6 +67,7 @@ public class Robot extends TimedRobot {
 		ballSystem.update(input);
 		driveFsmSystem.update(input);
 		ballSystem.update(input);
+		grabberSystem.update(input);
 	}
 
 	@Override
