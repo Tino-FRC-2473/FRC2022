@@ -16,9 +16,9 @@ public class GrabberFSM {
 	public enum FSMState {
 		LOW_IDLE,
 		ASCENDING,
-    	CONTROL,
-    	DESCENDING,
-    	MID_IDLE
+		CONTROL,
+		DESCENDING,
+		MID_IDLE
 	}
 
 
