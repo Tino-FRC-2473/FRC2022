@@ -84,10 +84,10 @@ public class DriveFSMSystem {
 		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
 											CANSparkMax.MotorType.kBrushless);
 
-		ballPoints.add(new Point(20.5, 60));
-		// ballPoints.add(new Point(26, 151));
-		ballPoints.add(new Point(26, 100));
-		// ballPoints.add(new Point(110, 88));
+		// ballPoints.add(new Point(20.5, 60));
+		ballPoints.add(new Point(26, 151));
+		// ballPoints.add(new Point(26, 100));
+		ballPoints.add(new Point(110, 88));
 		ballPoints.add(new Point(80, 88));
 		ballPoints.add(new Point(40, 90));
 		pointsToHub.add(new Point(40, 90));
@@ -506,8 +506,8 @@ public class DriveFSMSystem {
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
-		leftMotor.set(-motorSpeeds.getX() / 5);
-		rightMotor.set(motorSpeeds.getY() / 5);
+		leftMotor.set(-motorSpeeds.getX() / 4);
+		rightMotor.set(motorSpeeds.getY() / 4);
 
 	}
 
@@ -522,8 +522,8 @@ public class DriveFSMSystem {
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
-		leftMotor.set(-motorSpeeds.getX() / 5);
-		rightMotor.set(motorSpeeds.getY() / 5);
+		leftMotor.set(-motorSpeeds.getX() / 4);
+		rightMotor.set(motorSpeeds.getY() / 4);
 
 	}
 }
