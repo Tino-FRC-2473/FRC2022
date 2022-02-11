@@ -32,7 +32,8 @@ public class DriveFSMSystem {
 		TURN_STATE,
 		TELEOP_STATE,
 		PURE_PURSUIT,
-		PURE_PURSUIT_TO_HUB
+		PURE_PURSUIT_TO_HUB,
+		TURN_TO_HUB
 	}
 
 	/* ======================== Private variables ======================== */
@@ -47,7 +48,7 @@ public class DriveFSMSystem {
 	// private double robotYPosLine = 0;
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	private Point robotPosArc = new Point(20.5, 60);
+	private Point robotPosArc = new Point(0, 0);
 	// private double robotXPosArc = 0;
 	// private double robotYPosArc = 0;
 	private double prevGyroAngle = 0;
@@ -85,13 +86,17 @@ public class DriveFSMSystem {
 											CANSparkMax.MotorType.kBrushless);
 
 		// ballPoints.add(new Point(20.5, 60));
-		ballPoints.add(new Point(26, 151));
-		// ballPoints.add(new Point(26, 100));
-		ballPoints.add(new Point(110, 88));
-		ballPoints.add(new Point(80, 88));
-		ballPoints.add(new Point(40, 90));
-		pointsToHub.add(new Point(40, 90));
-		pointsToHub.add(new Point(20, 60));
+		// ballPoints.add(new Point(26, 151));
+		// ballPoints.add(new Point(110, 88));
+		// ballPoints.add(new Point(40, 90));
+		// pointsToHub.add(new Point(40, 90));
+		// pointsToHub.add(new Point(30, 60));
+		ballPoints.add(new Point(0, 0));
+		ballPoints.add(new Point(0, 60));
+		ballPoints.add(new Point(0, 0));
+		pointsToHub.add(new Point(0, 0));
+		pointsToHub.add(new Point(0, 60));
+		pointsToHub.add(new Point(0, 0));
 		ppController = new PurePursuit(ballPoints);
 
 		gyro = new AHRS(SPI.Port.kMXP);
@@ -189,6 +194,10 @@ public class DriveFSMSystem {
 				handlePurePursuitBackward();
 				break;
 
+			case TURN_TO_HUB:
+				handleTurnState(input, 69);
+				break;
+
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
@@ -263,9 +272,17 @@ public class DriveFSMSystem {
 			case PURE_PURSUIT_TO_HUB:
 				if (finishedPurePursuitPath) {
 					finishedPurePursuitPath = false;
-					return FSMState.TELEOP_STATE;
+					return FSMState.TURN_TO_HUB;
 				}
 				return FSMState.PURE_PURSUIT_TO_HUB;
+
+			case TURN_TO_HUB:
+				if (finishedTurning) {
+					finishedTurning = false;
+				} else {
+					return FSMState.TURN_TO_HUB;
+				}
+				return FSMState.TELEOP_STATE;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -506,8 +523,8 @@ public class DriveFSMSystem {
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
-		leftMotor.set(-motorSpeeds.getX() / 4);
-		rightMotor.set(motorSpeeds.getY() / 4);
+		leftMotor.set(-motorSpeeds.getX() / 5);
+		rightMotor.set(motorSpeeds.getY() / 5);
 
 	}
 
@@ -522,8 +539,8 @@ public class DriveFSMSystem {
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
-		leftMotor.set(-motorSpeeds.getX() / 4);
-		rightMotor.set(motorSpeeds.getY() / 4);
+		leftMotor.set(-motorSpeeds.getX() / 5);
+		rightMotor.set(motorSpeeds.getY() / 5);
 
 	}
 }
