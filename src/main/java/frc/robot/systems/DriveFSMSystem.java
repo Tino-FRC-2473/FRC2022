@@ -85,12 +85,12 @@ public class DriveFSMSystem {
 											CANSparkMax.MotorType.kBrushless);
 
 		ballPoints.add(new Point(20.5, 60));
-		ballPoints.add(new Point(26, 151));
-		// ballPoints.add(new Point(26, 100));
-		ballPoints.add(new Point(110, 88));
-		// ballPoints.add(new Point(80, 88));
-		ballPoints.add(new Point(60, 90));
-		pointsToHub.add(new Point(60, 90));
+		// ballPoints.add(new Point(26, 151));
+		ballPoints.add(new Point(26, 100));
+		// ballPoints.add(new Point(110, 88));
+		ballPoints.add(new Point(80, 88));
+		ballPoints.add(new Point(40, 90));
+		pointsToHub.add(new Point(40, 90));
 		pointsToHub.add(new Point(20, 60));
 		ppController = new PurePursuit(ballPoints);
 
@@ -130,7 +130,7 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.TELEOP_STATE;
+		currentState = FSMState.PURE_PURSUIT;
 
 		timer.reset();
 		timer.start();
@@ -149,6 +149,7 @@ public class DriveFSMSystem {
 		currentTime = updatedTime;
 		gyroAngle = getHeading();
 		System.out.println("gyro angle: " + gyroAngle);
+		System.out.println("raw encoder value: " + leftMotor.getEncoder().getPosition());
 		updateLineOdometry();
 		updateArcOdometry();
 		System.out.println("is finished: " + finishedPurePursuitPath);
@@ -254,6 +255,7 @@ public class DriveFSMSystem {
 			case PURE_PURSUIT:
 				if (finishedPurePursuitPath) {
 					finishedPurePursuitPath = false;
+					ppController = new PurePursuit(pointsToHub);
 					return FSMState.PURE_PURSUIT_TO_HUB;
 				}
 				return FSMState.PURE_PURSUIT;
@@ -393,11 +395,11 @@ public class DriveFSMSystem {
 			isDrivingForward = false;
 		}
 
-		// DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
-		// 	steerAngle, currentLeftPower,
-		// 	currentRightPower, isDrivingForward);
+		DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
+			steerAngle, currentLeftPower,
+			currentRightPower, isDrivingForward);
 
-		DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
+		// DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
 		//multiple speed modes
 		if (input.getTriggerPressed()) {
@@ -499,6 +501,7 @@ public class DriveFSMSystem {
 			finishedPurePursuitPath = true;
 			leftMotor.set(0);
 			rightMotor.set(0);
+			return;
 
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
@@ -514,6 +517,7 @@ public class DriveFSMSystem {
 			finishedPurePursuitPath = true;
 			leftMotor.set(0);
 			rightMotor.set(0);
+			return;
 
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());

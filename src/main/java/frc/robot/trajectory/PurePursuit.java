@@ -49,6 +49,9 @@ public class PurePursuit {
 
 		// store distances from robot to each path point in temp list
 		for (int i = lastClosestPointIndex; i < lastClosestPointIndex + lookaheadDistance; i++) {
+			if (i >= pathPoints.size()) {
+				break;
+			}
 			double distance = Point.findDistance(currentPos, pathPoints.get(i));
 			tempDistances.add(distance);
 		}
