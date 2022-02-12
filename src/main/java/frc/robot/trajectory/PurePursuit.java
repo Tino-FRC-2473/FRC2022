@@ -15,6 +15,10 @@ public class PurePursuit {
 	// in inches
 	private static final double SPACING = 6.0;
 
+	/**
+	 * Create PurePursuit controller and path of points to follow.
+	 * @param initialPoints ArrayList containing key points that form outline of path.
+	 */
 	public PurePursuit(ArrayList<Point> initialPoints) {
 		keyPoints = initialPoints;
 		pointInjection();
@@ -85,6 +89,12 @@ public class PurePursuit {
 		return null;
 	}
 
+	/**
+	 * Find lookahead point for robot to drive to.
+	 * @param robotPos Current robot position
+	 * @param robotHeading Current robot angle (heading)
+	 * @return the new lookahead point for robot to target.
+	 */
 	public Point findLookahead(Point robotPos, double robotHeading) {
 		// update index of closest point
 		findClosestPoint(robotPos);
