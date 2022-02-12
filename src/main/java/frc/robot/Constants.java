@@ -60,5 +60,9 @@ public class Constants {
 	//Pure Pursuit Constants
 	public static final double MAX_IN_TO_POINT = 54;
 
+	//Inverse Kinematics Constants
+	public static final double HORIZONTAL_HEADING_CORRECTION_DEG = 1;
+	public static final double ZERO_THRESHOLD = 0.01;
+
 }
 
