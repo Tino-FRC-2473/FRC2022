@@ -27,7 +27,7 @@ public class Constants {
 	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.35;
 	public static final double MOTOR_INITAL_POWER_ACCELERATION = 0.6;
 	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
-	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.15;
+	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.3;
 	public static final double TRACKWIDTH_IN = 20.72;
 
 	//Path constants

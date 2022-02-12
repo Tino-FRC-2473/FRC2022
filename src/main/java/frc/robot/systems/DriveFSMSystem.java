@@ -377,7 +377,7 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		double angle = 339 - gyro.getYaw();
+		double angle = 90 - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
 		}
@@ -431,9 +431,6 @@ public class DriveFSMSystem {
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
 
-		rightMotor.set(rightPower);
-		leftMotor.set(leftPower);
-
 		// 180 is temp target angle for alignment
 		if (input.getTopPressed()) {
 			if (Math.abs(gyroAngle - 180) > 5
@@ -444,6 +441,11 @@ public class DriveFSMSystem {
 				rightPower = 0.1;
 			}
 		}
+
+		rightMotor.set(rightPower);
+		leftMotor.set(leftPower);
+
+		
 	}
 
 	/**
