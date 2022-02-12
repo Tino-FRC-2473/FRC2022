@@ -122,7 +122,7 @@ public class TeleopInput {
 	 * @return true if the top driving button is released
 	 */
 	public boolean getTopPressed() {
-		return drivingJoystick.getRawButton(3);
+		return drivingJoystick.getRawButton(Constants.TURN_TO_HANGAR_BUTTON);
 	}
 
 	/* ======================== Private methods ======================== */

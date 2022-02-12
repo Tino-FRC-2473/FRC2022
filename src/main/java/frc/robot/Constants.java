@@ -29,6 +29,9 @@ public class Constants {
 	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
 	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.3;
 	public static final double TRACKWIDTH_IN = 20.72;
+	public static final double HANGAR_TURN_ERROR = 5;
+	public static final double HANGAR_TURN_SPEED = 0.3;
+	public static final double HANGAR_TURN_TARGET_ANGLE = 180;
 
 	//Path constants
 	// For Run 1 the start angle is 26.73
@@ -56,6 +59,7 @@ public class Constants {
 	public static final int DRIVING_JOYSTICK_PORT = 3;
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
+	public static final int TURN_TO_HANGAR_BUTTON = 3;
 
 	//Pure Pursuit Constants
 	public static final double MAX_IN_TO_POINT = 36;

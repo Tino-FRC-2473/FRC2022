@@ -410,7 +410,7 @@ public class DriveFSMSystem {
 
 		DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
-		//multiple speed modes
+		// multiple speed modes
 		if (input.getTriggerPressed()) {
 			targetPower.scale(Constants.MAX_POWER);
 		} else {
@@ -419,11 +419,11 @@ public class DriveFSMSystem {
 
 		DrivePower power;
 
-		//acceleration
+		// acceleration
 		power = Functions.accelerate(targetPower, new DrivePower(currentLeftPower,
 			currentRightPower));
 
-		//turning in place
+		// turning in place
 		// if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
 		//     power = Functions.turnInPlace(rightJoystickY, steerAngle);
 		// }
@@ -431,21 +431,20 @@ public class DriveFSMSystem {
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
 
-		// 180 is temp target angle for alignment
 		if (input.getTopPressed()) {
-			if (Math.abs(gyroAngle - 180) > 5
-				&& Math.abs(leftJoystickY) < 0.05 &&
-				Math.abs(rightJoystickY) < 0.05){
+			if (Math.abs(gyroAngle - Constants.HANGAR_TURN_TARGET_ANGLE)
+				> Constants.HANGAR_TURN_ERROR
+				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
+				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
 
-				leftPower = 0.1;
-				rightPower = 0.1;
+				leftPower = Constants.HANGAR_TURN_SPEED;
+				rightPower = Constants.HANGAR_TURN_SPEED;
 			}
 		}
 
 		rightMotor.set(rightPower);
 		leftMotor.set(leftPower);
 
-		
 	}
 
 	/**
