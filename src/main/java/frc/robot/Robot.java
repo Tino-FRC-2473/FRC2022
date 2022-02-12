@@ -5,10 +5,6 @@ package frc.robot;
 
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
-
-// Systems
-import frc.robot.systems.DriveFSMSystem;
-import frc.robot.systems.BallHandlingFSM;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
@@ -16,6 +12,9 @@ import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+// Systems
+import frc.robot.systems.DriveFSMSystem;
+import frc.robot.systems.BallHandlingFSM;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
