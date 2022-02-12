@@ -11,8 +11,6 @@ public class NeoSparkMaxPid {
 
 	private final RelativeEncoder encoder;
 
-	private static final int HALL_COUNTS_PER_REV = 42;
-
 	/**
 	 * Constructor for Neo motor controlled by Spark Max
 	 * controller wrapping up PIDF algorithms. Defaults
@@ -40,7 +38,7 @@ public class NeoSparkMaxPid {
 		motor.getPIDController().setIZone(0);
 		motor.getPIDController().setOutputRange(-1, 1);
 
-		encoder = motor.getEncoder(SparkMaxRelativeEncoder.Type.kHallSensor, HALL_COUNTS_PER_REV);
+		encoder = motor.getEncoder();
 	}
 
 

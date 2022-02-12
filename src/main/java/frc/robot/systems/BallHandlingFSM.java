@@ -2,11 +2,12 @@ package frc.robot.systems;
 
 import com.revrobotics.CANSparkMax;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+
 // WPILib Imports
 
 // Third party Hardware Imports
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 
 // Robot Imports
@@ -32,12 +33,13 @@ public class BallHandlingFSM {
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
 
-	private Solenoid pushSolenoid;
-	private Solenoid pullSolenoid;
+	private DoubleSolenoid pushSolenoid;
 
 	private NeoSparkMaxPid intakeMotor;
 
-	private double pushCommandTime;
+	private double pushCommandTimeStamp;
+
+	private boolean isSolenoidExtended;
 
 	private static final double P = 0.00006;
 	private static final double I = 0.00000028;
@@ -52,9 +54,8 @@ public class BallHandlingFSM {
 	 */
 	public BallHandlingFSM() {
 		// Perform hardware init
-		pushSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM,
-		HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID);
-		pullSolenoid = new Solenoid(PneumaticsModuleType.CTREPCM,
+		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
+		HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID,
 		HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
 
 		intakeMotor = new NeoSparkMaxPid(HardwareMap.CAN_ID_SPARK_INTAKE,
@@ -62,8 +63,10 @@ public class BallHandlingFSM {
 						I,
 						D,
 						F);
-
+		
 		// Reset state machine
+		pushCommandTimeStamp = Timer.getFPGATimestamp() - PUSH_TIME_SECONDS;
+
 		reset();
 	}
 
@@ -86,7 +89,7 @@ public class BallHandlingFSM {
 	public void reset() {
 		currentState = FSMState.IDLE;
 
-		pushCommandTime = -1;
+		isSolenoidExtended = false;
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
 	}
@@ -142,14 +145,12 @@ public class BallHandlingFSM {
 
 		switch (currentState) {
 			case IDLE:
-				if (pushCommandTime == -1 && input.isShooterButtonPressed()) {
-					pushCommandTime = Timer.getFPGATimestamp();
+				if (!isSolenoidExtended && input.isShooterButtonPressed()) {
+					pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
-				} else if (pushCommandTime != -1
-					&& Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
-					pushCommandTime = -1;
-
+				} else if (isSolenoidExtended
+						&& Timer.getFPGATimestamp() - pushCommandTimeStamp > PUSH_TIME_SECONDS) {
 					return FSMState.RETRACTING;
 				} else if (input.isIntakeButtonPressed()) {
 					return FSMState.INTAKING;
@@ -160,13 +161,11 @@ public class BallHandlingFSM {
 				}
 
 			case INTAKING:
-				if (pushCommandTime != -1
-					&& Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
-					pushCommandTime = -1;
-
+				if (isSolenoidExtended
+						&& Timer.getFPGATimestamp() - pushCommandTimeStamp > PUSH_TIME_SECONDS) {
 					return FSMState.RETRACTING;
-				} else if (pushCommandTime == -1 && input.isShooterButtonPressed()) {
-					pushCommandTime = Timer.getFPGATimestamp();
+				} else if (!isSolenoidExtended && input.isShooterButtonPressed()) {
+					pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
 				} else if (input.isIntakeButtonPressed()) {
@@ -176,13 +175,11 @@ public class BallHandlingFSM {
 				}
 
 			case RELEASING:
-				if (pushCommandTime != -1
-					&& Timer.getFPGATimestamp() - pushCommandTime > PUSH_TIME_SECONDS) {
-					pushCommandTime = -1;
-
+				if (isSolenoidExtended
+						&& Timer.getFPGATimestamp() - pushCommandTimeStamp > PUSH_TIME_SECONDS) {
 					return FSMState.RETRACTING;
-				} else if (pushCommandTime == -1 && input.isShooterButtonPressed()) {
-					pushCommandTime = Timer.getFPGATimestamp();
+				} else if (!isSolenoidExtended && input.isShooterButtonPressed()) {
+					pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
 				} else if (input.isTerminalReleaseButtonPressed()) {
@@ -221,8 +218,7 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIdleState(TeleopInput input) {
-		pushSolenoid.set(false);
-		pullSolenoid.set(false);
+		pushSolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeMotor.setVelocity(0);
 	}
 	/**
@@ -231,8 +227,9 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleFiringState(TeleopInput input) {
-		pushSolenoid.set(true);
-		pullSolenoid.set(false);
+		pushSolenoid.set(DoubleSolenoid.Value.kForward);
+
+		isSolenoidExtended = true;
 	}
 	/**
 	 * Handle behavior in RETRACTING.
@@ -240,8 +237,9 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleRetractingState(TeleopInput input) {
-		pushSolenoid.set(false);
-		pullSolenoid.set(true);
+		pushSolenoid.set(DoubleSolenoid.Value.kReverse);
+
+		isSolenoidExtended = false;
 	}
 	/**
 	 * Handle behavior in INTAKING.
@@ -249,8 +247,7 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIntakingState(TeleopInput input) {
-		pushSolenoid.set(false);
-		pullSolenoid.set(false);
+		pushSolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeMotor.setVelocity(INTAKE_MOTOR_RPM);
 	}
 	/**
@@ -259,8 +256,7 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleReleasingState(TeleopInput input) {
-		pushSolenoid.set(false);
-		pullSolenoid.set(false);
+		pushSolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeMotor.setVelocity(-INTAKE_MOTOR_RPM);
 	}
 
