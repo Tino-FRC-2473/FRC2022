@@ -42,5 +42,8 @@ public class Constants {
 	public static final int DRIVING_JOYSTICK_PORT = 3;
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
+	public static final int SHOOTER_BUTTON = 1;
+	public static final int INTAKE_BUTTON = 2;
+	public static final int TERMINAL_RELEASE_BUTTON = 3;
 
 }
