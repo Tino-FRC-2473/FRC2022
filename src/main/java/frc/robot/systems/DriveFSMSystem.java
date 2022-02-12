@@ -43,12 +43,12 @@ public class DriveFSMSystem {
 	private boolean finishedPurePursuitPath;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	private Point robotPosLine = new Point(20.5, 60);
+	private Point robotPosLine = new Point(-20.5, -60);
 	// private double robotXPosLine = 0;
 	// private double robotYPosLine = 0;
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	private Point robotPosArc = new Point(0, 0);
+	private Point robotPosArc = new Point(-20.5, -60);
 	// private double robotXPosArc = 0;
 	// private double robotYPosArc = 0;
 	private double prevGyroAngle = 0;
@@ -85,18 +85,13 @@ public class DriveFSMSystem {
 		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
 											CANSparkMax.MotorType.kBrushless);
 
-		// ballPoints.add(new Point(20.5, 60));
-		// ballPoints.add(new Point(26, 151));
-		// ballPoints.add(new Point(110, 88));
-		// ballPoints.add(new Point(40, 90));
-		// pointsToHub.add(new Point(40, 90));
-		// pointsToHub.add(new Point(30, 60));
-		ballPoints.add(new Point(0, 0));
-		ballPoints.add(new Point(0, 60));
-		ballPoints.add(new Point(0, 0));
-		pointsToHub.add(new Point(0, 0));
-		pointsToHub.add(new Point(0, 60));
-		pointsToHub.add(new Point(0, 0));
+		ballPoints.add(new Point(-20.5, -60));
+		ballPoints.add(new Point(-26, -151));
+		ballPoints.add(new Point(-80, -88));
+		ballPoints.add(new Point(-40, -90));
+		pointsToHub.add(new Point(-40, -90));
+		pointsToHub.add(new Point(-30, -60));
+
 		ppController = new PurePursuit(ballPoints);
 
 		gyro = new AHRS(SPI.Port.kMXP);
@@ -195,7 +190,7 @@ public class DriveFSMSystem {
 				break;
 
 			case TURN_TO_HUB:
-				handleTurnState(input, 69);
+				handleTurnState(input, 249);
 				break;
 
 			default:
@@ -385,7 +380,7 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		double angle = 90 - gyro.getYaw();
+		double angle = 249 - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
 		}
@@ -513,8 +508,8 @@ public class DriveFSMSystem {
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
-		leftMotor.set(-motorSpeeds.getX() / 5);
-		rightMotor.set(motorSpeeds.getY() / 5);
+		leftMotor.set(-motorSpeeds.getX() / 3);
+		rightMotor.set(motorSpeeds.getY() / 3);
 
 	}
 
@@ -529,8 +524,8 @@ public class DriveFSMSystem {
 		}
 		System.out.println("Target point: " + target.getX() + " " + target.getY());
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
-		leftMotor.set(-motorSpeeds.getX() / 5);
-		rightMotor.set(motorSpeeds.getY() / 5);
+		leftMotor.set(-motorSpeeds.getX() / 3);
+		rightMotor.set(motorSpeeds.getY() / 3);
 
 	}
 }

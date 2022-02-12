@@ -10,7 +10,7 @@ public class PurePursuit {
 	private ArrayList<Point> pathPoints = new ArrayList<>();
 	private int lastClosestPointIndex = 0;
 	// lookahead point is this many inches ahead
-	private final int lookaheadDistance = 9;
+	private final int lookaheadDistance = 6;
 
 	// in inches
 	private static final double SPACING = 6.0;
