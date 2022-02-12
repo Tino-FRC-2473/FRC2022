@@ -43,12 +43,12 @@ public class DriveFSMSystem {
 	private boolean finishedPurePursuitPath;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	private Point robotPosLine = new Point(-20.5, -60);
+	private Point robotPosLine = new Point(80, -60);
 	// private double robotXPosLine = 0;
 	// private double robotYPosLine = 0;
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	private Point robotPosArc = new Point(-20.5, -60);
+	private Point robotPosArc = new Point(80, -60);
 	// private double robotXPosArc = 0;
 	// private double robotYPosArc = 0;
 	private double prevGyroAngle = 0;
@@ -85,12 +85,17 @@ public class DriveFSMSystem {
 		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
 											CANSparkMax.MotorType.kBrushless);
 
-		ballPoints.add(new Point(-20.5, -60));
-		ballPoints.add(new Point(-26, -151));
-		ballPoints.add(new Point(-80, -88));
-		ballPoints.add(new Point(-40, -90));
-		pointsToHub.add(new Point(-40, -90));
-		pointsToHub.add(new Point(-30, -60));
+		// ballPoints.add(new Point(-20.5, -60));
+		// ballPoints.add(new Point(-26, -151));
+		// ballPoints.add(new Point(-80, -88));
+		// ballPoints.add(new Point(-40, -90));
+		// pointsToHub.add(new Point(-40, -90));
+		// pointsToHub.add(new Point(-30, -60));
+
+		ballPoints.add(new Point(80, -60));
+		ballPoints.add(new Point(129, -82));
+		pointsToHub.add(new Point(129, -82));
+		pointsToHub.add(new Point(33, -24));
 
 		ppController = new PurePursuit(ballPoints);
 
@@ -130,7 +135,7 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.PURE_PURSUIT;
+		currentState = FSMState.TELEOP_STATE;
 
 		timer.reset();
 		timer.start();
@@ -148,13 +153,9 @@ public class DriveFSMSystem {
 		double updatedTime = timer.get();
 		currentTime = updatedTime;
 		gyroAngle = getHeading();
-		System.out.println("gyro angle: " + gyroAngle);
-		System.out.println("raw encoder value: " + leftMotor.getEncoder().getPosition());
+
 		updateLineOdometry();
 		updateArcOdometry();
-		System.out.println("is finished: " + finishedPurePursuitPath);
-		System.out.println("current state: " + currentState);
-
 
 		switch (currentState) {
 			case START_STATE:
@@ -190,7 +191,7 @@ public class DriveFSMSystem {
 				break;
 
 			case TURN_TO_HUB:
-				handleTurnState(input, 249);
+				handleTurnState(input, 339);
 				break;
 
 			default:
@@ -303,7 +304,7 @@ public class DriveFSMSystem {
 		double inches) {
 
 		double currrentPosTicks = -leftMotor.getEncoder().getPosition();
-		System.out.println("currrentPosTicks: " + currrentPosTicks);
+
 		if (forwardStateInitialEncoderPos == -1) {
 			forwardStateInitialEncoderPos = currrentPosTicks;
 		}
@@ -311,15 +312,13 @@ public class DriveFSMSystem {
 		double currentPosInches = (positionRev * Math.PI
 			* Constants.WHEEL_DIAMETER_INCHES) / Constants.GEAR_RATIO;
 		double error = inches - currentPosInches;
-		System.out.println("Inches: " + inches);
-		System.out.println("Error: " + error);
 
 		// Checks if either the encoder value is equal to the inches required (reached destination)
 		// or checks if the robot has hit a wall (encoder value is not chaning but motor power is
 	// not zero)
 		if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN)
 			|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
-			System.out.println("im here");
+
 			finishedMovingStraight = true;
 			forwardStateInitialEncoderPos = -1;
 			setPowerForAllMotors(0);
@@ -327,8 +326,6 @@ public class DriveFSMSystem {
 		}
 
 		double speed = Constants.KP_MOVE_STRAIGHT * error;
-		//System.out.println("speed: " + speed);
-		// double speed = speedMultipler * error;
 
 		if (speed >= Constants.MOTOR_RUN_POWER) {
 			setPowerForAllMotors(Constants.MOTOR_MAX_RUN_POWER_ACCELERATION
@@ -359,7 +356,7 @@ public class DriveFSMSystem {
 	* @param degrees The final angle of the robot after the desired turn
 	*/
 	private void handleTurnState(TeleopInput input, double degrees) {
-		System.out.println("angle: " + gyroAngle);
+
 		double error = degrees - getHeading();
 		if (Math.abs(error) <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
 			finishedTurning = true;
@@ -380,7 +377,7 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		double angle = 249 - gyro.getYaw();
+		double angle = 339 - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
 		}
@@ -407,11 +404,11 @@ public class DriveFSMSystem {
 			isDrivingForward = false;
 		}
 
-		DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
-			steerAngle, currentLeftPower,
-			currentRightPower, isDrivingForward);
+		// DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
+		// 	steerAngle, currentLeftPower,
+		// 	currentRightPower, isDrivingForward);
 
-		// DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
+		DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
 		//multiple speed modes
 		if (input.getTriggerPressed()) {
@@ -433,10 +430,6 @@ public class DriveFSMSystem {
 
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
-
-		System.out.println("Encoder left: " + leftMotor.getEncoder().getPosition());
-		System.out.println("Encoder right: " + rightMotor.getEncoder().getPosition());
-		System.out.println("Angle: " + gyroAngle);
 
 		rightMotor.set(rightPower);
 		leftMotor.set(leftPower);
@@ -506,10 +499,10 @@ public class DriveFSMSystem {
 			return;
 
 		}
-		System.out.println("Target point: " + target.getX() + " " + target.getY());
+
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
-		leftMotor.set(-motorSpeeds.getX() / 3);
-		rightMotor.set(motorSpeeds.getY() / 3);
+		leftMotor.set(-motorSpeeds.getX() / 5);
+		rightMotor.set(motorSpeeds.getY() / 5);
 
 	}
 
@@ -522,10 +515,10 @@ public class DriveFSMSystem {
 			return;
 
 		}
-		System.out.println("Target point: " + target.getX() + " " + target.getY());
+
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
-		leftMotor.set(-motorSpeeds.getX() / 3);
-		rightMotor.set(motorSpeeds.getY() / 3);
+		leftMotor.set(-motorSpeeds.getX() / 5);
+		rightMotor.set(motorSpeeds.getY() / 5);
 
 	}
 }
