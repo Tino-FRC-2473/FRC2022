@@ -9,12 +9,16 @@ public class PurePursuit {
 	private ArrayList<Point> keyPoints = new ArrayList<>();
 	private ArrayList<Point> pathPoints = new ArrayList<>();
 	private int lastClosestPointIndex = 0;
-	// lookahead point is this many points ahead of the closest point
+	// lookahead point is this many inches ahead
 	private final int lookaheadDistance = 6;
 
 	// in inches
 	private static final double SPACING = 6.0;
 
+	/**
+	 * Create PurePursuit controller and path of points to follow.
+	 * @param initialPoints ArrayList containing key points that form outline of path.
+	 */
 	public PurePursuit(ArrayList<Point> initialPoints) {
 		keyPoints = initialPoints;
 		pointInjection();
@@ -49,6 +53,9 @@ public class PurePursuit {
 
 		// store distances from robot to each path point in temp list
 		for (int i = lastClosestPointIndex; i < lastClosestPointIndex + lookaheadDistance; i++) {
+			if (i >= pathPoints.size()) {
+				break;
+			}
 			double distance = Point.findDistance(currentPos, pathPoints.get(i));
 			tempDistances.add(distance);
 		}
@@ -82,6 +89,12 @@ public class PurePursuit {
 		return null;
 	}
 
+	/**
+	 * Find lookahead point for robot to drive to.
+	 * @param robotPos Current robot position
+	 * @param robotHeading Current robot angle (heading)
+	 * @return the new lookahead point for robot to target.
+	 */
 	public Point findLookahead(Point robotPos, double robotHeading) {
 		// update index of closest point
 		findClosestPoint(robotPos);

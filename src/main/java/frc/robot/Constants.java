@@ -17,7 +17,7 @@ public class Constants {
 	public static final double TURN_ERROR_THRESHOLD_DEGREE = 1.0;
 	public static final double TELEOP_ACCELERATION_CONSTANT = 0.05;
 	public static final double TELEOP_ACCELERATION_MIN = 0.1;
-	public static final double ENCODER_CONSTANT = 1.0799;
+	public static final double ENCODER_CONSTANT = 1.0814; //1.0799;
 	public static final double COUNTS_PER_MOTOR_REVOLUTION = 42;
 	public static final double GEAR_RATIO = 8.0; //26.0 * 4.67 / 12.0;
 	public static final double REVOLUTIONS_PER_INCH
@@ -27,7 +27,7 @@ public class Constants {
 	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.35;
 	public static final double MOTOR_INITAL_POWER_ACCELERATION = 0.6;
 	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
-	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.1;
+	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.15;
 	public static final double TRACKWIDTH_IN = 20.72;
 
 	//Path constants
@@ -58,7 +58,11 @@ public class Constants {
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
 
 	//Pure Pursuit Constants
-	public static final double MAX_IN_TO_POINT = 35;
+	public static final double MAX_IN_TO_POINT = 36;
+
+	//Inverse Kinematics Constants
+	public static final double HORIZONTAL_HEADING_CORRECTION_DEG = 1;
+	public static final double ZERO_THRESHOLD = 0.01;
 
 }
 

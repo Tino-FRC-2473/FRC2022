@@ -4,12 +4,12 @@ public class Point {
 	private double x;
 	private double y;
 
-	public Point(double x, double y){
+	public Point(double x, double y) {
 		this.x = x;
 		this.y = y;
 	}
 
-	public double getX(){
+	public double getX() {
 		return x;
 	}
 
@@ -39,7 +39,7 @@ public class Point {
 		return new Point(newX, newY);
 	}
 
-	public static double findDistance(Point a, Point b){
+	public static double findDistance(Point a, Point b) {
 		return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 	}
 }

@@ -6,12 +6,22 @@ public class Vector {
 	private double yMag;
 	private double magnitude;
 
+	/**
+	 * Create vector and calculate its magnitude.
+	 * @param a initial point of vector
+	 * @param b point that the vector ends at
+	 */
 	public Vector(Point a, Point b) {
 		xMag = b.getX() - a.getX();
 		yMag = b.getY() - a.getY();
 		calcMags();
 	}
 
+	/**
+	 * Create vector and calculate its magnitude.
+	 * @param xMag magnitude of vector in X direction.
+	 * @param yMag magnitude of vector in Y direction.
+	 */
 	public Vector(double xMag, double yMag) {
 		this.xMag = xMag;
 		this.yMag = yMag;
@@ -43,7 +53,7 @@ public class Vector {
 		return yMag;
 	}
 
-	public Vector multiplyByScalar (double scalar) {
+	public Vector multiplyByScalar(double scalar) {
 		double newXMag = xMag * scalar;
 		double newYMag = yMag * scalar;
 		return new Vector(newXMag, newYMag);

@@ -172,7 +172,7 @@
     <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>
     <module name="MagicNumber">
-      <property name="ignoreNumbers" value="-1, 0, 1, 2, 90, 180, 360"/>
+      <property name="ignoreNumbers" value="-1, 0, 1, 2, 90, 180, 270, 360, -180"/>
     </module>
     <module name="MissingSwitchDefault"/>
     <module name="MultipleVariableDeclarations"/>
