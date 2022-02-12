@@ -434,6 +434,16 @@ public class DriveFSMSystem {
 		rightMotor.set(rightPower);
 		leftMotor.set(leftPower);
 
+		// 180 is temp target angle for alignment
+		if (input.getTopPressed()) {
+			if (Math.abs(gyroAngle - 180) > 5
+				&& Math.abs(leftJoystickY) < 0.05 &&
+				Math.abs(rightJoystickY) < 0.05){
+
+				leftPower = 0.1;
+				rightPower = 0.1;
+			}
+		}
 	}
 
 	/**
