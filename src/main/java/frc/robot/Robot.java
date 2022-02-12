@@ -7,6 +7,8 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVPhysicsSim;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
 
@@ -33,6 +35,10 @@ public class Robot extends TimedRobot {
 	public void robotInit() {
 		System.out.println("robotInit");
 		input = new TeleopInput();
+
+		Compressor pneumaticsCompressor = new Compressor(PneumaticsModuleType.CTREPCM);
+
+		pneumaticsCompressor.enableDigital();
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
