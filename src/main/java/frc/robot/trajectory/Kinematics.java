@@ -6,7 +6,17 @@ public class Kinematics {
 
 	private static boolean keepTurning = false;
 
-	public static Point updateLineOdometry(double gyroAngle, double currentEncoderPos, double prevEncoderPos, Point robotPos) {
+	/**
+	 * Calculates the new robot position as if the robot
+	 * traveled in a line.
+	 * @param gyroAngle current heading of the robot (90 is straight forward)
+	 * @param currentEncoderPos current encoder position
+	 * @param prevEncoderPos previous encoder position
+	 * @param robotPos current robot position
+	 * @return new robot position
+	 */
+	public static Point updateLineOdometry(double gyroAngle,
+		double currentEncoderPos, double prevEncoderPos, Point robotPos) {
 		// double currentEncoderPos = ((-leftEncoderPos + rightEncoderPos) / 2.0);
 		double dEncoder = (currentEncoderPos - prevEncoderPos) / Constants.REVOLUTIONS_PER_INCH;
 		double dX = dEncoder * Math.cos(Math.toRadians(gyroAngle));
@@ -15,7 +25,18 @@ public class Kinematics {
 		return new Point(robotPos.getX() + dX, robotPos.getY() + dY);
 	}
 
-	public static Point updateArcOdometry(double gyroAngle, double prevGyroAngle, double currentEncoderPos, double prevEncoderPos, Point robotPos) {
+	/**
+	 * Calculated the new robot position as if the robot
+	 * traveled in an arc.
+	 * @param gyroAngle current heading of the robot (90 is straight forward)
+	 * @param prevGyroAngle previous heading of the robot
+	 * @param currentEncoderPos current encoder position
+	 * @param prevEncoderPos previous encoder position
+	 * @param robotPos current robot position
+	 * @return new robot position
+	 */
+	public static Point updateArcOdometry(double gyroAngle,
+		double prevGyroAngle, double currentEncoderPos, double prevEncoderPos, Point robotPos) {
 		double theta = Math.abs(gyroAngle - prevGyroAngle);
 		double arcLength = (currentEncoderPos - prevEncoderPos) / Constants.REVOLUTIONS_PER_INCH;
 		if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
@@ -28,28 +49,43 @@ public class Kinematics {
 		double beta = alpha + 180 - theta;
 		double robotNewXPos = circleX + radius * Math.cos(Math.toRadians(beta));
 		double robotNewYPos = circleY + radius * Math.sin(Math.toRadians(beta));
-		
+
 		return new Point(robotNewXPos, robotNewYPos);
 	}
 
+	/**
+	 * Calculates the motor powers needed to move to a specific point.
+	 * @param gyroHeading heading of the robot (90 is straight forward)
+	 * @param robotPos robot position
+	 * @param targetPos target position
+	 * @param isRobotGoingForward checks whether the robot wants to go forward
+	 * or backwards
+	 * @return the motor powers to needed to move to the target position
+	 */
 	public static Point inversekinematics(double gyroHeading, Point robotPos,
 		Point targetPos, boolean isRobotGoingForward) {
 
+		//new target position relative to the robot
 		Point newtargetPos = new Point(targetPos.getX() - robotPos.getX(),
 			targetPos.getY() - robotPos.getY());
 
+		//slope of the line form the robot to the center of the circle that
+		//defines the arc the robot will travel
 		double mRC = Math.tan(Math.toRadians(gyroHeading));
 		if (gyroHeading == 0) {
-			mRC = Math.tan(Math.toRadians(1));
+			mRC = Math.tan(Math.toRadians(Constants.HORIZONTAL_HEADING_CORRECTION_DEG));
 		} else if (gyroHeading == 180) {
-			mRC = Math.tan(Math.toRadians(179));
+			mRC = Math.tan(Math.toRadians(180 - Constants.HORIZONTAL_HEADING_CORRECTION_DEG));
 		}
 
+		//midpoint between the robot and the target point
+		//this is point A
 		Point midpoint = new Point(newtargetPos.getX() / 2.0, newtargetPos.getY() / 2.0);
-		//need to make sure newtargetPos.getX() does not equal 0 (or isn't close to 0)
+
+		//slope of the line from the robot to the target point
 		double mRT;
-		if (Math.abs(newtargetPos.getX()) < 0.01) {
-			mRT = newtargetPos.getY() / 0.01;
+		if (Math.abs(newtargetPos.getX()) < Constants.ZERO_THRESHOLD) {
+			mRT = newtargetPos.getY() / Constants.ZERO_THRESHOLD;
 		} else {
 			mRT = newtargetPos.getY() / newtargetPos.getX();
 		}
@@ -57,15 +93,17 @@ public class Kinematics {
 		if (mRT != mRT) {
 			System.out.println(mRT);
 		}
-		if (Math.abs(newtargetPos.getX()) < 0.01) {
-			mRT = newtargetPos.getY() / 0.01;
+		if (Math.abs(newtargetPos.getX()) < Constants.ZERO_THRESHOLD) {
+			mRT = newtargetPos.getY() / Constants.ZERO_THRESHOLD;
 		}
+
+		//center of the circle that defines the arc
 		Point center = new Point(0, 0);
 
 		//if mRC - mRT is close to 0, center.getX() will have a divide by 0 error
-		if (Math.abs(mRC - mRT) < 0.01) {
+		if (Math.abs(mRC - mRT) < Constants.ZERO_THRESHOLD) {
 			center.setX((newtargetPos.getX() * mRC + newtargetPos.getY() * mRC * mRT)
-				/ (2.0 * (mRC - mRT < 0 ? -1 : 1) * 0.01));
+				/ (2.0 * (mRC - mRT < 0 ? -1 : 1) * Constants.ZERO_THRESHOLD));
 			//if the heading is one way and the target point is 180 deg
 			//in the other direction, set the center of the circle at ~(0, 0)
 			if (gyroHeading > 270 && gyroHeading < 90 & newtargetPos.getX() < 0) {
@@ -82,23 +120,31 @@ public class Kinematics {
 			center.setY(-center.getX() / mRC);
 		}
 
+		//radius of the circle
 		double radius = getMagnitude(center.getX(), center.getY());
 
-		double RA = getMagnitude(midpoint.getX(), midpoint.getY());
-		double AC = getMagnitude(midpoint.getX() - center.getX(),
+		//distance from the robot to the midpoint
+		double distRA = getMagnitude(midpoint.getX(), midpoint.getY());
+
+		//distance from the midpoint to the center of the circle
+		double distAC = getMagnitude(midpoint.getX() - center.getX(),
 			midpoint.getY() - center.getY());
 
-		double alpha = Math.atan2(RA, AC);
+		double alpha = Math.atan2(distRA, distAC);
 
-		double radius_i = radius - Constants.TRACKWIDTH_IN / 2.0;
-		double radius_o = radius + Constants.TRACKWIDTH_IN / 2.0;
+		//radius for the inner set of wheels
+		double radInner = radius - Constants.TRACKWIDTH_IN / 2.0;
+		//radius for the outer set of wheels
+		double radOuter = radius + Constants.TRACKWIDTH_IN / 2.0;
 
-		double s_i = 2 * radius_i * alpha;
-		double s_o = 2 * radius_o * alpha;
+		//length of the arc for the inner wheels
+		double arcInner = 2 * radInner * alpha;
+		//length of the arc for the outer wheels
+		double arcOuter = 2 * radOuter * alpha;
 
 		//powers to set the inner and outer set of wheels
-		double p_i = s_i / s_o;
-		double p_o = 1;
+		double powerInner = arcInner / arcOuter;
+		double powerOuter = 1;
 
 		double targetAngle = Math.toDegrees(Math.atan2(newtargetPos.getY(), newtargetPos.getX()));
 		if (targetAngle < 0) {
@@ -108,53 +154,33 @@ public class Kinematics {
 		//check if the point is behind the robot
 		//or not in front of it (requires the robot to make too large of an arc)
 		System.out.println("target angle: " + targetAngle);
-		// if (isRobotGoingForward) {
-		// 	if ((Math.abs(targetAngle - gyroHeading) > 60) &&
-		// 		(Math.abs(targetAngle - gyroHeading) < 305)) {
-		// 		keepTurning = true;
-		// 	}
-		// 	if ((Math.abs(targetAngle - gyroHeading) < 45) ||
-		// 		(Math.abs(targetAngle - gyroHeading) > 315)) {
-		// 		keepTurning = false;
-		// 	}
-		// 	if (keepTurning) {
-		// 		if (targetAngle > gyroHeading && targetAngle - 180 < gyroHeading) {
-		// 			System.out.println("left");
-		// 			return new Point(-0.5, 0.5);
-		// 		} else {
-		// 			System.out.println("right");
-		// 			return new Point(0.5, -0.5);
-		// 		}
-		// 	}
-		// } else {
-		// 	if (Math.abs(targetAngle - gyroHeading) < 90) {
-		// 		if (targetAngle - gyroHeading > 0) {
-		// 			return new Point(1.0, -1.0);
-		// 		} else {
-		// 			return new Point(-1.0, 1.0);
-		// 		}
-		// 	}
-		// }
 
 		//find out whether the left or right side is the inner/outer set of wheels
 		if ((targetAngle - gyroHeading > 0 && targetAngle - gyroHeading < 180)
 			|| targetAngle - gyroHeading < -180) {
 			//left side is the inner side
 			if (isRobotGoingForward) {
-				return new Point(p_i, p_o);
+				return new Point(powerInner, powerOuter);
 			} else {
-				return new Point(-p_i, -p_o);
+				return new Point(-powerInner, -powerOuter);
 			}
 		} else {
 			//right side is the inner side
 			if (isRobotGoingForward) {
-				return new Point(p_o, p_i);
+				return new Point(powerOuter, powerInner);
 			} else {
-				return new Point(-p_o, -p_i);
+				return new Point(-powerOuter, -powerInner);
 			}
 		}
-
 	}
+
+	/**
+	 * Calculates the motor powers needed to move to a specific point.
+	 * @param gyroHeading heading of the robot (90 is straight forward)
+	 * @param robotPos robot position
+	 * @param targetPos target position
+	 * @return the motor powers to needed to move to the target position
+	 */
 	public static Point inversekinematics(double gyroHeading, Point robotPos,
 		Point targetPos) {
 

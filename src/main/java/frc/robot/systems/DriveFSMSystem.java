@@ -448,14 +448,14 @@ public class DriveFSMSystem {
 
 	}
 
+	/**
+	 * Updates the robot's position assuming the robot moves in an line.
+	 * @return the robot's new position
+	 */
 	public Point updateLineOdometry() {
 
 		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
 			+ rightMotor.getEncoder().getPosition()) / 2.0);
-	//     robotPosLine = Kinematics.updateLineOdometry(gyroAngle, newEncoderPos,
-		// prevEncoderPosLine, robotPosLine);
-	//     prevEncoderPosLine = ((-leftMotor.getEncoder().getPosition()
-		// + rightMotor.getEncoder().getPosition()) / 2.0);
 
 		double adjustedAngle = gyroAngle;
 		double currentEncoderPos = ((-leftMotor.getEncoder().getPosition()
@@ -467,10 +467,13 @@ public class DriveFSMSystem {
 		robotPosLine.addY(dY);
 
 		prevEncoderPosLine = currentEncoderPos;
-		System.out.println("line odo: (" + robotPosLine.getX() + ", " + robotPosLine.getY() + ")");
 		return robotPosLine;
 	}
 
+	/**
+	 * Updates the robot's position assuming the robot moves in an arc.
+	 * @return the robot's new position
+	 */
 	public Point updateArcOdometry() {
 		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
 			+ rightMotor.getEncoder().getPosition()) / 2.0);
@@ -481,33 +484,20 @@ public class DriveFSMSystem {
 		prevEncoderPosArc = newEncoderPos;
 
 		return robotPosArc;
-		// double adjustedAngle = gyroAngle;
-		// double theta = Math.abs(adjustedAngle - prevGyroAngle);
-		// double currentEncoderPos = ((-leftMotor.getEncoder().getPosition()
-		//     + rightMotor.getEncoder().getPosition()) / 2.0);
-		// double arcLength = (currentEncoderPos - prevEncoderPosArc)
-			// / Constants.REVOLUTIONS_PER_INCH;
-		// if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
-		//     theta = Constants.ODOMETRY_MIN_THETA;
-		// }
-		// double radius = 180 * arcLength / (Math.PI * theta);
-		// double alpha = prevGyroAngle - 90;
-		// double circleX = robotXPosArc + radius * Math.cos(Math.toRadians(alpha));
-		// double circleY = robotYPosArc + radius * Math.sin(Math.toRadians(alpha));
-		// double beta = alpha + 180 - theta;
-		// robotXPosArc = circleX + radius * Math.cos(Math.toRadians(beta));
-		// robotYPosArc = circleY + radius * Math.sin(Math.toRadians(beta));
-
-		// prevGyroAngle = adjustedAngle;
-		// prevEncoderPosArc = currentEncoderPos;
-		//System.out.println("Arc: (" + robotXPosArc + ", " + robotYPosArc + ")");
-
 	}
 
+	/**
+	 * Gets the robot position from the arc-based odometry calculations.
+	 * @return the robot's position
+	 */
 	public Point getRobotPosArc() {
 		return robotPosArc;
 	}
 
+	/**
+	 * Gets the robot position from the line-based odometry calculations.
+	 * @return the robot's position
+	 */
 	public Point getRobotPosLine() {
 		return robotPosLine;
 	}
