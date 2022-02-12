@@ -63,7 +63,7 @@ public class BallHandlingFSM {
 						I,
 						D,
 						F);
-		
+
 		// Reset state machine
 		pushCommandTimeStamp = Timer.getFPGATimestamp() - PUSH_TIME_SECONDS;
 
