@@ -35,24 +35,45 @@ public class Vector {
 		}
 	}
 
+	/**
+	 * Scale vector's length to 1 (and change x/y magnitudes accordingly).
+	 * @return normalized vector with length 1
+	 */
 	public Vector normalize() {
 		double newXMag = xMag / Math.abs(magnitude);
 		double newYMag = yMag / Math.abs(magnitude);
 		return new Vector(newXMag, newYMag);
 	}
 
+	/**
+	 *
+	 * @return magnitude of vector
+	 */
 	public double getMagnitude() {
 		return magnitude;
 	}
 
+	/**
+	 * Get vector's magnitude in the x-direction.
+	 * @return vector's magnitude in x-direction
+	 */
 	public double getXMag() {
 		return xMag;
 	}
 
+	/**
+	 * Get vector's magnitude in the y-direction.
+	 * @return vector's magnitude in y-direction
+	 */
 	public double getYMag() {
 		return yMag;
 	}
 
+	/**
+	 * Scale up/down vector by a double value.
+	 * @param scalar the scalar by which to multiply this vector
+	 * @return scaled vector
+	 */
 	public Vector multiplyByScalar(double scalar) {
 		double newXMag = xMag * scalar;
 		double newYMag = yMag * scalar;
