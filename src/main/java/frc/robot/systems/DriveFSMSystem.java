@@ -13,6 +13,7 @@ import frc.robot.TeleopInput;
 import frc.robot.drive.DriveModes;
 import frc.robot.drive.DrivePower;
 import frc.robot.drive.Functions;
+import frc.robot.trajectory.AutoPaths;
 import frc.robot.trajectory.Kinematics;
 import frc.robot.trajectory.Point;
 import frc.robot.trajectory.PurePursuit;
@@ -43,12 +44,12 @@ public class DriveFSMSystem {
 	private boolean finishedPurePursuitPath;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	private Point robotPosLine = new Point(80, -60);
+	private Point robotPosLine = Constants.PP_R2_START_POINT;
 	// private double robotXPosLine = 0;
 	// private double robotYPosLine = 0;
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	private Point robotPosArc = new Point(80, -60);
+	private Point robotPosArc = Constants.PP_R2_START_POINT;
 	// private double robotXPosArc = 0;
 	// private double robotYPosArc = 0;
 	private double prevGyroAngle = 0;
@@ -92,10 +93,8 @@ public class DriveFSMSystem {
 		// pointsToHub.add(new Point(-40, -90));
 		// pointsToHub.add(new Point(-30, -60));
 
-		ballPoints.add(new Point(80, -60));
-		ballPoints.add(new Point(129, -82));
-		pointsToHub.add(new Point(129, -82));
-		pointsToHub.add(new Point(33, -24));
+		ballPoints = AutoPaths.r2BallPath();
+		pointsToHub = AutoPaths.r2HubPath();
 
 		ppController = new PurePursuit(ballPoints);
 
@@ -191,7 +190,7 @@ public class DriveFSMSystem {
 				break;
 
 			case TURN_TO_HUB:
-				handleTurnState(input, 339);
+				handleTurnState(input, Constants.PP_R2_HUB_ANGLE_DEG);
 				break;
 
 			default:
@@ -512,8 +511,8 @@ public class DriveFSMSystem {
 		}
 
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
-		leftMotor.set(-motorSpeeds.getX() / 5);
-		rightMotor.set(motorSpeeds.getY() / 5);
+		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
+		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
 	}
 
@@ -528,8 +527,8 @@ public class DriveFSMSystem {
 		}
 
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
-		leftMotor.set(-motorSpeeds.getX() / 5);
-		rightMotor.set(motorSpeeds.getY() / 5);
+		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
+		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
 	}
 }

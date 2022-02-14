@@ -1,5 +1,7 @@
 package frc.robot;
 
+import frc.robot.trajectory.Point;
+
 public class Constants {
 	//Drive Constants
 	public static final double KP_MOVE_STRAIGHT = 0.05;
@@ -63,6 +65,10 @@ public class Constants {
 
 	//Pure Pursuit Constants
 	public static final double MAX_IN_TO_POINT = 36;
+	public static final double PP_MAX_SPEED = 0.2;
+
+	public static final Point PP_R2_START_POINT = new Point(80, -60);
+	public static final double PP_R2_HUB_ANGLE_DEG = 339.0;
 
 	//Inverse Kinematics Constants
 	public static final double HORIZONTAL_HEADING_CORRECTION_DEG = 1;
