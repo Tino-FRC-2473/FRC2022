@@ -61,14 +61,12 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		ballSystem.reset();
 		driveFsmSystem.reset();
 		ballSystem.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		ballSystem.update(input);
 		driveFsmSystem.update(input);
 		ballSystem.update(input);
 	}

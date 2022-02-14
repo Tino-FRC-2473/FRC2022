@@ -57,6 +57,11 @@
     <property name="optional" value="true"/>
   </module>
 
+  <module name="SuppressionSingleFilter">
+    <property name="checks" value="MagicNumberCheck"/>
+    <property name="files" value="AutoPaths.java"/>
+  </module>
+
   <!-- Checks that a package-info.java file exists for each package.     -->
   <!-- See https://checkstyle.org/config_javadoc.html#JavadocPackage -->
   <!-- <module name="JavadocPackage"/> -->
@@ -172,7 +177,7 @@
     <module name="IllegalInstantiation"/>
     <module name="InnerAssignment"/>
     <module name="MagicNumber">
-      <property name="ignoreNumbers" value="-1, 0, 1, 2, 90, 180, 360"/>
+      <property name="ignoreNumbers" value="-1, 0, 1, 2, 90, 180, 270, 360, -180"/>
     </module>
     <module name="MissingSwitchDefault"/>
     <module name="MultipleVariableDeclarations"/>
