@@ -25,7 +25,7 @@ public class Robot extends TimedRobot {
 
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
-	// private BallHandlingFSM ballSystem;
+	private BallHandlingFSM ballSystem;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -42,33 +42,33 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
-		// ballSystem = new BallHandlingFSM();
+		ballSystem = new BallHandlingFSM();
 	}
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
 		driveFsmSystem.reset();
-		// ballSystem.reset();
+		ballSystem.reset();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
-		// ballSystem.update(null);
+		ballSystem.update(null);
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		driveFsmSystem.reset();
-		// ballSystem.reset();
+		ballSystem.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
 		driveFsmSystem.update(input);
-		// ballSystem.update(input);
+		ballSystem.update(input);
 	}
 
 	@Override
