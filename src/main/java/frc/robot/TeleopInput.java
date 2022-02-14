@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.Joystick;
  * for inputs by value, but may not access the internal input objects.
  */
 public class TeleopInput {
-
 	/* ======================== Private variables ======================== */
 	// Input objects
 	private Joystick leftJoystick;
@@ -55,14 +54,21 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isShooterButtonPressed() {
-		return leftJoystick.getRawButton(1);
+		return leftJoystick.getRawButton(Constants.SHOOTER_BUTTON);
 	}
 	/**
 	 * Get the value of the intake button.
 	 * @return True if button is pressed
 	 */
 	public boolean isIntakeButtonPressed() {
-		return leftJoystick.getRawButton(2);
+		return leftJoystick.getRawButton(Constants.INTAKE_BUTTON);
+	}
+	/**
+	 * Get the value of the terminal release button.
+	 * @return True if button is pressed
+	 */
+	public boolean isTerminalReleaseButtonPressed() {
+		return leftJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
 	}
 
 	/* ------------------------ Right Joystick ------------------------ */
@@ -117,7 +123,14 @@ public class TeleopInput {
 		return drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON);
 	}
 
+	/**
+	 * Checks if the top button of the driving joystick is released.
+	 * @return true if the top driving button is released
+	 */
+	public boolean getTopPressed() {
+		return drivingJoystick.getRawButton(Constants.TURN_TO_HANGAR_BUTTON);
+	}
+
 	/* ======================== Private methods ======================== */
 
 }
-
