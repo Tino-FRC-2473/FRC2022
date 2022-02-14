@@ -62,6 +62,9 @@ public class Constants {
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
 	public static final int TURN_TO_HANGAR_BUTTON = 3;
+	public static final int SHOOTER_BUTTON = 1;
+	public static final int INTAKE_BUTTON = 2;
+	public static final int TERMINAL_RELEASE_BUTTON = 3;
 
 	//Pure Pursuit Constants
 	public static final double MAX_IN_TO_POINT = 36;
