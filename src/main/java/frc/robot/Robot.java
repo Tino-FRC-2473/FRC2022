@@ -16,8 +16,6 @@ import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.cameraserver.CameraServer;
-// import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
-// import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Systems
@@ -83,14 +81,12 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		ballSystem.reset();
 		driveFsmSystem.reset();
 		ballSystem.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		ballSystem.update(input);
 		driveFsmSystem.update(input);
 		ballSystem.update(input);
 		updateShuffleboardVisualizations();
