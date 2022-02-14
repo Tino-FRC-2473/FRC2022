@@ -56,6 +56,7 @@
               default="checkstyle-suppressions.xml" />
     <property name="optional" value="true"/>
   </module>
+
   <module name="SuppressionSingleFilter">
     <property name="checks" value="MagicNumberCheck"/>
     <property name="files" value="AutoPaths.java"/>
