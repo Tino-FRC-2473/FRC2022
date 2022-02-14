@@ -54,8 +54,11 @@
   <module name="SuppressionFilter">
     <property name="file" value="${org.checkstyle.sun.suppressionfilter.config}"
               default="checkstyle-suppressions.xml" />
-    <property name="file" value="${checkstyle.config.path}/suppressions.xml"/>
-    <property name="optional" value="false"/>
+    <property name="optional" value="true"/>
+  </module>
+  <module name="SuppressionSingleFilter">
+    <property name="checks" value="MagicNumberCheck"/>
+    <property name="files" value="AutoPaths.java"/>
   </module>
 
   <!-- Checks that a package-info.java file exists for each package.     -->
