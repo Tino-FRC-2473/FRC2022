@@ -58,7 +58,7 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
-    UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
+		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
 		CvSink cvSinkRear = CameraServer.getVideo(rearCam);
 		CvSource outputStreamRear =
 			new CvSource("Rear Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
@@ -79,7 +79,7 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.update(input);
 		ballSystem.update(null);
 		grabberSystem.update(null);
-    updateShuffleboardVisualizations();
+		updateShuffleboardVisualizations();
 	}
 
 	@Override
@@ -95,7 +95,7 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.update(input);
 		ballSystem.update(input);
 		grabberSystem.update(input);
-    updateShuffleboardVisualizations();
+		updateShuffleboardVisualizations();
 	}
 
 	@Override
