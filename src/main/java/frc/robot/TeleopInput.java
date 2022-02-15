@@ -70,6 +70,20 @@ public class TeleopInput {
 	public boolean isTerminalReleaseButtonPressed() {
 		return leftJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
 	}
+	/**
+	 * Get the value of the ascending button.
+	 * @return True if button is pressed
+	 */
+	public boolean isAscendingButtonPressed() {
+		return rightJoystick.getRawButton(1);
+	}
+	/**
+	 * Get the value of the descending button.
+	 * @return True if button is pressed
+	 */
+	public boolean isDescendingButtonPressed() {
+		return rightJoystick.getRawButton(2);
+	}
 
 	/* ------------------------ Right Joystick ------------------------ */
 

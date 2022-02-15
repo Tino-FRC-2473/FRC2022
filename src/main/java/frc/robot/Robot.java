@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Systems
 import frc.robot.systems.DriveFSMSystem;
+import frc.robot.systems.GrabberFSM;
 import frc.robot.systems.BallHandlingFSM;
 
 /**
@@ -32,6 +33,7 @@ public class Robot extends TimedRobot {
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
 	private BallHandlingFSM ballSystem;
+	private GrabberFSM grabberSystem;
 
 	// Constants
 	private final int fps = 30;
@@ -55,7 +57,7 @@ public class Robot extends TimedRobot {
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
-
+		grabberSystem = new GrabberFSM();
 		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
 		CvSink cvSinkRear = CameraServer.getVideo(rearCam);
 		CvSource outputStreamRear =
@@ -69,12 +71,14 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Autonomous Init --------");
 		driveFsmSystem.reset();
 		ballSystem.reset();
+		grabberSystem.reset();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
 		ballSystem.update(null);
+		grabberSystem.update(null);
 		updateShuffleboardVisualizations();
 	}
 
@@ -83,12 +87,14 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Teleop Init --------");
 		driveFsmSystem.reset();
 		ballSystem.reset();
+		grabberSystem.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
 		driveFsmSystem.update(input);
 		ballSystem.update(input);
+		grabberSystem.update(input);
 		updateShuffleboardVisualizations();
 	}
 
