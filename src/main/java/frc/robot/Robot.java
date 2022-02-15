@@ -6,10 +6,10 @@ package frc.robot;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVPhysicsSim;
 
+// WPILib Imports
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-// WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
@@ -58,12 +58,12 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
-		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
-		CvSink cvSinkRear = CameraServer.getVideo(rearCam);
-		CvSource outputStreamRear =
-			new CvSource("Rear Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
-		cvSinkRear.setSource(outputStreamRear);
-		rearCam.setBrightness(cameraBrightness);
+		UsbCamera frontCam = CameraServer.startAutomaticCapture("Front Camera", 0);
+		CvSink cvSinkFront = CameraServer.getVideo(frontCam);
+		CvSource outputStreamFront=
+			new CvSource("Front Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
+		cvSinkFront.setSource(outputStreamFront);
+		frontCam.setBrightness(cameraBrightness);
 	}
 
 	@Override
