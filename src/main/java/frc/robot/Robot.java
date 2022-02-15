@@ -36,39 +36,39 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 		input = new TeleopInput();
 
-		Compressor pneumaticsCompressor = new Compressor(PneumaticsModuleType.CTREPCM);
+		// Compressor pneumaticsCompressor = new Compressor(PneumaticsModuleType.CTREPCM);
 
-		pneumaticsCompressor.enableDigital();
+		// pneumaticsCompressor.enableDigital();
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
-		ballSystem = new BallHandlingFSM();
+		// ballSystem = new BallHandlingFSM();
 	}
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
 		driveFsmSystem.reset();
-		ballSystem.reset();
+		// ballSystem.reset();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
-		ballSystem.update(null);
+		// ballSystem.update(null);
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		driveFsmSystem.reset();
-		ballSystem.reset();
+		// ballSystem.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
 		driveFsmSystem.update(input);
-		ballSystem.update(input);
+		// ballSystem.update(input);
 	}
 
 	@Override

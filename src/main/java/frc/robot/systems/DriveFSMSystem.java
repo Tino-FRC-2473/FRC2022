@@ -403,11 +403,11 @@ public class DriveFSMSystem {
 			isDrivingForward = false;
 		}
 
-		// DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
-		// 	steerAngle, currentLeftPower,
-		// 	currentRightPower, isDrivingForward);
+		DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
+			steerAngle, currentLeftPower,
+			currentRightPower, isDrivingForward);
 
-		DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
+		// DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
 		// multiple speed modes
 		if (input.getTriggerPressed()) {
@@ -423,9 +423,9 @@ public class DriveFSMSystem {
 			currentRightPower));
 
 		// turning in place
-		// if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
-		//     power = Functions.turnInPlace(rightJoystickY, steerAngle);
-		// }
+		if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+			power = Functions.turnInPlace(rightJoystickY, steerAngle);
+		}
 
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
