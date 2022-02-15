@@ -3,8 +3,20 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVPhysicsSim;
+
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.CvSource;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoMode.PixelFormat;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Systems
 import frc.robot.systems.DriveFSMSystem;
@@ -23,6 +35,12 @@ public class Robot extends TimedRobot {
 	private BallHandlingFSM ballSystem;
 	private GrabberFSM grabberSystem;
 
+	// Constants
+	private final int fps = 30;
+	private final int cameraBrightness = 25;
+	private final int camWidth = 320;
+	private final int camHeight = 240;
+
 	/**
 	 * This function is run when the robot is first started up and should be used for any
 	 * initialization code.
@@ -32,10 +50,20 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 		input = new TeleopInput();
 
+		Compressor pneumaticsCompressor = new Compressor(PneumaticsModuleType.CTREPCM);
+
+		pneumaticsCompressor.enableDigital();
+
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
+    UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
+		CvSink cvSinkRear = CameraServer.getVideo(rearCam);
+		CvSource outputStreamRear =
+			new CvSource("Rear Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
+		cvSinkRear.setSource(outputStreamRear);
+		rearCam.setBrightness(cameraBrightness);
 	}
 
 	@Override
@@ -51,12 +79,12 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.update(input);
 		ballSystem.update(null);
 		grabberSystem.update(null);
+    updateShuffleboardVisualizations();
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		ballSystem.reset();
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
@@ -64,10 +92,10 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopPeriodic() {
-		ballSystem.update(input);
 		driveFsmSystem.update(input);
 		ballSystem.update(input);
 		grabberSystem.update(input);
+    updateShuffleboardVisualizations();
 	}
 
 	@Override
@@ -77,7 +105,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void disabledPeriodic() {
-
+		updateShuffleboardVisualizations();
 	}
 
 	@Override
@@ -87,19 +115,36 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void testPeriodic() {
-
+		updateShuffleboardVisualizations();
 	}
 
 	/* Simulation mode handlers, only used for simulation testing  */
 	@Override
 	public void simulationInit() {
 		System.out.println("-------- Simulation Init --------");
+
+		CANSparkMax[] sparkMaxs = ballSystem.getSparkMaxs();
+
+		for (int i = 0; i < sparkMaxs.length; i++) {
+			REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
+		}
+
+		System.out.println("-------- Simulation Init --------");
 	}
 
 	@Override
-	public void simulationPeriodic() { }
+	public void simulationPeriodic() {
+		REVPhysicsSim.getInstance().run();
+	}
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
 	public void robotPeriodic() { }
+
+	/**
+	 * Updates shuffleboard values.
+	 */
+	public void updateShuffleboardVisualizations() {
+		SmartDashboard.updateValues();
+	}
 }
