@@ -67,8 +67,10 @@ public class DriveFSMSystem {
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
 
-	private CANSparkMax rightMotor;
-	private CANSparkMax leftMotor;
+	private CANSparkMax frontRightMotor;
+	private CANSparkMax frontLeftMotor;
+	private CANSparkMax backRightMotor;
+	private CANSparkMax backLeftMotor;
 
 	private AHRS gyro;
 
@@ -81,9 +83,13 @@ public class DriveFSMSystem {
 	public DriveFSMSystem() {
 		// Perform hardware init
 
-		rightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_RIGHT,
+		frontRightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_FRONT_RIGHT,
 											CANSparkMax.MotorType.kBrushless);
-		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
+		frontLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_FRONT_LEFT,
+											CANSparkMax.MotorType.kBrushless);
+		backLeftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_BACK_LEFT,
+											CANSparkMax.MotorType.kBrushless);
+		backRightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_BACK_RIGHT,
 											CANSparkMax.MotorType.kBrushless);
 
 		// ballPoints.add(new Point(-20.5, -60));
@@ -124,8 +130,10 @@ public class DriveFSMSystem {
 	 */
 	public void reset() {
 
-		rightMotor.getEncoder().setPosition(0);
-		leftMotor.getEncoder().setPosition(0);
+		frontRightMotor.getEncoder().setPosition(0);
+		frontLeftMotor.getEncoder().setPosition(0);
+		backLeftMotor.getEncoder().setPosition(0);
+		backRightMotor.getEncoder().setPosition(0);
 
 		gyro.reset();
 		gyro.zeroYaw();
@@ -302,7 +310,7 @@ public class DriveFSMSystem {
 	private void handleForwardOrBackwardState(TeleopInput input,
 		double inches) {
 
-		double currrentPosTicks = -leftMotor.getEncoder().getPosition();
+		double currrentPosTicks = -frontLeftMotor.getEncoder().getPosition();
 
 		if (forwardStateInitialEncoderPos == -1) {
 			forwardStateInitialEncoderPos = currrentPosTicks;
@@ -343,8 +351,10 @@ public class DriveFSMSystem {
 	* @param power The power to set all the motors to
 	*/
 	private void setPowerForAllMotors(double power) {
-		leftMotor.set(-power);
-		rightMotor.set(power);
+		frontLeftMotor.set(-power);
+		frontRightMotor.set(power);
+		backLeftMotor.set(-power);
+		backRightMotor.set(power);
 
 	}
 
@@ -366,8 +376,10 @@ public class DriveFSMSystem {
 			power = Constants.MIN_TURN_POWER * (power < 0 ? -1 : 1);
 		}
 
-		leftMotor.set(power);
-		rightMotor.set(power);
+		frontLeftMotor.set(power);
+		frontRightMotor.set(power);
+		backLeftMotor.set(power);
+		backRightMotor.set(power);
 
 	}
 
@@ -394,8 +406,8 @@ public class DriveFSMSystem {
 		double leftJoystickY = input.getLeftJoystickY();
 		double rightJoystickY = input.getDrivingJoystickY();
 		double steerAngle = input.getSteerAngle();
-		double currentLeftPower = leftMotor.get();
-		double currentRightPower = rightMotor.get();
+		double currentLeftPower = frontLeftMotor.get();
+		double currentRightPower = frontRightMotor.get();
 
 		if (input.isForwardDrivingButtonPressed()) {
 			isDrivingForward = true;
@@ -441,8 +453,10 @@ public class DriveFSMSystem {
 			}
 		}
 
-		rightMotor.set(rightPower);
-		leftMotor.set(leftPower);
+		frontRightMotor.set(rightPower);
+		frontLeftMotor.set(leftPower);
+		backRightMotor.set(rightPower);
+		backLeftMotor.set(leftPower);
 
 	}
 
@@ -452,12 +466,12 @@ public class DriveFSMSystem {
 	 */
 	public Point updateLineOdometry() {
 
-		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
-			+ rightMotor.getEncoder().getPosition()) / 2.0);
+		double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
 
 		double adjustedAngle = gyroAngle;
-		double currentEncoderPos = ((-leftMotor.getEncoder().getPosition()
-			+ rightMotor.getEncoder().getPosition()) / 2.0);
+		double currentEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
 		double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
 		double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
 		double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
@@ -473,8 +487,8 @@ public class DriveFSMSystem {
 	 * @return the robot's new position
 	 */
 	public Point updateArcOdometry() {
-		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
-			+ rightMotor.getEncoder().getPosition()) / 2.0);
+		double newEncoderPos = ((-frontLeftMotor.getEncoder().getPosition()
+			+ frontRightMotor.getEncoder().getPosition()) / 2.0);
 		robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle,
 			newEncoderPos, prevEncoderPosArc, robotPosArc);
 
@@ -504,15 +518,15 @@ public class DriveFSMSystem {
 		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
-			leftMotor.set(0);
-			rightMotor.set(0);
+			frontLeftMotor.set(0);
+			frontRightMotor.set(0);
 			return;
 
 		}
 
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
-		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
-		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
+		frontLeftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
+		frontRightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
 	}
 
@@ -520,15 +534,15 @@ public class DriveFSMSystem {
 		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
-			leftMotor.set(0);
-			rightMotor.set(0);
+			frontLeftMotor.set(0);
+			frontRightMotor.set(0);
 			return;
 
 		}
 
 		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
-		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
-		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
+		frontLeftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
+		frontRightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
 	}
 }
