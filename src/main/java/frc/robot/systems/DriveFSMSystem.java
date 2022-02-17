@@ -54,6 +54,7 @@ public class DriveFSMSystem {
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
+	private double previousEncoderCount = 0;
 	private Timer timer;
 	private double currentTime = 0;
 	private boolean isDrivingForward = true;
@@ -314,11 +315,12 @@ public class DriveFSMSystem {
 		double error = inches - currentPosInches;
 
 		// Checks if either the encoder value is equal to the inches required (reached destination)
-		// or checks if the robot has hit a wall (encoder value is not chaning but motor power is
-	// not zero)
+		// or checks if the robot has hit a wall (encoder value is not chaning and motor power is
+		// not zero)
 		if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN)
-			|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
-
+			|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)
+			|| (previousEncoderCount == currrentPosTicks && frontLeftMotor.get() != 0.0)) {
+			System.out.println("im here");
 			finishedMovingStraight = true;
 			forwardStateInitialEncoderPos = -1;
 			setPowerForAllMotors(0);
@@ -337,6 +339,9 @@ public class DriveFSMSystem {
 		} else {
 			setPowerForAllMotors(speed);
 		}
+
+		previousEncoderCount = currrentPosTicks;
+		System.out.println("Previous Encoder Count: " + previousEncoderCount);
 	}
 
 	/**
