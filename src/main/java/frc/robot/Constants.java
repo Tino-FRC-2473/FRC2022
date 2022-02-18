@@ -71,6 +71,7 @@ public class Constants {
 	public static final double PP_MAX_SPEED = 0.2;
 	public static final double PP_BALL_MAX_RUN_TIME_SEC = 7.0;
 	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 5.0;
+	public static final double PP_TURN_RUN_TIME_SEC = 2.0;
 
 	public static final Point PP_R2_START_POINT = new Point(80, -60);
 	public static final double PP_R2_HUB_ANGLE_DEG = 339.0;

@@ -85,15 +85,15 @@ public class DriveFSMSystem {
 		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
 											CANSparkMax.MotorType.kBrushless);
 
-		// ballPoints.add(new Point(-20.5, -60));
-		// ballPoints.add(new Point(-26, -151));
-		// ballPoints.add(new Point(-80, -88));
-		// ballPoints.add(new Point(-40, -90));
-		// pointsToHub.add(new Point(-40, -90));
-		// pointsToHub.add(new Point(-30, -60));
+		ballPoints.add(new Point(-20.5, -60));
+		ballPoints.add(new Point(-26, -151));
+		ballPoints.add(new Point(-80, -88));
+		ballPoints.add(new Point(-40, -90));
+		pointsToHub.add(new Point(-40, -90));
+		pointsToHub.add(new Point(-30, -60));
 
-		ballPoints = AutoPaths.r2BallPath();
-		pointsToHub = AutoPaths.r2HubPath();
+		// ballPoints = AutoPaths.r2BallPath();
+		// pointsToHub = AutoPaths.r2HubPath();
 
 		ppController = new PurePursuit(ballPoints);
 
@@ -133,7 +133,7 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.TELEOP_STATE;
+		currentState = FSMState.PURE_PURSUIT;
 
 		timer.reset();
 		timer.start();
@@ -151,6 +151,7 @@ public class DriveFSMSystem {
 		double updatedTime = timer.get();
 		currentTime = updatedTime;
 		gyroAngle = getHeading();
+		System.out.println("state: " + currentState);
 
 		updateLineOdometry();
 		updateArcOdometry();
@@ -179,7 +180,8 @@ public class DriveFSMSystem {
 				break;
 
 			case TURN_STATE:
-				handleTurnState(input, Constants.RUN_1_TURN_TO_HUB_ANGLE);
+				handleTurnState(input, Constants.RUN_1_TURN_TO_HUB_ANGLE,
+						Constants.PP_TURN_RUN_TIME_SEC);
 				break;
 
 			case PURE_PURSUIT:
@@ -191,7 +193,8 @@ public class DriveFSMSystem {
 				break;
 
 			case TURN_TO_HUB:
-				handleTurnState(input, Constants.PP_R2_HUB_ANGLE_DEG);
+				handleTurnState(input, Constants.PP_R2_HUB_ANGLE_DEG,
+						Constants.PP_TURN_RUN_TIME_SEC);
 				break;
 
 			case DEPOSIT_BALL_IDLE:
@@ -265,6 +268,7 @@ public class DriveFSMSystem {
 				if (finishedPurePursuitPath) {
 					finishedPurePursuitPath = false;
 					ppController = new PurePursuit(pointsToHub);
+					timer.reset();
 					return FSMState.PURE_PURSUIT_TO_HUB;
 				}
 				return FSMState.PURE_PURSUIT;
@@ -272,6 +276,7 @@ public class DriveFSMSystem {
 			case PURE_PURSUIT_TO_HUB:
 				if (finishedPurePursuitPath) {
 					finishedPurePursuitPath = false;
+					timer.reset();
 					return FSMState.TURN_TO_HUB;
 				}
 				return FSMState.PURE_PURSUIT_TO_HUB;
@@ -366,11 +371,19 @@ public class DriveFSMSystem {
 	*        the robot is in autonomous mode.
 	* @param degrees The final angle of the robot after the desired turn
 	*/
-	private void handleTurnState(TeleopInput input, double degrees) {
+	private void handleTurnState(TeleopInput input, double degrees, double maxRunTime) {
 
+		if (timer.get() > maxRunTime) {
+			finishedTurning = true;
+			leftMotor.set(0);
+			rightMotor.set(0);
+			return;
+		}
 		double error = degrees - getHeading();
 		if (Math.abs(error) <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
 			finishedTurning = true;
+			leftMotor.set(0);
+			rightMotor.set(0);
 			return;
 		}
 		double power = error / Constants.TURN_ERROR_POWER_RATIO;
@@ -513,6 +526,12 @@ public class DriveFSMSystem {
 	}
 
 	private void handlePurePursuit(double maxRunTime) {
+		if (timer.get() > maxRunTime) {
+			finishedPurePursuitPath = true;
+			leftMotor.set(0);
+			rightMotor.set(0);
+			return;
+		}
 		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
@@ -529,6 +548,12 @@ public class DriveFSMSystem {
 	}
 
 	private void handlePurePursuitBackward(double maxRunTime) {
+		if (timer.get() > maxRunTime) {
+			finishedPurePursuitPath = true;
+			leftMotor.set(0);
+			rightMotor.set(0);
+			return;
+		}
 		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
