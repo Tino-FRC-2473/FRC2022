@@ -34,7 +34,8 @@ public class DriveFSMSystem {
 		TELEOP_STATE,
 		PURE_PURSUIT,
 		PURE_PURSUIT_TO_HUB,
-		TURN_TO_HUB
+		TURN_TO_HUB,
+		DEPOSIT_BALL_IDLE
 	}
 
 	/* ======================== Private variables ======================== */
@@ -44,14 +45,12 @@ public class DriveFSMSystem {
 	private boolean finishedPurePursuitPath;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	private Point robotPosLine = Constants.PP_R2_START_POINT;
-	// private double robotXPosLine = 0;
-	// private double robotYPosLine = 0;
+	// private Point robotPosLine = Constants.PP_R2_START_POINT;
+	private Point robotPosLine = new Point(0, 0);
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	private Point robotPosArc = Constants.PP_R2_START_POINT;
-	// private double robotXPosArc = 0;
-	// private double robotYPosArc = 0;
+	// private Point robotPosArc = Constants.PP_R2_START_POINT;
+	private Point robotPosArc = new Point(0, 0);
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
@@ -155,6 +154,8 @@ public class DriveFSMSystem {
 
 		updateLineOdometry();
 		updateArcOdometry();
+		System.out.println("arc odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
+		System.out.println("line odo: " + robotPosLine.getX() + " " + robotPosLine.getY());
 
 		switch (currentState) {
 			case START_STATE:
@@ -182,15 +183,19 @@ public class DriveFSMSystem {
 				break;
 
 			case PURE_PURSUIT:
-				handlePurePursuit();
+				handlePurePursuit(Constants.PP_BALL_MAX_RUN_TIME_SEC);
 				break;
 
 			case PURE_PURSUIT_TO_HUB:
-				handlePurePursuitBackward();
+				handlePurePursuitBackward(Constants.PP_TO_HUB_MAX_RUN_TIME_SEC);
 				break;
 
 			case TURN_TO_HUB:
 				handleTurnState(input, Constants.PP_R2_HUB_ANGLE_DEG);
+				break;
+
+			case DEPOSIT_BALL_IDLE:
+				handleBallDepositIdleState(input);
 				break;
 
 			default:
@@ -278,6 +283,13 @@ public class DriveFSMSystem {
 					return FSMState.TURN_TO_HUB;
 				}
 				return FSMState.TELEOP_STATE;
+
+			case DEPOSIT_BALL_IDLE:
+				if (true) {
+					return FSMState.PURE_PURSUIT;
+				} else {
+					return FSMState.DEPOSIT_BALL_IDLE;
+				}
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -403,11 +415,11 @@ public class DriveFSMSystem {
 			isDrivingForward = false;
 		}
 
-		// DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
-		// 	steerAngle, currentLeftPower,
-		// 	currentRightPower, isDrivingForward);
+		DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
+			steerAngle, currentLeftPower,
+			currentRightPower, isDrivingForward);
 
-		DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
+		// DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
 		// multiple speed modes
 		if (input.getTriggerPressed()) {
@@ -423,9 +435,9 @@ public class DriveFSMSystem {
 			currentRightPower));
 
 		// turning in place
-		// if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
-		//     power = Functions.turnInPlace(rightJoystickY, steerAngle);
-		// }
+		if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+			power = Functions.turnInPlace(rightJoystickY, steerAngle);
+		}
 
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
@@ -500,7 +512,7 @@ public class DriveFSMSystem {
 		return robotPosLine;
 	}
 
-	private void handlePurePursuit() {
+	private void handlePurePursuit(double maxRunTime) {
 		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
@@ -516,7 +528,7 @@ public class DriveFSMSystem {
 
 	}
 
-	private void handlePurePursuitBackward() {
+	private void handlePurePursuitBackward(double maxRunTime) {
 		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
@@ -530,5 +542,11 @@ public class DriveFSMSystem {
 		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
 		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
+	}
+
+	private void handleBallDepositIdleState(TeleopInput input) {
+
+		leftMotor.set(0);
+		rightMotor.set(0);
 	}
 }
