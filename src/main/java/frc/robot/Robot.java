@@ -11,17 +11,14 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.cscore.CvSink;
-import edu.wpi.first.cscore.CvSource;
-import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.cscore.VideoMode.PixelFormat;
-import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Systems
 import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.GrabberFSM;
 import frc.robot.systems.BallHandlingFSM;
+import frc.robot.systems.CameraFSM;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -30,16 +27,14 @@ import frc.robot.systems.BallHandlingFSM;
 public class Robot extends TimedRobot {
 	private TeleopInput input;
 
+	// Shuffleboard
+	public SendableChooser<Integer> autoChooser = new SendableChooser<>();
+
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
 	private BallHandlingFSM ballSystem;
 	private GrabberFSM grabberSystem;
-
-	// Constants
-	private final int fps = 30;
-	private final int cameraBrightness = 25;
-	private final int camWidth = 320;
-	private final int camHeight = 240;
+	private CameraFSM cameraSystem;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -58,20 +53,28 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
-		UsbCamera frontCam = CameraServer.startAutomaticCapture("Front Camera", 0);
-		CvSink cvSinkFront = CameraServer.getVideo(frontCam);
-		CvSource outputStreamFront=
-			new CvSource("Front Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
-		cvSinkFront.setSource(outputStreamFront);
-		frontCam.setBrightness(cameraBrightness);
+		cameraSystem = new CameraFSM();
+
+		autoChooser.setDefaultOption("3 Ball Red", 1);
+		autoChooser.addOption("3 Ball Blue", 2);
+		autoChooser.addOption("2 Ball Red", 3);
+		autoChooser.addOption("2 Ball Blue", 4);
+		autoChooser.addOption("1 Ball Red", 5);
+		autoChooser.addOption("1 Ball Blue", 6);
+
+		SmartDashboard.putData("Auto Mode:", autoChooser);
 	}
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
+		SmartDashboard.putString("Match Cycle", "AUTONOMOUS");
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
+		cameraSystem.reset();
+		int autoMode = autoChooser.getSelected();
+		updateShuffleboard();
 	}
 
 	@Override
@@ -79,15 +82,18 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.update(input);
 		ballSystem.update(null);
 		grabberSystem.update(null);
-		updateShuffleboardVisualizations();
+		cameraSystem.update(null);
+		updateShuffleboard();
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
+		SmartDashboard.putString("Match Cycle", "TELEOP");
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
+		updateShuffleboard();
 	}
 
 	@Override
@@ -95,27 +101,30 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.update(input);
 		ballSystem.update(input);
 		grabberSystem.update(input);
-		updateShuffleboardVisualizations();
+		updateShuffleboard();
 	}
 
 	@Override
 	public void disabledInit() {
 		System.out.println("-------- Disabled Init --------");
+		SmartDashboard.putString("Match Cycle", "DISABLED");
 	}
 
 	@Override
 	public void disabledPeriodic() {
-		updateShuffleboardVisualizations();
+		updateShuffleboard();
 	}
 
 	@Override
 	public void testInit() {
 		System.out.println("-------- Test Init --------");
+		SmartDashboard.putString("Match Cycle", "TEST");
+		updateShuffleboard();
 	}
 
 	@Override
 	public void testPeriodic() {
-		updateShuffleboardVisualizations();
+		updateShuffleboard();
 	}
 
 	/* Simulation mode handlers, only used for simulation testing  */
@@ -129,12 +138,15 @@ public class Robot extends TimedRobot {
 			REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
 		}
 
+		updateShuffleboard();
+
 		System.out.println("-------- Simulation Init --------");
 	}
 
 	@Override
 	public void simulationPeriodic() {
 		REVPhysicsSim.getInstance().run();
+		updateShuffleboard();
 	}
 
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
@@ -144,7 +156,7 @@ public class Robot extends TimedRobot {
 	/**
 	 * Updates shuffleboard values.
 	 */
-	public void updateShuffleboardVisualizations() {
+	public void updateShuffleboard() {
 		SmartDashboard.updateValues();
 	}
 }

@@ -145,6 +145,10 @@ public class TeleopInput {
 		return drivingJoystick.getRawButton(Constants.TURN_TO_HANGAR_BUTTON);
 	}
 
+	// public boolean isCamSwitchPressed() {
+	// 	return drivingJoystick.getRawButton(Constants.CAMERA_SWITCH_BUTTON);
+	// }
+
 	/* ======================== Private methods ======================== */
 
 }
