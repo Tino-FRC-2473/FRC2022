@@ -1,13 +1,16 @@
 package frc.robot.trajectory;
 
+// WPILib Imports
+import edu.wpi.first.math.geometry.Translation2d;
+
 import java.util.ArrayList;
 
 import frc.robot.Constants;
 
 public class PurePursuit {
 
-	private ArrayList<Point> keyPoints = new ArrayList<>();
-	private ArrayList<Point> pathPoints = new ArrayList<>();
+	private ArrayList<Translation2d> keyPoints = new ArrayList<>();
+	private ArrayList<Translation2d> pathPoints = new ArrayList<>();
 	private int lastClosestPointIndex = 0;
 	// lookahead point is this many inches ahead
 	private final int lookaheadDistance = 6;
@@ -19,35 +22,36 @@ public class PurePursuit {
 	 * Create PurePursuit controller and path of points to follow.
 	 * @param initialPoints ArrayList containing key points that form outline of path.
 	 */
-	public PurePursuit(ArrayList<Point> initialPoints) {
+	public PurePursuit(ArrayList<Translation2d> initialPoints) {
 		keyPoints = initialPoints;
 		pointInjection();
-		for (Point p : pathPoints) {
-			System.out.println("(" + p.getX() + ", " + p.getY() + ")");
+		for (Translation2d p : pathPoints) {
+			System.out.println(p);
 		}
 	}
 
 	private void pointInjection() {
 		for (int i = 1; i < keyPoints.size(); i++) {
-			Point startPoint = keyPoints.get(i - 1);
-			Point endPoint = keyPoints.get(i);
+			Translation2d startPoint = keyPoints.get(i - 1);
+			Translation2d endPoint = keyPoints.get(i);
 
-			Vector v = new Vector(startPoint, endPoint);
+			Vector v = new Vector(endPoint.getX() - startPoint.getX(),
+				endPoint.getY() - startPoint.getY());
 
-			double numPoints = Math.ceil(Math.abs(v.getMagnitude()) / SPACING);
+			double numPoints = Math.ceil(Math.abs(v.getNorm()) / SPACING);
 
-			v = v.normalize().multiplyByScalar(SPACING);
+			v = (Vector) v.normalize().times(SPACING);
 
 			for (int j = 0; j <= (int) numPoints; j++) {
-				Vector tempV = v.multiplyByScalar(j);
+				Vector tempV = (Vector) v.times(j);
 
-				Point toInject = startPoint.addVector(tempV);
+				Translation2d toInject = startPoint.plus(tempV);
 				pathPoints.add(toInject);
 			}
 		}
 	}
 
-	private Point findClosestPoint(Point currentPos) {
+	private Translation2d findClosestPoint(Translation2d currentPos) {
 		// temporary list of distances from robot to each path point
 		ArrayList<Double> tempDistances = new ArrayList<>();
 
@@ -56,7 +60,7 @@ public class PurePursuit {
 			if (i >= pathPoints.size()) {
 				break;
 			}
-			double distance = Point.findDistance(currentPos, pathPoints.get(i));
+			double distance = currentPos.getDistance(pathPoints.get(i));
 			tempDistances.add(distance);
 		}
 
@@ -79,9 +83,8 @@ public class PurePursuit {
 		/* make sure the index we chose is within bounds of the list of path points
 		(and not the last point) */
 		if (lastClosestPointIndex < pathPoints.size() - 1) {
-			Point closestPoint = pathPoints.get(lastClosestPointIndex);
-			System.out.println("closest point: (" + closestPoint.getX() + ", "
-				+ closestPoint.getY() + ")");
+			Translation2d closestPoint = pathPoints.get(lastClosestPointIndex);
+			System.out.println("closest point: " + closestPoint);
 			return closestPoint;
 		}
 
@@ -95,7 +98,7 @@ public class PurePursuit {
 	 * @param robotHeading Current robot angle (heading)
 	 * @return the new lookahead point for robot to target.
 	 */
-	public Point findLookahead(Point robotPos, double robotHeading) {
+	public Translation2d findLookahead(Translation2d robotPos, double robotHeading) {
 		// update index of closest point
 		findClosestPoint(robotPos);
 
@@ -112,12 +115,12 @@ public class PurePursuit {
 			if (i >= pathPoints.size()) {
 				break;
 			}
-			double dist = Point.findDistance(pathPoints.get(i), robotPos);
+			double dist = pathPoints.get(i).getDistance(robotPos);
 			if (dist < Constants.MAX_IN_TO_POINT) {
 				lookaheadPointIndex = i;
 			}
 		}
-		Point lookaheadPoint = lookaheadPointIndex < pathPoints.size()
+		Translation2d lookaheadPoint = lookaheadPointIndex < pathPoints.size()
 			? pathPoints.get(lookaheadPointIndex) : pathPoints.get(pathPoints.size() - 1);
 		return lookaheadPoint;
 	}

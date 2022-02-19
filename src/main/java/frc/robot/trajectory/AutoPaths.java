@@ -1,5 +1,8 @@
 package frc.robot.trajectory;
 
+// WPILib Imports
+import edu.wpi.first.math.geometry.Translation2d;
+
 import java.util.ArrayList;
 
 import frc.robot.Constants;
@@ -12,10 +15,10 @@ public class AutoPaths {
 	 * @return an arraylist containing the key points
 	 */
 
-	public static ArrayList<Point> r2BallPath() {
-		ArrayList<Point> path = new ArrayList<>();
+	public static ArrayList<Translation2d> r2BallPath() {
+		ArrayList<Translation2d> path = new ArrayList<>();
 		path.add(Constants.PP_R2_START_POINT);
-		path.add(new Point(129, -82));
+		path.add(new Translation2d(129, -82));
 		return path;
 	}
 
@@ -24,10 +27,10 @@ public class AutoPaths {
 	 * @return an arraylist containing the key points
 	 */
 
-	public static ArrayList<Point> r2HubPath() {
-		ArrayList<Point> path = new ArrayList<>();
-		path.add(new Point(129, -82));
-		path.add(new Point(33, -24));
+	public static ArrayList<Translation2d> r2HubPath() {
+		ArrayList<Translation2d> path = new ArrayList<>();
+		path.add(new Translation2d(129, -82));
+		path.add(new Translation2d(33, -24));
 		return path;
 	}
 }

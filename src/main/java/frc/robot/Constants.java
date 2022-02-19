@@ -1,6 +1,7 @@
 package frc.robot;
 
-import frc.robot.trajectory.Point;
+// WPILib Imports
+import edu.wpi.first.math.geometry.Translation2d;
 
 public class Constants {
 	//Drive Constants
@@ -73,7 +74,7 @@ public class Constants {
 	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 5.0;
 	public static final double PP_TURN_RUN_TIME_SEC = 2.0;
 
-	public static final Point PP_R2_START_POINT = new Point(80, -60);
+	public static final Translation2d PP_R2_START_POINT = new Translation2d(80, -60);
 	public static final double PP_R2_HUB_ANGLE_DEG = 339.0;
 
 	//Inverse Kinematics Constants

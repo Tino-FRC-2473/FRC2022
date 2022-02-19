@@ -3,6 +3,7 @@ package frc.robot.systems;
 // WPILib Imports
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.geometry.Translation2d;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -15,7 +16,6 @@ import frc.robot.drive.DrivePower;
 import frc.robot.drive.Functions;
 import frc.robot.trajectory.AutoPaths;
 import frc.robot.trajectory.Kinematics;
-import frc.robot.trajectory.Point;
 import frc.robot.trajectory.PurePursuit;
 import frc.robot.HardwareMap;
 import frc.robot.Constants;
@@ -45,12 +45,12 @@ public class DriveFSMSystem {
 	private boolean finishedPurePursuitPath;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	// private Point robotPosLine = Constants.PP_R2_START_POINT;
-	private Point robotPosLine = new Point(0, 0);
+	// private Translation2d robotPosLine = Constants.PP_R2_START_POINT;
+	private Translation2d robotPosLine = new Translation2d(0, 0);
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	// private Point robotPosArc = Constants.PP_R2_START_POINT;
-	private Point robotPosArc = new Point(0, 0);
+	// private Translation2d robotPosArc = Constants.PP_R2_START_POINT;
+	private Translation2d robotPosArc = new Translation2d(0, 0);
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
@@ -59,8 +59,8 @@ public class DriveFSMSystem {
 	private boolean isDrivingForward = true;
 
 	private PurePursuit ppController;
-	private ArrayList<Point> ballPoints = new ArrayList<>();
-	private ArrayList<Point> pointsToHub = new ArrayList<>();
+	private ArrayList<Translation2d> ballPoints = new ArrayList<>();
+	private ArrayList<Translation2d> pointsToHub = new ArrayList<>();
 
 
 	// Hardware devices should be owned by one and only one system. They must
@@ -85,12 +85,12 @@ public class DriveFSMSystem {
 		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
 											CANSparkMax.MotorType.kBrushless);
 
-		// ballPoints.add(new Point(-20.5, -60));
-		// ballPoints.add(new Point(-26, -151));
-		// ballPoints.add(new Point(-80, -88));
-		// ballPoints.add(new Point(-40, -90));
-		// pointsToHub.add(new Point(-40, -90));
-		// pointsToHub.add(new Point(-30, -60));
+		// ballPoints.add(new Translation2d(-20.5, -60));
+		// ballPoints.add(new Translation2d(-26, -151));
+		// ballPoints.add(new Translation2d(-80, -88));
+		// ballPoints.add(new Translation2d(-40, -90));
+		// pointsToHub.add(new Translation2d(-40, -90));
+		// pointsToHub.add(new Translation2d(-30, -60));
 
 		ballPoints = AutoPaths.r2BallPath();
 		pointsToHub = AutoPaths.r2HubPath();
@@ -476,7 +476,7 @@ public class DriveFSMSystem {
 	 * Updates the robot's position assuming the robot moves in an line.
 	 * @return the robot's new position
 	 */
-	public Point updateLineOdometry() {
+	public Translation2d updateLineOdometry() {
 
 		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
 			+ rightMotor.getEncoder().getPosition()) / 2.0);
@@ -487,8 +487,7 @@ public class DriveFSMSystem {
 		double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
 		double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
 		double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
-		robotPosLine.addX(dX);
-		robotPosLine.addY(dY);
+		robotPosLine.plus(new Translation2d(dX, dY));
 
 		prevEncoderPosLine = currentEncoderPos;
 		return robotPosLine;
@@ -498,7 +497,7 @@ public class DriveFSMSystem {
 	 * Updates the robot's position assuming the robot moves in an arc.
 	 * @return the robot's new position
 	 */
-	public Point updateArcOdometry() {
+	public Translation2d updateArcOdometry() {
 		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
 			+ rightMotor.getEncoder().getPosition()) / 2.0);
 		robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle,
@@ -514,7 +513,7 @@ public class DriveFSMSystem {
 	 * Gets the robot position from the arc-based odometry calculations.
 	 * @return the robot's position
 	 */
-	public Point getRobotPosArc() {
+	public Translation2d getRobotPosArc() {
 		return robotPosArc;
 	}
 
@@ -522,7 +521,7 @@ public class DriveFSMSystem {
 	 * Gets the robot position from the line-based odometry calculations.
 	 * @return the robot's position
 	 */
-	public Point getRobotPosLine() {
+	public Translation2d getRobotPosLine() {
 		return robotPosLine;
 	}
 
@@ -533,7 +532,7 @@ public class DriveFSMSystem {
 			rightMotor.set(0);
 			return;
 		}
-		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
+		Translation2d target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
 			leftMotor.set(0);
@@ -542,7 +541,8 @@ public class DriveFSMSystem {
 
 		}
 
-		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
+		Translation2d motorSpeeds = Kinematics.inversekinematics(gyroAngle,
+			robotPosArc, target, true);
 		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
 		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
@@ -555,7 +555,7 @@ public class DriveFSMSystem {
 			rightMotor.set(0);
 			return;
 		}
-		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
+		Translation2d target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
 			leftMotor.set(0);
@@ -564,7 +564,8 @@ public class DriveFSMSystem {
 
 		}
 
-		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
+		Translation2d motorSpeeds = Kinematics.inversekinematics(gyroAngle,
+			robotPosArc, target, false);
 		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
 		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
