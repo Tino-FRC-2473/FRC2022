@@ -24,4 +24,9 @@ public class Vector extends Translation2d {
 		double newYMag = getY() / Math.abs(originalMag);
 		return new Vector(newXMag, newYMag);
 	}
+
+	@Override
+	public Vector times(double scalar) {
+		return new Vector(getX() * scalar, getY() * scalar);
+	}
 }

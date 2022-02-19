@@ -40,10 +40,10 @@ public class PurePursuit {
 
 			double numPoints = Math.ceil(Math.abs(v.getNorm()) / SPACING);
 
-			v = (Vector) v.normalize().times(SPACING);
+			v = v.normalize().times(SPACING);
 
 			for (int j = 0; j <= (int) numPoints; j++) {
-				Vector tempV = (Vector) v.times(j);
+				Vector tempV = v.times(j);
 
 				Translation2d toInject = startPoint.plus(tempV);
 				pathPoints.add(toInject);

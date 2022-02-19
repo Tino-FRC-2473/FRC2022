@@ -45,12 +45,12 @@ public class DriveFSMSystem {
 	private boolean finishedPurePursuitPath;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	// private Translation2d robotPosLine = Constants.PP_R2_START_POINT;
-	private Translation2d robotPosLine = new Translation2d(0, 0);
+	private Translation2d robotPosLine = Constants.PP_R1_START_POINT;
+	// private Translation2d robotPosLine = new Translation2d(0, 0);
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	// private Translation2d robotPosArc = Constants.PP_R2_START_POINT;
-	private Translation2d robotPosArc = new Translation2d(0, 0);
+	private Translation2d robotPosArc = Constants.PP_R1_START_POINT;
+	// private Translation2d robotPosArc = new Translation2d(0, 0);
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
@@ -92,8 +92,8 @@ public class DriveFSMSystem {
 		// pointsToHub.add(new Translation2d(-40, -90));
 		// pointsToHub.add(new Translation2d(-30, -60));
 
-		ballPoints = AutoPaths.r2BallPath();
-		pointsToHub = AutoPaths.r2HubPath();
+		ballPoints = AutoPaths.r1BallPath();
+		pointsToHub = AutoPaths.r1HubPath();
 
 		ppController = new PurePursuit(ballPoints);
 
@@ -102,7 +102,7 @@ public class DriveFSMSystem {
 		timer = new Timer();
 
 		// Reset state machine
-		reset();
+		// reset();
 	}
 
 	/* ======================== Public methods ======================== */
@@ -114,14 +114,14 @@ public class DriveFSMSystem {
 		return currentState;
 	}
 	/**
-	 * Reset this system to its start state. This may be called from mode init
+	 * Reset this system to its autonomous state. This may be called from mode init
 	 * when the robot is enabled.
 	 *
 	 * Note this is distinct from the one-time initialization in the constructor
 	 * as it may be called multiple times in a boot cycle,
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
-	public void reset() {
+	public void resetAutonomou() {
 
 		rightMotor.getEncoder().setPosition(0);
 		leftMotor.getEncoder().setPosition(0);
@@ -134,6 +134,35 @@ public class DriveFSMSystem {
 		finishedPurePursuitPath = false;
 
 		currentState = FSMState.PURE_PURSUIT;
+
+		timer.reset();
+		timer.start();
+
+		// Call one tick of update to ensure outputs reflect start state
+		update(null);
+	}
+
+	/**
+	 * Reset this system to its teleop state. This may be called from mode init
+	 * when the robot is enabled.
+	 *
+	 * Note this is distinct from the one-time initialization in the constructor
+	 * as it may be called multiple times in a boot cycle,
+	 * Ex. if the robot is enabled, disabled, then reenabled.
+	 */
+	public void resetTeleop() {
+
+		rightMotor.getEncoder().setPosition(0);
+		leftMotor.getEncoder().setPosition(0);
+
+		gyro.reset();
+		gyro.zeroYaw();
+
+		finishedMovingStraight = false;
+		finishedTurning = false;
+		finishedPurePursuitPath = false;
+
+		currentState = FSMState.TELEOP_STATE;
 
 		timer.reset();
 		timer.start();
@@ -155,8 +184,6 @@ public class DriveFSMSystem {
 
 		updateLineOdometry();
 		updateArcOdometry();
-		System.out.println("arc odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
-		System.out.println("line odo: " + robotPosLine.getX() + " " + robotPosLine.getY());
 
 		switch (currentState) {
 			case START_STATE:
@@ -402,7 +429,7 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		double angle = 90 - gyro.getYaw();
+		double angle = 339 - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
 		}
@@ -456,14 +483,45 @@ public class DriveFSMSystem {
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
 
-		if (input.getTopPressed()) {
+		if (input.getHangarButton()) {
 			if (Math.abs(gyroAngle - Constants.HANGAR_TURN_TARGET_ANGLE)
-				> Constants.HANGAR_TURN_ERROR
+				> Constants.AUTOALIGN_TURN_ERROR
 				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
 				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
 
-				leftPower = Constants.HANGAR_TURN_SPEED;
-				rightPower = Constants.HANGAR_TURN_SPEED;
+				double error = Constants.HANGAR_TURN_TARGET_ANGLE - gyroAngle;
+				double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
+				if (turnPower < Constants.TELEOP_MIN_TURN_POWER) {
+					turnPower = Constants.TELEOP_MIN_TURN_POWER;
+				}
+
+				turnPower *= error < 0 && error > -180 ? -1 : 1;
+
+				leftPower = turnPower;
+				rightPower = turnPower;
+			}
+		}
+
+		if (input.getTerminalButton()) {
+			if (Math.abs(gyroAngle - Constants.TERMINAL_TURN_TARGET_ANGLE)
+				> Constants.AUTOALIGN_TURN_ERROR
+				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
+				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+
+				double error = Constants.TERMINAL_TURN_TARGET_ANGLE - gyroAngle;
+				double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
+				if (turnPower < Constants.TELEOP_MIN_TURN_POWER) {
+					turnPower = Constants.TELEOP_MIN_TURN_POWER;
+				}
+
+				turnPower *= error < 0 && error > -180 ? -1 : 1;
+
+				System.out.println("Turning power:" + turnPower);
+				System.out.println("Turn error: " + (gyroAngle
+					- Constants.TERMINAL_TURN_TARGET_ANGLE));
+
+				leftPower = turnPower;
+				rightPower = turnPower;
 			}
 		}
 

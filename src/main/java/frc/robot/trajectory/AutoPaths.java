@@ -33,4 +33,27 @@ public class AutoPaths {
 		path.add(new Translation2d(33, -24));
 		return path;
 	}
+
+	/**
+	 * The red 1 ball path.
+	 * @return an arraylist containing the key points
+	 */
+	public static ArrayList<Translation2d> r1BallPath() {
+		ArrayList<Translation2d> path = new ArrayList<>();
+		path.add(Constants.PP_R1_START_POINT);
+		path.add(new Translation2d(62, -22));
+		path.add(new Translation2d(150, 3));
+		return path;
+	}
+
+	/**
+	 * The red 1 "hub" path.
+	 * @return an arraylist containing the key points
+	 */
+	public static ArrayList<Translation2d> r1HubPath() {
+		ArrayList<Translation2d> path = new ArrayList<>();
+		path.add(new Translation2d(150, 3));
+		path.add(new Translation2d(150, 3));
+		return path;
+	}
 }

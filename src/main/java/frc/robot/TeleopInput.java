@@ -124,11 +124,19 @@ public class TeleopInput {
 	}
 
 	/**
-	 * Checks if the top button of the driving joystick is released.
-	 * @return true if the top driving button is released
+	 * Checks if the button to turn to hangar on the driving joystick is released.
+	 * @return true if the button to turn to hangar is released
 	 */
-	public boolean getTopPressed() {
+	public boolean getHangarButton() {
 		return drivingJoystick.getRawButton(Constants.TURN_TO_HANGAR_BUTTON);
+	}
+
+	/**
+	 * Checks if the button to turn to terminal on the driving joystick is released.
+	 * @return true if the button to turn to terminal is released
+	 */
+	public boolean getTerminalButton() {
+		return drivingJoystick.getRawButton(Constants.TURN_TO_TERMINAL_BUTTON);
 	}
 
 	/* ======================== Private methods ======================== */

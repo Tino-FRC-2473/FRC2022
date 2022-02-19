@@ -48,7 +48,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
-		driveFsmSystem.reset();
+		driveFsmSystem.resetAutonomou();
 		// ballSystem.reset();
 	}
 
@@ -61,7 +61,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
-		driveFsmSystem.reset();
+		driveFsmSystem.resetTeleop();
 		// ballSystem.reset();
 	}
 
