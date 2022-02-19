@@ -61,12 +61,12 @@ public class Robot extends TimedRobot {
 
 		//Initialize CV resources
 		try {
-			UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
-			CvSink cvSinkRear = CameraServer.getVideo(rearCam);
+			UsbCamera driverCamera = CameraServer.startAutomaticCapture("Driver Camera", 0);
+			CvSink cvSinkRear = CameraServer.getVideo(driverCamera);
 			CvSource outputStreamRear =
-				new CvSource("Rear Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
+				new CvSource("Driver Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
 			cvSinkRear.setSource(outputStreamRear);
-			rearCam.setBrightness(cameraBrightness);
+			driverCamera.setBrightness(cameraBrightness);
 		} catch (VideoException e) {
 			e.printStackTrace();
 		}
