@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.cscore.VideoException;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -50,20 +51,25 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 		input = new TeleopInput();
 
-		Compressor pneumaticsCompressor = new Compressor(PneumaticsModuleType.CTREPCM);
-
-		pneumaticsCompressor.enableDigital();
+		//Enable Compressor feedback loop on the REV PH
+		new Compressor(1, PneumaticsModuleType.REVPH).enableDigital();
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
-		UsbCamera rearCam = CameraServer.startAutomaticCapture("Rear Camera", 0);
-		CvSink cvSinkRear = CameraServer.getVideo(rearCam);
-		CvSource outputStreamRear =
-			new CvSource("Rear Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
-		cvSinkRear.setSource(outputStreamRear);
-		rearCam.setBrightness(cameraBrightness);
+
+		//Initialize CV resources
+		try {
+			UsbCamera driverCamera = CameraServer.startAutomaticCapture("Driver Camera", 0);
+			CvSink cvSinkRear = CameraServer.getVideo(driverCamera);
+			CvSource outputStreamRear =
+				new CvSource("Driver Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
+			cvSinkRear.setSource(outputStreamRear);
+			driverCamera.setBrightness(cameraBrightness);
+		} catch (VideoException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
