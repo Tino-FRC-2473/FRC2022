@@ -121,7 +121,7 @@ public class DriveFSMSystem {
 	 * as it may be called multiple times in a boot cycle,
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
-	public void resetAutonomou() {
+	public void resetAutonomous() {
 
 		rightMotor.getEncoder().setPosition(0);
 		leftMotor.getEncoder().setPosition(0);
@@ -180,7 +180,11 @@ public class DriveFSMSystem {
 		double updatedTime = timer.get();
 		currentTime = updatedTime;
 		gyroAngle = getHeading();
-		System.out.println("state: " + currentState);
+		if (currentTime > 1) {
+			System.out.println("gyro: " + gyroAngle);
+			timer.reset();
+			currentTime = 0;
+		}
 
 		updateLineOdometry();
 		updateArcOdometry();
@@ -429,7 +433,7 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		double angle = 339 - gyro.getYaw();
+		double angle = 90 - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
 		}
@@ -515,10 +519,6 @@ public class DriveFSMSystem {
 				}
 
 				turnPower *= error < 0 && error > -180 ? -1 : 1;
-
-				System.out.println("Turning power:" + turnPower);
-				System.out.println("Turn error: " + (gyroAngle
-					- Constants.TERMINAL_TURN_TARGET_ANGLE));
 
 				leftPower = turnPower;
 				rightPower = turnPower;

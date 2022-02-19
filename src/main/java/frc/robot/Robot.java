@@ -7,11 +7,12 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVPhysicsSim;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-// import edu.wpi.first.wpilibj.Compressor;
-// import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.PowerDistribution;
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
-
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 // Systems
 import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.BallHandlingFSM;
@@ -22,6 +23,8 @@ import frc.robot.systems.BallHandlingFSM;
  */
 public class Robot extends TimedRobot {
 	private TeleopInput input;
+
+	private Compressor pneumaticsCompressor;
 
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
@@ -36,44 +39,46 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 		input = new TeleopInput();
 
-		// Compressor pneumaticsCompressor = new Compressor(PneumaticsModuleType.CTREPCM);
+		pneumaticsCompressor = new Compressor(1, PneumaticsModuleType.REVPH);
 
-		// pneumaticsCompressor.enableDigital();
+		pneumaticsCompressor.enableDigital();
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
-		// ballSystem = new BallHandlingFSM();
+		ballSystem = new BallHandlingFSM();
 	}
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
-		driveFsmSystem.resetAutonomou();
-		// ballSystem.reset();
+		driveFsmSystem.resetAutonomous();
+		ballSystem.reset();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
-		// ballSystem.update(null);
+		ballSystem.update(null);
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		driveFsmSystem.resetTeleop();
-		// ballSystem.reset();
+		ballSystem.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
 		driveFsmSystem.update(input);
-		// ballSystem.update(input);
+		ballSystem.update(input);
 	}
 
 	@Override
 	public void disabledInit() {
 		System.out.println("-------- Disabled Init --------");
+
+		pneumaticsCompressor.disable();
 	}
 
 	@Override
