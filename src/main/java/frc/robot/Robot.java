@@ -77,8 +77,6 @@ public class Robot extends TimedRobot {
 	@Override
 	public void disabledInit() {
 		System.out.println("-------- Disabled Init --------");
-
-		pneumaticsCompressor.disable();
 	}
 
 	@Override
