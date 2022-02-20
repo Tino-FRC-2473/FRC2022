@@ -57,17 +57,27 @@ public class Constants {
 	public static final double RUN_3_BACK_TO_HUB_DIST = -49.306;
 
 	//Teleop Input Constants
+
+	//Left Joystick
 	public static final int LEFT_JOYSTICK_PORT = 0;
+	public static final int SHOOTER_BUTTON = 1;
+	public static final int INTAKE_BUTTON = 2;
+	public static final int TERMINAL_RELEASE_BUTTON = 3;
+	public static final int ASCEND_BUTTON = 4;
+	public static final int DESCEND_BUTTON = 5;
+
+	//Right Joystick
 	public static final int RIGHT_JOYSTICK_PORT = 1;
+
+	//Steering Wheel
 	public static final int STEERING_WHEEL_PORT = 2;
+
+	//Driving Joystick
 	public static final int DRIVING_JOYSTICK_PORT = 3;
+	public static final int TURN_TO_TERMINAL_BUTTON = 2;
+	public static final int TURN_TO_HANGAR_BUTTON = 3;
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
-	public static final int TURN_TO_HANGAR_BUTTON = 3;
-	public static final int SHOOTER_BUTTON = 7;
-	public static final int INTAKE_BUTTON = 8;
-	public static final int TERMINAL_RELEASE_BUTTON = 6;
-	public static final int TURN_TO_TERMINAL_BUTTON = 2;
 
 	//Pure Pursuit Constants
 	public static final double MAX_IN_TO_POINT = 36;
