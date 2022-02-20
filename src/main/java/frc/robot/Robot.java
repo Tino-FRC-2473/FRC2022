@@ -37,10 +37,10 @@ public class Robot extends TimedRobot {
 	private GrabberFSM grabberSystem;
 
 	// Constants
-	private static final int fps = 30;
-	private static final int cameraBrightness = 25;
-	private static final int camWidth = 320;
-	private static final int camHeight = 240;
+	private final int fps = 30;
+	private final int cameraBrightness = 25;
+	private final int camWidth = 320;
+	private final int camHeight = 240;
 	public static final boolean RUN_COMPRESSOR = false;
 
 	/**
@@ -159,8 +159,8 @@ public class Robot extends TimedRobot {
 
 	/**
 	 * Get the hardware utility controller object to control
-	 * and read information from the PDH and Compressor
-	 * @return
+	 * and read information from the PDH and Compressor.
+	 * @return HardwareUtility object
 	 */
 	public HardwareUtility getHardwareUtilityController() {
 		return hwUtilityController;

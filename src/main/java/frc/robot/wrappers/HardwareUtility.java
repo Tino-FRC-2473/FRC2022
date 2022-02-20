@@ -8,18 +8,18 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 public class HardwareUtility {
 
 	//HARDWARE Components
-	private final PowerDistribution PDH;
+	private final PowerDistribution pDH;
 
 	private Compressor pneumaticsCompressor;
 
 	/**
-	 * Constructor for general HardwareController
+	 * Constructor for general HardwareController.
 	 * @param runCompressor Whether or not the compressor
 	 * 		should be running (must be TRUE for games, or
 	 *	  anytime pneumatics are being used)
 	 */
 	public HardwareUtility(boolean runCompressor) {
-		PDH = new PowerDistribution(1, ModuleType.kRev);
+		pDH = new PowerDistribution(1, ModuleType.kRev);
 
 		pneumaticsCompressor = new Compressor(1, PneumaticsModuleType.REVPH);
 
@@ -52,16 +52,16 @@ public class HardwareUtility {
 	 * @param state desired state of the Switchable Channel on the PDH
 	 */
 	public void setPDPSwitchableChannel(boolean state) {
-		PDH.setSwitchableChannel(state);
+		pDH.setSwitchableChannel(state);
 	}
-	
+
 	/**
 	 * Get the current state of the Switchable Channel on the PDH.
 	 * True if the channel is enabled, false if it is disabled.
 	 * @return Current state of the Switchable Channel on the PDH
 	 */
 	public boolean getPDPSwitchableChannel() {
-		return PDH.getSwitchableChannel();
+		return pDH.getSwitchableChannel();
 	}
 
 	/**
@@ -72,6 +72,6 @@ public class HardwareUtility {
 	 * @return object representing the REV Power Distribution Hub
 	 */
 	public PowerDistribution getPDH() {
-		return PDH;
+		return pDH;
 	}
 }
