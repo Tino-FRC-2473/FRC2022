@@ -87,7 +87,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
-		ballSystem.update(null);
+		ballSystem.update(null, driveFsmSystem.getCurrentState());
 		grabberSystem.update(null);
 		updateShuffleboardVisualizations();
 	}
@@ -103,7 +103,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		driveFsmSystem.update(input);
-		ballSystem.update(input);
+		ballSystem.update(input, driveFsmSystem.getCurrentState());
 		grabberSystem.update(input);
 		updateShuffleboardVisualizations();
 	}
@@ -138,8 +138,6 @@ public class Robot extends TimedRobot {
 		for (int i = 0; i < sparkMaxs.length; i++) {
 			REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
 		}
-
-		System.out.println("-------- Simulation Init --------");
 	}
 
 	@Override
