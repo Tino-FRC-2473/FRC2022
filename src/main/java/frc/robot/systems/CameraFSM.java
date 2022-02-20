@@ -24,7 +24,6 @@ public class CameraFSM {
 	private final int camHeight = 240;
 
     UsbCamera driverCam;
-    UsbCamera cvCam;
     VideoSink server;
 
 	/* ======================== Private variables ======================== */
@@ -38,7 +37,11 @@ public class CameraFSM {
 	 */
 	public CameraFSM() {
         driverCam = CameraServer.startAutomaticCapture("Driver Camera", 0);
-		cvCam = CameraServer.startAutomaticCapture("CV Camera", 1);
+		CvSink cvSinkFront = CameraServer.getVideo(driverCam);
+		CvSource outputStreamDriver =
+			new CvSource("Front Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
+		cvSinkFront.setSource(outputStreamDriver);
+		driverCam.setBrightness(cameraBrightness);
 
 		// Reset state machine
 		reset();
@@ -77,10 +80,6 @@ public class CameraFSM {
 			case DRIVER_CAM:
 				handleDriverState(input);
 				break;
-
-            // case CV_CAM:
-            //     handleCvState(input);
-            //     break;
             
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -91,20 +90,7 @@ public class CameraFSM {
     private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case DRIVER_CAM:
-                // if(input != null) {
-                //     if(input.isCamSwitchPressed()) {
-                //         return FSMState.CV_CAM;
-                //     }
-                // }
 				return currentState;
-
-            // case CV_CAM:
-            //     if(input != null) {
-            //         if(input.isCamSwitchPressed()) {
-            //             return FSMState.DRIVER_CAM;
-            //         }
-            //     }
-			// 	return currentState;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -112,18 +98,6 @@ public class CameraFSM {
 	}
 
     private void handleDriverState(TeleopInput input) {
-        CvSink cvSinkFront = CameraServer.getVideo(driverCam);
-		CvSource outputStreamDriver =
-			new CvSource("Front Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
-		cvSinkFront.setSource(outputStreamDriver);
-		driverCam.setBrightness(cameraBrightness);
+        
     }
-
-    // private void handleCvState(TeleopInput input) {
-    //     CvSink cvSinkCV = CameraServer.getVideo(cvCam);
-    //     CvSource outputStreamCV =
-    //         new CvSource("CV Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
-    //     cvSinkCV.setSource(outputStreamCV);
-    //     cvCam.setBrightness(cameraBrightness);
-    // }
 }
