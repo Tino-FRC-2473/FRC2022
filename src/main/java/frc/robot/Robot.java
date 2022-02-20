@@ -114,7 +114,9 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void testPeriodic() {}
+	public void testPeriodic() {
+
+	}
 
 	/* Simulation mode handlers, only used for simulation testing  */
 	@Override

@@ -4,7 +4,6 @@ package frc.robot.systems;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.cscore.VideoSink;
 import edu.wpi.first.cscore.VideoMode.PixelFormat;
 import edu.wpi.first.cameraserver.CameraServer;
 
@@ -34,7 +33,7 @@ public class CameraFSM {
 	 * the constructor is called only once when the robot boots.
 	 */
 	public CameraFSM() {
-    	driverCam = CameraServer.startAutomaticCapture("Driver Camera", 0);
+		driverCam = CameraServer.startAutomaticCapture("Driver Camera", 0);
 		CvSink cvSinkFront = CameraServer.getVideo(driverCam);
 		CvSource outputStreamDriver =
 			new CvSource("Front Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
@@ -95,5 +94,7 @@ public class CameraFSM {
 		}
 	}
 
-	private void handleDriverState(TeleopInput input) {}
+	private void handleDriverState(TeleopInput input) {
+		
+	}
 }
