@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // Systems
 import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.GrabberFSM;
-import frc.robot.wrappers.HardwareController;
+import frc.robot.wrappers.HardwareUtility;
 import frc.robot.systems.BallHandlingFSM;
 
 /**
@@ -29,7 +29,7 @@ import frc.robot.systems.BallHandlingFSM;
  */
 public class Robot extends TimedRobot {
 	private TeleopInput input;
-	private HardwareController hwController;
+	private HardwareUtility hwUtilityController;
 
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
@@ -52,7 +52,7 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 
 		//Init hardware utility controller
-		hwController = new HardwareController(RUN_COMPRESSOR);
+		hwUtilityController = new HardwareUtility(RUN_COMPRESSOR);
 		
 		//Init Driver Inputs
 		input = new TeleopInput();
@@ -157,7 +157,12 @@ public class Robot extends TimedRobot {
 		SmartDashboard.updateValues();
 	}
 
-	public HardwareController getHardwareController() {
-		return hwController;
+	/**
+	 * Get the hardware utility controller object to control
+	 * and read information from the PDH and Compressor
+	 * @return
+	 */
+	public HardwareUtility getHardwareUtilityController() {
+		return hwUtilityController;
 	}
 }
