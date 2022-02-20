@@ -366,7 +366,7 @@ public class DriveFSMSystem {
 		// not zero)
 		if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN)
 			|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
-			System.out.println("im here");
+
 			finishedMovingStraight = true;
 			forwardStateInitialEncoderPos = -1;
 			setPowerForAllMotors(0);

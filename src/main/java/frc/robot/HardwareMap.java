@@ -12,7 +12,6 @@ public final class HardwareMap {
 	public static final int CAN_ID_SPARK_DRIVE_BACK_LEFT = 4;
 	public static final int CAN_ID_SPARK_INTAKE = 7;
 
-
 	// ID numbers for devices on the CAN bus
 	public static final int CAN_ID_SPARK_DRIVE_LEFT = 6;
 	public static final int CAN_ID_SPARK_DRIVE_RIGHT = 5;
