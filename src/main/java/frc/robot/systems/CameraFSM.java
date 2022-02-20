@@ -15,16 +15,14 @@ public class CameraFSM {
 	// FSM state definitions
 	public enum FSMState {
 		DRIVER_CAM
-        //CV_CAM
 	}
 
-    private final int fps = 30;
+	private final int fps = 30;
 	private final int cameraBrightness = 25;
 	private final int camWidth = 320;
 	private final int camHeight = 240;
 
-    UsbCamera driverCam;
-    VideoSink server;
+	private UsbCamera driverCam;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
@@ -36,7 +34,7 @@ public class CameraFSM {
 	 * the constructor is called only once when the robot boots.
 	 */
 	public CameraFSM() {
-        driverCam = CameraServer.startAutomaticCapture("Driver Camera", 0);
+    	driverCam = CameraServer.startAutomaticCapture("Driver Camera", 0);
 		CvSink cvSinkFront = CameraServer.getVideo(driverCam);
 		CvSource outputStreamDriver =
 			new CvSource("Front Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
@@ -80,14 +78,14 @@ public class CameraFSM {
 			case DRIVER_CAM:
 				handleDriverState(input);
 				break;
-            
+
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
 		currentState = nextState(input);
 	}
 
-    private FSMState nextState(TeleopInput input) {
+	private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case DRIVER_CAM:
 				return currentState;
@@ -97,7 +95,5 @@ public class CameraFSM {
 		}
 	}
 
-    private void handleDriverState(TeleopInput input) {
-        
-    }
+	private void handleDriverState(TeleopInput input) {}
 }
