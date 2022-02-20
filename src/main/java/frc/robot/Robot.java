@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
 
 		//Init hardware utility controller
 		hwUtilityController = new HardwareUtility(RUN_COMPRESSOR);
-		
+
 		//Init Driver Inputs
 		input = new TeleopInput();
 
