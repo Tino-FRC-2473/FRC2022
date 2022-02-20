@@ -54,6 +54,7 @@ public class DriveFSMSystem {
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
+	private double previousEncoderCount = 0;
 	private Timer timer;
 	private double currentTime = 0;
 	private boolean isDrivingForward = true;
@@ -199,15 +200,15 @@ public class DriveFSMSystem {
 				break;
 
 			case FORWARD_STATE_10_IN:
-				handleForwardOrBackwardState(input, Constants.RUN_1_LEAVE_TARMAC_DIST);
+				handleForwardOrBackwardState(input, Constants.RUN_2_LEAVE_TARMAC_DIST);
 				break;
 
 			case BACK_TO_TARMAC:
-				handleForwardOrBackwardState(input, Constants.RUN_1_BACK_TO_TARMAC_DIST);
+				handleForwardOrBackwardState(input, Constants.RUN_2_BACK_TO_TARMAC_DIST);
 				break;
 
 			case BACK_TO_HUB:
-				handleForwardOrBackwardState(input, Constants.RUN_1_BACK_TO_HUB_DIST);
+				handleForwardOrBackwardState(input, Constants.RUN_2_BACK_TO_HUB_DIST);
 				break;
 
 			case TURN_STATE:
@@ -361,11 +362,11 @@ public class DriveFSMSystem {
 		double error = inches - currentPosInches;
 
 		// Checks if either the encoder value is equal to the inches required (reached destination)
-		// or checks if the robot has hit a wall (encoder value is not chaning but motor power is
-	// not zero)
+		// or checks if the robot has hit a wall (encoder value is not chaning and motor power is
+		// not zero)
 		if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN)
 			|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
-
+			System.out.println("im here");
 			finishedMovingStraight = true;
 			forwardStateInitialEncoderPos = -1;
 			setPowerForAllMotors(0);
@@ -375,15 +376,19 @@ public class DriveFSMSystem {
 		double speed = Constants.KP_MOVE_STRAIGHT * error;
 
 		if (speed >= Constants.MOTOR_RUN_POWER) {
-			setPowerForAllMotors(Constants.MOTOR_MAX_RUN_POWER_ACCELERATION
-				* (-Math.pow((Constants.MOTOR_MAX_POWER_RATIO_ACCELERATION
-				* Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2)
-				+ Constants.MOTOR_INITAL_POWER_ACCELERATION));
+			setPowerForAllMotors(Constants.MOTOR_RUN_POWER);
+			// setPowerForAllMotors(Constants.MOTOR_MAX_RUN_POWER_ACCELERATION
+			// 	* (-Math.pow((Constants.MOTOR_MAX_POWER_RATIO_ACCELERATION
+			// 	* Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2)
+			// 	+ Constants.MOTOR_INITAL_POWER_ACCELERATION));
 		} else if (speed <= -Constants.MOTOR_RUN_POWER) {
 			setPowerForAllMotors(-Constants.MOTOR_RUN_POWER);
 		} else {
 			setPowerForAllMotors(speed);
 		}
+
+		previousEncoderCount = currrentPosTicks;
+		System.out.println("Previous Encoder Count: " + previousEncoderCount);
 	}
 
 	/**
