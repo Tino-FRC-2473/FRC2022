@@ -98,6 +98,7 @@ public class BallHandlingFSM {
 	 * the FSM state specific handlers.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
+	 * @param driveState Current FSMState of DriveFSMSystem.
 	 */
 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		switch (currentState) {
@@ -135,12 +136,13 @@ public class BallHandlingFSM {
 	 * values to decide what state to go to.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
+	 * @param driveState Current FSMState of DriveFSMSystem.
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		if (input == null) {
-			if (!isSolenoidExtended &&
-					driveState == DriveFSMSystem.FSMState.DEPOSIT_BALL_IDLE) {
+			if (!isSolenoidExtended
+					&& driveState == DriveFSMSystem.FSMState.DEPOSIT_BALL_IDLE) {
 				pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 				return FSMState.FIRING;
