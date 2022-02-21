@@ -24,8 +24,6 @@ public class CameraFSM {
 	private final int camWidth = 320;
 	private final int camHeight = 240;
 
-	private UsbCamera driverCam;
-
 	/* ======================== Constructor ======================== */
 	/**
 	 * Create FSMSystem and initialize to starting state. Also perform any
