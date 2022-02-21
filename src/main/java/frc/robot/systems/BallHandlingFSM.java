@@ -277,7 +277,7 @@ public class BallHandlingFSM {
 		};
 	}
 
-	private void updateIsInShootingPositionIndicator( boolean isInShootingPosition) {
+	private void updateIsInShootingPositionIndicator(boolean isInShootingPosition) {
 		pDH.setSwitchableChannel(isInShootingPosition);
 	}
 }
