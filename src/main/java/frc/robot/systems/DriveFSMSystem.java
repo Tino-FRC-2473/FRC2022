@@ -3,6 +3,7 @@ package frc.robot.systems;
 // WPILib Imports
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -99,6 +100,8 @@ public class DriveFSMSystem {
 		ppController = new PurePursuit(ballPoints);
 
 		gyro = new AHRS(SPI.Port.kMXP);
+
+		SmartDashboard.putNumber("Gyro", gyro.getAngle());
 
 		timer = new Timer();
 
