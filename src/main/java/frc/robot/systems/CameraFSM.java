@@ -16,15 +16,14 @@ public class CameraFSM {
 		DRIVER_CAM
 	}
 
+	/* ======================== Private variables ======================== */
+	private FSMState currentState;
 	private final int fps = 30;
 	private final int cameraBrightness = 25;
 	private final int camWidth = 320;
 	private final int camHeight = 240;
 
 	private UsbCamera driverCam;
-
-	/* ======================== Private variables ======================== */
-	private FSMState currentState;
 
 	/* ======================== Constructor ======================== */
 	/**
