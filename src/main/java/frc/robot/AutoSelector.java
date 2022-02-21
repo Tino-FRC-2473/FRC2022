@@ -34,7 +34,7 @@ public class AutoSelector {
 	}
 
 	/**
-	* Updates the auto mode when driver selects different auto
+	* Updates the auto mode when driver selects different auto.
 	*/
 	public void updateModeChooser() {
 		DesiredMode desiredMode = modeChooser.getSelected();
@@ -44,14 +44,14 @@ public class AutoSelector {
 	}
 
 	/**
-	* Resets the selected auto
+	* Resets the selected auto.
 	*/
 	public void reset() {
 		mDesiredMode = null;
 	}
 
 	/**
-	* Outputs the current auto to Shuffleboard
+	* Outputs the current auto to Shuffleboard.
 	*/
 	public void outputToShuffleboard() {
 		SmartDashboard.putString("Auto Mode selected", mDesiredMode.name());

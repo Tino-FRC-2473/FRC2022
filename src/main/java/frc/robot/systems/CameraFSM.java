@@ -95,6 +95,5 @@ public class CameraFSM {
 	}
 
 	private void handleDriverState(TeleopInput input) {
-		
 	}
 }
