@@ -196,6 +196,7 @@ public class DriveFSMSystem {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
+		outputToShuffleboard();
 		currentState = nextState(input);
 	}
 
@@ -530,5 +531,9 @@ public class DriveFSMSystem {
 		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
 		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
+	}
+
+	private void outputToShuffleboard() {
+		SmartDashboard.putNumber("Gyro heading", getHeading());
 	}
 }
