@@ -134,7 +134,7 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.PURE_PURSUIT;
+		currentState = FSMState.FORWARD_STATE_10_IN;
 
 		timer.reset();
 		timer.start();
@@ -261,11 +261,12 @@ public class DriveFSMSystem {
 			case TELEOP_STATE:
 				return FSMState.TELEOP_STATE;
 
+				// CHANGE BACK TO return FSMState.BACK_TO_TARMAC; after R1 Auto works
 			case FORWARD_STATE_10_IN:
 				if (finishedMovingStraight) {
 					finishedMovingStraight = false;
 					forwardStateInitialEncoderPos = -1;
-					return FSMState.BACK_TO_TARMAC;
+					return FSMState.TELEOP_STATE;
 				} else {
 					return FSMState.FORWARD_STATE_10_IN;
 				}
