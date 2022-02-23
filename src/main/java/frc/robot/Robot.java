@@ -6,16 +6,10 @@ package frc.robot;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVPhysicsSim;
 
+// WPILib Imports
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.Compressor;
-// WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.cscore.CvSink;
-import edu.wpi.first.cscore.CvSource;
-import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.cscore.VideoException;
-import edu.wpi.first.cscore.VideoMode.PixelFormat;
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Systems
@@ -23,6 +17,7 @@ import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.GrabberFSM;
 import frc.robot.systems.BallHandlingFSM;
 import frc.robot.systems.CompressorSystem;
+import frc.robot.systems.CameraFSM;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -32,16 +27,15 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 	private Compressor pneumaticsCompressor;
 
+	private AutoSelector autoSelector = new AutoSelector();
+
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
 	private BallHandlingFSM ballSystem;
 	private GrabberFSM grabberSystem;
+	private CameraFSM cameraSystem;
 
 	// Constants
-	private final int fps = 30;
-	private final int cameraBrightness = 25;
-	private final int camWidth = 320;
-	private final int camHeight = 240;
 	private static final boolean RUN_COMPRESSOR = false;
 
 	/**
@@ -62,26 +56,20 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
+		cameraSystem = new CameraFSM();
 
-		//Initialize CV resources
-		try {
-			UsbCamera driverCamera = CameraServer.startAutomaticCapture("Driver Camera", 0);
-			CvSink cvSinkRear = CameraServer.getVideo(driverCamera);
-			CvSource outputStreamRear =
-				new CvSource("Driver Camera", PixelFormat.kMJPEG, camWidth, camHeight, fps);
-			cvSinkRear.setSource(outputStreamRear);
-			driverCamera.setBrightness(cameraBrightness);
-		} catch (VideoException e) {
-			e.printStackTrace();
-		}
+		autoSelector.updateModeChooser();
 	}
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
+		SmartDashboard.putString("Match Cycle", "AUTONOMOUS");
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
+		cameraSystem.reset();
+		autoSelector.updateModeChooser();
 	}
 
 	@Override
@@ -89,15 +77,17 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.update(input);
 		ballSystem.update(null);
 		grabberSystem.update(null);
-		updateShuffleboardVisualizations();
+		cameraSystem.update(null);
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
+		SmartDashboard.putString("Match Cycle", "TELEOP");
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
+		cameraSystem.reset();
 	}
 
 	@Override
@@ -105,27 +95,30 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.update(input);
 		ballSystem.update(input);
 		grabberSystem.update(input);
-		updateShuffleboardVisualizations();
+		cameraSystem.update(input);
 	}
 
 	@Override
 	public void disabledInit() {
 		System.out.println("-------- Disabled Init --------");
+		SmartDashboard.putString("Match Cycle", "DISABLED");
+		autoSelector.reset();
+		autoSelector.updateModeChooser();
 	}
 
 	@Override
 	public void disabledPeriodic() {
-		updateShuffleboardVisualizations();
+		autoSelector.updateModeChooser();
 	}
 
 	@Override
 	public void testInit() {
 		System.out.println("-------- Test Init --------");
+		SmartDashboard.putString("Match Cycle", "TEST");
 	}
 
 	@Override
 	public void testPeriodic() {
-		updateShuffleboardVisualizations();
 	}
 
 	/* Simulation mode handlers, only used for simulation testing  */
@@ -150,11 +143,4 @@ public class Robot extends TimedRobot {
 	// Do not use robotPeriodic. Use mode specific periodic methods instead.
 	@Override
 	public void robotPeriodic() { }
-
-	/**
-	 * Updates shuffleboard values.
-	 */
-	public void updateShuffleboardVisualizations() {
-		SmartDashboard.updateValues();
-	}
 }
