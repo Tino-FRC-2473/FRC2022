@@ -65,29 +65,29 @@ public class Robot extends TimedRobot {
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
 		SmartDashboard.putString("Match Cycle", "AUTONOMOUS");
- 		driveFsmSystem.reset();
- 		ballSystem.reset();
- 		grabberSystem.reset();
- 		cameraSystem.reset();
- 		autoSelector.updateModeChooser();
+		driveFsmSystem.reset();
+		ballSystem.reset();
+		grabberSystem.reset();
+		cameraSystem.reset();
+		autoSelector.updateModeChooser();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
- 		ballSystem.update(null);
- 		grabberSystem.update(null);
- 		cameraSystem.update(null);
+		ballSystem.update(null);
+		grabberSystem.update(null);
+		cameraSystem.update(null);
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		SmartDashboard.putString("Match Cycle", "TELEOP");
- 		driveFsmSystem.reset();
- 		ballSystem.reset();
- 		grabberSystem.reset();
- 		cameraSystem.reset();
+		driveFsmSystem.reset();
+		ballSystem.reset();
+		grabberSystem.reset();
+		cameraSystem.reset();
 	}
 
 	@Override
@@ -108,6 +108,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void disabledPeriodic() {
+		autoSelector.updateModeChooser();
 	}
 
 	@Override
