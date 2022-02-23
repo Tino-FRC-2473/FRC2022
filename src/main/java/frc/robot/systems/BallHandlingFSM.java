@@ -8,8 +8,9 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 // Third party Hardware Imports
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
-
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 // Robot Imports
 import frc.robot.TeleopInput;
 import frc.robot.wrappers.NeoSparkMaxPid;
@@ -37,6 +38,8 @@ public class BallHandlingFSM {
 
 	private NeoSparkMaxPid intakeMotor;
 
+	private PowerDistribution pDH;
+
 	private double pushCommandTimeStamp;
 
 	private boolean isSolenoidExtended;
@@ -63,6 +66,8 @@ public class BallHandlingFSM {
 						I,
 						D,
 						F);
+
+		pDH = new PowerDistribution(1, ModuleType.kRev);
 
 		// Reset state machine
 		pushCommandTimeStamp = Timer.getFPGATimestamp() - PUSH_TIME_SECONDS;
@@ -101,6 +106,8 @@ public class BallHandlingFSM {
 	 * @param driveState Current FSMState of DriveFSMSystem.
 	 */
 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
+		updateIsInShootingPositionIndicator(false);
+
 		switch (currentState) {
 			case IDLE:
 				handleIdleState(input);
@@ -279,5 +286,9 @@ public class BallHandlingFSM {
 		return new CANSparkMax[]{
 			intakeMotor.getMotor()
 		};
+	}
+
+	private void updateIsInShootingPositionIndicator(boolean isInShootingPosition) {
+		pDH.setSwitchableChannel(isInShootingPosition);
 	}
 }

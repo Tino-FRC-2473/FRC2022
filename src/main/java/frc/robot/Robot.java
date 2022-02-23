@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.GrabberFSM;
 import frc.robot.systems.BallHandlingFSM;
+import frc.robot.systems.CompressorSystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -31,6 +32,7 @@ import frc.robot.systems.BallHandlingFSM;
  */
 public class Robot extends TimedRobot {
 	private TeleopInput input;
+	private Compressor pneumaticsCompressor;
 
 	private Compressor pneumaticsCompressor;
 
@@ -44,6 +46,7 @@ public class Robot extends TimedRobot {
 	private final int cameraBrightness = 25;
 	private final int camWidth = 320;
 	private final int camHeight = 240;
+	private static final boolean RUN_COMPRESSOR = false;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -52,11 +55,12 @@ public class Robot extends TimedRobot {
 	@Override
 	public void robotInit() {
 		System.out.println("robotInit");
+
+		//Init Compressor
+		CompressorSystem compressorSystem = new CompressorSystem(RUN_COMPRESSOR);
+
+		//Init Driver Inputs
 		input = new TeleopInput();
-
-		pneumaticsCompressor = new Compressor(1, PneumaticsModuleType.REVPH);
-
-		pneumaticsCompressor.enableDigital();
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
