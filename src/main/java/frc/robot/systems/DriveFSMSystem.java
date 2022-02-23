@@ -27,14 +27,19 @@ public class DriveFSMSystem {
 	// FSM state definitions
 	public enum FSMState {
 		START_STATE,
-		FORWARD_STATE_10_IN,
-		BACK_TO_TARMAC,
-		BACK_TO_HUB,
-		TURN_STATE,
+		LEAVE_TARMAC,
+		TURN_TO_TERMINAL,
+		MOVE_TO_BALL,
+		ANGLE_TO_BALL,
+		PUSH_BALL_IN_TERMINAL,
+		LEAVE_TERMINAL,
+		TURN_TO_HUB,
+		MOVE_TO_HUB,
+		ANGLE_TO_HUB,
+		RUN_INTO_HUB,
 		TELEOP_STATE,
 		PURE_PURSUIT,
 		PURE_PURSUIT_TO_HUB,
-		TURN_TO_HUB,
 		DEPOSIT_BALL_IDLE
 	}
 
@@ -63,7 +68,6 @@ public class DriveFSMSystem {
 	private ArrayList<Translation2d> ballPoints = new ArrayList<>();
 	private ArrayList<Translation2d> pointsToHub = new ArrayList<>();
 
-
 	// Hardware devices should be owned by one and only one system. They must
 	// be private to their owner system and may not be used elsewhere.
 
@@ -82,9 +86,9 @@ public class DriveFSMSystem {
 		// Perform hardware init
 
 		rightMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_RIGHT,
-											CANSparkMax.MotorType.kBrushless);
+				CANSparkMax.MotorType.kBrushless);
 		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
-											CANSparkMax.MotorType.kBrushless);
+				CANSparkMax.MotorType.kBrushless);
 
 		// ballPoints.add(new Translation2d(-20.5, -60));
 		// ballPoints.add(new Translation2d(-26, -151));
@@ -114,6 +118,7 @@ public class DriveFSMSystem {
 	public FSMState getCurrentState() {
 		return currentState;
 	}
+
 	/**
 	 * Reset this system to its autonomous state. This may be called from mode init
 	 * when the robot is enabled.
@@ -134,7 +139,7 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.FORWARD_STATE_10_IN;
+		currentState = FSMState.LEAVE_TARMAC;
 
 		timer.reset();
 		timer.start();
@@ -171,11 +176,12 @@ public class DriveFSMSystem {
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
 	}
+
 	/**
 	 * Update FSM based on new inputs. This function only calls the FSM state
 	 * specific handlers.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
+	 *              the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
 		double updatedTime = timer.get();
@@ -199,22 +205,70 @@ public class DriveFSMSystem {
 				handleTeleOpState(input);
 				break;
 
-			case FORWARD_STATE_10_IN:
-				handleForwardOrBackwardState(input, Constants.RUN_2_LEAVE_TARMAC_DIST);
+			case LEAVE_TARMAC:
+				handleForwardOrBackwardState(input, Constants.RUN_ADVANCE_LEAVE_TARMAC_DIST);
 				break;
 
-			case BACK_TO_TARMAC:
-				handleForwardOrBackwardState(input, Constants.RUN_2_BACK_TO_TARMAC_DIST);
-				break;
-
-			case BACK_TO_HUB:
-				handleForwardOrBackwardState(input, Constants.RUN_2_BACK_TO_HUB_DIST);
-				break;
-
-			case TURN_STATE:
-				handleTurnState(input, Constants.RUN_1_TURN_TO_HUB_ANGLE,
+			case TURN_TO_TERMINAL:
+				handleTurnState(input, Constants.RUN_ADVANCE_TURN_TO_TERMINAL_ANGLE,
 						Constants.PP_TURN_RUN_TIME_SEC);
 				break;
+
+			case MOVE_TO_BALL:
+				handleForwardOrBackwardState(input, Constants.RUN_ADVANCE_MOVE_TO_BALL_DIST);
+				break;
+
+			case ANGLE_TO_BALL:
+				handleTurnState(input, Constants.RUN_ADVANCE_TURN_TO_BALL_ANGLE,
+						Constants.PP_TURN_RUN_TIME_SEC);
+				break;
+
+			case PUSH_BALL_IN_TERMINAL:
+				handleForwardOrBackwardState(input,
+						Constants.RUN_ADVANCE_PUSH_BALL_IN_TERMINAL_DIST);
+				break;
+
+			case LEAVE_TERMINAL:
+				handleForwardOrBackwardState(input,
+						Constants.RUN_ADVANCE_LEAVE_TERMINAL);
+				break;
+
+			case TURN_TO_HUB:
+				handleTurnState(input, Constants.RUN_ADVANCE_TURN_TO_HUB,
+						Constants.PP_TURN_RUN_TIME_SEC);
+				break;
+
+			case MOVE_TO_HUB:
+				handleForwardOrBackwardState(input,
+						Constants.RUN_ADVANCE_MOVE_TOWARDS_HUB);
+				break;
+
+			case ANGLE_TO_HUB:
+				handleTurnState(input, Constants.RUN_ADVANCE_ANGLE_TO_HUB,
+						Constants.PP_TURN_RUN_TIME_SEC);
+				break;
+
+			case RUN_INTO_HUB:
+				handleForwardOrBackwardState(input,
+						Constants.RUN_ADVANCE_RUN_INTO_HUB);
+				break;
+
+			// case FORWARD_STATE_10_IN:
+			// handleForwardOrBackwardState(input, Constants.RUN_2_LEAVE_TARMAC_DIST);
+			// break;
+
+			// case BACK_TO_TARMAC:
+			// handleForwardOrBackwardState(input, Constants.RUN_2_BACK_TO_TARMAC_DIST);
+			// break;
+
+			// case BACK_TO_HUB:
+			// handleForwardOrBackwardState(input, Constants.RUN_2_BACK_TO_HUB_DIST);
+			// break;
+
+			// case TURN_STATE:
+			// handleTurnState(input, Constants.RUN_1_TURN_TO_HUB_ANGLE,
+			// Constants.PP_TURN_RUN_TIME_SEC);
+			// break;
 
 			case PURE_PURSUIT:
 				handlePurePursuit(Constants.PP_BALL_MAX_RUN_TIME_SEC);
@@ -224,10 +278,10 @@ public class DriveFSMSystem {
 				handlePurePursuitBackward(Constants.PP_TO_HUB_MAX_RUN_TIME_SEC);
 				break;
 
-			case TURN_TO_HUB:
-				handleTurnState(input, Constants.PP_R2_HUB_ANGLE_DEG,
-						Constants.PP_TURN_RUN_TIME_SEC);
-				break;
+			// case TURN_TO_HUB:
+			// handleTurnState(input, Constants.PP_R2_HUB_ANGLE_DEG,
+			// Constants.PP_TURN_RUN_TIME_SEC);
+			// break;
 
 			case DEPOSIT_BALL_IDLE:
 				handleBallDepositIdleState(input);
@@ -246,7 +300,7 @@ public class DriveFSMSystem {
 	 * effects on outputs. In other words, this method should only read or get
 	 * values to decide what state to go to.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
+	 *              the robot is in autonomous mode.
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input) {
@@ -261,41 +315,128 @@ public class DriveFSMSystem {
 			case TELEOP_STATE:
 				return FSMState.TELEOP_STATE;
 
-				// CHANGE BACK TO return FSMState.BACK_TO_TARMAC; after R1 Auto works
-			case FORWARD_STATE_10_IN:
+			case LEAVE_TARMAC:
 				if (finishedMovingStraight) {
 					finishedMovingStraight = false;
 					forwardStateInitialEncoderPos = -1;
-					return FSMState.TELEOP_STATE;
+					return FSMState.TURN_TO_TERMINAL;
 				} else {
-					return FSMState.FORWARD_STATE_10_IN;
+					return FSMState.LEAVE_TARMAC;
 				}
 
-			case BACK_TO_TARMAC:
-				if (finishedMovingStraight) {
-					finishedMovingStraight = false;
-					forwardStateInitialEncoderPos = -1;
-					return FSMState.TURN_STATE;
-				} else {
-					return FSMState.BACK_TO_TARMAC;
-				}
-
-			case TURN_STATE:
+			case TURN_TO_TERMINAL:
 				if (finishedTurning) {
 					finishedTurning = false;
-					return FSMState.BACK_TO_HUB;
+					return FSMState.MOVE_TO_BALL;
 				} else {
-					return FSMState.TURN_STATE;
+					return FSMState.TURN_TO_TERMINAL;
 				}
 
-			case BACK_TO_HUB:
+			case MOVE_TO_BALL:
 				if (finishedMovingStraight) {
 					finishedMovingStraight = false;
 					forwardStateInitialEncoderPos = -1;
+					return FSMState.ANGLE_TO_BALL;
+				} else {
+					return FSMState.MOVE_TO_BALL;
+				}
+
+			case ANGLE_TO_BALL:
+				if (finishedTurning) {
+					finishedTurning = false;
+					return FSMState.PUSH_BALL_IN_TERMINAL;
+				} else {
+					return FSMState.ANGLE_TO_BALL;
+				}
+
+			case PUSH_BALL_IN_TERMINAL:
+				if (finishedMovingStraight) {
+					finishedMovingStraight = false;
+					forwardStateInitialEncoderPos = -1;
+					return FSMState.LEAVE_TERMINAL;
+				} else {
+					return FSMState.PUSH_BALL_IN_TERMINAL;
+				}
+
+			case LEAVE_TERMINAL:
+				if (finishedMovingStraight) {
+					finishedMovingStraight = false;
+					forwardStateInitialEncoderPos = -1;
+					return FSMState.TURN_TO_HUB;
+				} else {
+					return FSMState.LEAVE_TERMINAL;
+				}
+
+			case TURN_TO_HUB:
+				if (finishedTurning) {
+					finishedTurning = false;
+					return FSMState.MOVE_TO_HUB;
+				} else {
+					return FSMState.TURN_TO_HUB;
+				}
+
+			case MOVE_TO_HUB:
+				if (finishedMovingStraight) {
+					finishedMovingStraight = false;
+					forwardStateInitialEncoderPos = -1;
+					return FSMState.ANGLE_TO_HUB;
+				} else {
+					return FSMState.MOVE_TO_HUB;
+				}
+
+			case ANGLE_TO_HUB:
+				if (finishedTurning) {
+					finishedTurning = false;
+					return FSMState.MOVE_TO_HUB;
+				} else {
+					return FSMState.ANGLE_TO_HUB;
+				}
+
+			case RUN_INTO_HUB:
+				if (finishedMovingStraight) {
+					finishedMovingStraight = false;
+					forwardStateInitialEncoderPos = -1;
+					// ADD BALL SHOOTING CODE HERE. NEEDS TO SHOOT BALL TWICE
 					return FSMState.TELEOP_STATE;
 				} else {
-					return FSMState.BACK_TO_HUB;
+					return FSMState.RUN_INTO_HUB;
 				}
+
+				// CHANGE BACK TO return FSMState.BACK_TO_TARMAC; after R1 Auto works
+				// case FORWARD_STATE_10_IN:
+				// if (finishedMovingStraight) {
+				// finishedMovingStraight = false;
+				// forwardStateInitialEncoderPos = -1;
+				// return FSMState.TELEOP_STATE;
+				// } else {
+				// return FSMState.FORWARD_STATE_10_IN;
+				// }
+
+				// case BACK_TO_TARMAC:
+				// if (finishedMovingStraight) {
+				// finishedMovingStraight = false;
+				// forwardStateInitialEncoderPos = -1;
+				// return FSMState.TURN_STATE;
+				// } else {
+				// return FSMState.BACK_TO_TARMAC;
+				// }
+
+				// case TURN_STATE:
+				// if (finishedTurning) {
+				// finishedTurning = false;
+				// return FSMState.BACK_TO_HUB;
+				// } else {
+				// return FSMState.TURN_STATE;
+				// }
+
+				// case BACK_TO_HUB:
+				// if (finishedMovingStraight) {
+				// finishedMovingStraight = false;
+				// forwardStateInitialEncoderPos = -1;
+				// return FSMState.TELEOP_STATE;
+				// } else {
+				// return FSMState.BACK_TO_HUB;
+				// }
 
 			case PURE_PURSUIT:
 				if (finishedPurePursuitPath) {
@@ -314,14 +455,6 @@ public class DriveFSMSystem {
 				}
 				return FSMState.PURE_PURSUIT_TO_HUB;
 
-			case TURN_TO_HUB:
-				if (finishedTurning) {
-					finishedTurning = false;
-				} else {
-					return FSMState.TURN_TO_HUB;
-				}
-				return FSMState.TELEOP_STATE;
-
 			case DEPOSIT_BALL_IDLE:
 				if (true) {
 					return FSMState.PURE_PURSUIT;
@@ -337,20 +470,23 @@ public class DriveFSMSystem {
 	/* ------------------------ FSM state handlers ------------------------ */
 	/**
 	 * Handle behavior in START_STATE.
+	 *
 	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
+	 *              the robot is in autonomous mode.
 	 */
 	private void handleStartState(TeleopInput input) {
-		setPowerForAllMotors(0); //start with all motors set to 0
+		setPowerForAllMotors(0); // start with all motors set to 0
 	}
+
 	/**
-	* Handle behavior in FORWARD_STATE, or BACKWARD_STATE.
-	* @param input Global TeleopInput if robot in teleop mode or null if
-	*        the robot is in autonomous mode.
-	* @param inches The number of inches to move forward or backward
-	*/
+	 * Handle behavior in FORWARD_STATE, or BACKWARD_STATE.
+	 *
+	 * @param input  Global TeleopInput if robot in teleop mode or null if
+	 *               the robot is in autonomous mode.
+	 * @param inches The number of inches to move forward or backward
+	 */
 	private void handleForwardOrBackwardState(TeleopInput input,
-		double inches) {
+			double inches) {
 
 		double currrentPosTicks = -leftMotor.getEncoder().getPosition();
 
@@ -359,14 +495,16 @@ public class DriveFSMSystem {
 		}
 		double positionRev = currrentPosTicks - forwardStateInitialEncoderPos;
 		double currentPosInches = (positionRev * Math.PI
-			* Constants.WHEEL_DIAMETER_INCHES) / Constants.GEAR_RATIO;
+				* Constants.WHEEL_DIAMETER_INCHES) / Constants.GEAR_RATIO;
 		double error = inches - currentPosInches;
 
-		// Checks if either the encoder value is equal to the inches required (reached destination)
-		// or checks if the robot has hit a wall (encoder value is not chaning and motor power is
+		// Checks if either the encoder value is equal to the inches required (reached
+		// destination)
+		// or checks if the robot has hit a wall (encoder value is not chaning and motor
+		// power is
 		// not zero)
 		if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN)
-			|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
+				|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
 
 			finishedMovingStraight = true;
 			forwardStateInitialEncoderPos = -1;
@@ -379,9 +517,9 @@ public class DriveFSMSystem {
 		if (speed >= Constants.MOTOR_RUN_POWER) {
 			setPowerForAllMotors(Constants.MOTOR_RUN_POWER);
 			// setPowerForAllMotors(Constants.MOTOR_MAX_RUN_POWER_ACCELERATION
-			// 	* (-Math.pow((Constants.MOTOR_MAX_POWER_RATIO_ACCELERATION
-			// 	* Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2)
-			// 	+ Constants.MOTOR_INITAL_POWER_ACCELERATION));
+			// * (-Math.pow((Constants.MOTOR_MAX_POWER_RATIO_ACCELERATION
+			// * Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2)
+			// + Constants.MOTOR_INITAL_POWER_ACCELERATION));
 		} else if (speed <= -Constants.MOTOR_RUN_POWER) {
 			setPowerForAllMotors(-Constants.MOTOR_RUN_POWER);
 		} else {
@@ -393,9 +531,10 @@ public class DriveFSMSystem {
 	}
 
 	/**
-	* Sets power for all motors.
-	* @param power The power to set all the motors to
-	*/
+	 * Sets power for all motors.
+	 *
+	 * @param power The power to set all the motors to
+	 */
 	private void setPowerForAllMotors(double power) {
 		leftMotor.set(-power);
 		rightMotor.set(power);
@@ -403,12 +542,13 @@ public class DriveFSMSystem {
 	}
 
 	/**
-	* Handle behavior in TURN_STATE.
-	* @param input Global TeleopInput if robot in teleop mode or null if
-	*        the robot is in autonomous mode.
-	* @param degrees The final angle of the robot after the desired turn
-	* @param maxRunTime the maximum time the state can run for (in seconds)
-	*/
+	 * Handle behavior in TURN_STATE.
+	 *
+	 * @param input      Global TeleopInput if robot in teleop mode or null if
+	 *                   the robot is in autonomous mode.
+	 * @param degrees    The final angle of the robot after the desired turn
+	 * @param maxRunTime the maximum time the state can run for (in seconds)
+	 */
 	private void handleTurnState(TeleopInput input, double degrees, double maxRunTime) {
 
 		if (timer.get() > maxRunTime) {
@@ -435,9 +575,10 @@ public class DriveFSMSystem {
 	}
 
 	/**
-	* Gets the heading from the gyro.
-	* @return the gyro heading
-	*/
+	 * Gets the heading from the gyro.
+	 *
+	 * @return the gyro heading
+	 */
 	public double getHeading() {
 		double angle = 90 - gyro.getYaw();
 		if (angle < 0) {
@@ -467,8 +608,8 @@ public class DriveFSMSystem {
 		}
 
 		DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
-			steerAngle, currentLeftPower,
-			currentRightPower, isDrivingForward);
+				steerAngle, currentLeftPower,
+				currentRightPower, isDrivingForward);
 
 		// DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
@@ -483,7 +624,7 @@ public class DriveFSMSystem {
 
 		// acceleration
 		power = Functions.accelerate(targetPower, new DrivePower(currentLeftPower,
-			currentRightPower));
+				currentRightPower));
 
 		// turning in place
 		if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
@@ -494,10 +635,9 @@ public class DriveFSMSystem {
 		rightPower = power.getRightPower();
 
 		if (input.getHangarButton()) {
-			if (Math.abs(gyroAngle - Constants.HANGAR_TURN_TARGET_ANGLE)
-				> Constants.AUTOALIGN_TURN_ERROR
-				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
-				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+			if (Math.abs(gyroAngle - Constants.HANGAR_TURN_TARGET_ANGLE) > Constants.AUTOALIGN_TURN_ERROR
+					&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
+					&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
 
 				double error = Constants.HANGAR_TURN_TARGET_ANGLE - gyroAngle;
 				double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
@@ -513,10 +653,9 @@ public class DriveFSMSystem {
 		}
 
 		if (input.getTerminalButton()) {
-			if (Math.abs(gyroAngle - Constants.TERMINAL_TURN_TARGET_ANGLE)
-				> Constants.AUTOALIGN_TURN_ERROR
-				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
-				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+			if (Math.abs(gyroAngle - Constants.TERMINAL_TURN_TARGET_ANGLE) > Constants.AUTOALIGN_TURN_ERROR
+					&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
+					&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
 
 				double error = Constants.TERMINAL_TURN_TARGET_ANGLE - gyroAngle;
 				double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
@@ -538,16 +677,17 @@ public class DriveFSMSystem {
 
 	/**
 	 * Updates the robot's position assuming the robot moves in an line.
+	 *
 	 * @return the robot's new position
 	 */
 	public Translation2d updateLineOdometry() {
 
 		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
-			+ rightMotor.getEncoder().getPosition()) / 2.0);
+				+ rightMotor.getEncoder().getPosition()) / 2.0);
 
 		double adjustedAngle = gyroAngle;
 		double currentEncoderPos = ((-leftMotor.getEncoder().getPosition()
-			+ rightMotor.getEncoder().getPosition()) / 2.0);
+				+ rightMotor.getEncoder().getPosition()) / 2.0);
 		double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
 		double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
 		double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
@@ -559,13 +699,14 @@ public class DriveFSMSystem {
 
 	/**
 	 * Updates the robot's position assuming the robot moves in an arc.
+	 *
 	 * @return the robot's new position
 	 */
 	public Translation2d updateArcOdometry() {
 		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
-			+ rightMotor.getEncoder().getPosition()) / 2.0);
+				+ rightMotor.getEncoder().getPosition()) / 2.0);
 		robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle,
-			newEncoderPos, prevEncoderPosArc, robotPosArc);
+				newEncoderPos, prevEncoderPosArc, robotPosArc);
 
 		prevGyroAngle = gyroAngle;
 		prevEncoderPosArc = newEncoderPos;
@@ -575,6 +716,7 @@ public class DriveFSMSystem {
 
 	/**
 	 * Gets the robot position from the arc-based odometry calculations.
+	 *
 	 * @return the robot's position
 	 */
 	public Translation2d getRobotPosArc() {
@@ -583,6 +725,7 @@ public class DriveFSMSystem {
 
 	/**
 	 * Gets the robot position from the line-based odometry calculations.
+	 *
 	 * @return the robot's position
 	 */
 	public Translation2d getRobotPosLine() {
@@ -606,7 +749,7 @@ public class DriveFSMSystem {
 		}
 
 		Translation2d motorSpeeds = Kinematics.inversekinematics(gyroAngle,
-			robotPosArc, target, true);
+				robotPosArc, target, true);
 		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
 		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
@@ -629,7 +772,7 @@ public class DriveFSMSystem {
 		}
 
 		Translation2d motorSpeeds = Kinematics.inversekinematics(gyroAngle,
-			robotPosArc, target, false);
+				robotPosArc, target, false);
 		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
 		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 

@@ -56,6 +56,20 @@ public class Constants {
 	public static final double RUN_3_TURN_TO_HUB_ANGLE = 339.125;
 	public static final double RUN_3_BACK_TO_HUB_DIST = -49.306;
 
+	// For R1 Advanced (3 Ball auto)
+	public static final double RUN_ADVANCE_LEAVE_TARMAC_DIST = 120.75;
+	public static final double RUN_ADVANCE_TURN_TO_TERMINAL_ANGLE = 330;
+	public static final double RUN_ADVANCE_MOVE_TO_BALL_DIST = 203.688;
+	public static final double RUN_ADVANCE_TURN_TO_BALL_ANGLE = 226.250;
+	public static final double RUN_ADVANCE_PUSH_BALL_IN_TERMINAL_DIST = -10;
+	public static final double RUN_ADVANCE_LEAVE_TERMINAL = 170;
+	public static final double RUN_ADVANCE_TURN_TO_HUB = 135;
+	public static final double RUN_ADVANCE_MOVE_TOWARDS_HUB = -78.50;
+	public static final double RUN_ADVANCE_ANGLE_TO_HUB = 45;
+	public static final double RUN_ADVANCE_RUN_INTO_HUB = -50;
+
+
+
 	//Teleop Input Constants
 
 	//Left Joystick
