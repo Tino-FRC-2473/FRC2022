@@ -1,19 +1,18 @@
 package frc.robot.systems;
 
-import com.revrobotics.CANSparkMax;
-
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-
 // WPILib Imports
-
-// Third party Hardware Imports
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+
+// Third party Hardware Imports
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 // Robot Imports
 import frc.robot.TeleopInput;
-import frc.robot.wrappers.NeoSparkMaxPid;
 import frc.robot.HardwareMap;
 
 public class BallHandlingFSM {
@@ -29,25 +28,20 @@ public class BallHandlingFSM {
 
 	private static final double PUSH_TIME_SECONDS = 1;
 
-	private static final double INTAKE_MOTOR_RPM = 700;
+	private static final double INTAKE_MOTOR_VOLTAGE = 5;
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
 
 	private DoubleSolenoid pushSolenoid;
 
-	private NeoSparkMaxPid intakeMotor;
+	private CANSparkMax intakeMotor;
 
 	private PowerDistribution pDH;
 
 	private double pushCommandTimeStamp;
 
 	private boolean isSolenoidExtended;
-
-	private static final double P = 0.00006;
-	private static final double I = 0.00000028;
-	private static final double D = 0.000002;
-	private static final double F = 0.00003;
 
 	/* ======================== Constructor ======================== */
 	/**
@@ -61,11 +55,8 @@ public class BallHandlingFSM {
 		HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID,
 		HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
 
-		intakeMotor = new NeoSparkMaxPid(HardwareMap.CAN_ID_SPARK_INTAKE,
-						P,
-						I,
-						D,
-						F);
+		intakeMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_INTAKE,
+			MotorType.kBrushless);
 
 		pDH = new PowerDistribution(1, ModuleType.kRev);
 
@@ -226,7 +217,7 @@ public class BallHandlingFSM {
 	 */
 	private void handleIdleState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
-		intakeMotor.setVelocity(0);
+		intakeMotor.setVoltage(0);
 	}
 	/**
 	 * Handle behavior in FIRING.
@@ -255,7 +246,7 @@ public class BallHandlingFSM {
 	 */
 	private void handleIntakingState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
-		intakeMotor.setVelocity(INTAKE_MOTOR_RPM);
+		intakeMotor.setVoltage(-INTAKE_MOTOR_VOLTAGE);
 	}
 	/**
 	 * Handle behavior in RELEASING.
@@ -264,7 +255,7 @@ public class BallHandlingFSM {
 	 */
 	private void handleReleasingState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
-		intakeMotor.setVelocity(-INTAKE_MOTOR_RPM);
+		intakeMotor.setVoltage(INTAKE_MOTOR_VOLTAGE);
 	}
 
 	/**
@@ -273,7 +264,7 @@ public class BallHandlingFSM {
 	 */
 	public CANSparkMax[] getSparkMaxs() {
 		return new CANSparkMax[]{
-			intakeMotor.getMotor()
+			intakeMotor
 		};
 	}
 
