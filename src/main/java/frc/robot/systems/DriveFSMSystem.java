@@ -4,6 +4,7 @@ package frc.robot.systems;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -236,6 +237,7 @@ public class DriveFSMSystem {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
+		outputToShuffleboard();
 		currentState = nextState(input);
 	}
 
@@ -638,5 +640,9 @@ public class DriveFSMSystem {
 
 		leftMotor.set(0);
 		rightMotor.set(0);
+	}
+
+	private void outputToShuffleboard() {
+		SmartDashboard.putNumber("Gyro heading", getHeading());
 	}
 }

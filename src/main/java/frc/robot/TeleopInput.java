@@ -3,6 +3,7 @@ package frc.robot;
 
 // WPILib Imports
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 
 /**
@@ -47,6 +48,7 @@ public class TeleopInput {
 	 * @return Axis value
 	 */
 	public double getLeftJoystickY() {
+		SmartDashboard.putNumber("Left Joystick", leftJoystick.getY());
 		return leftJoystick.getY();
 	}
 	/**
@@ -54,13 +56,17 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isShooterButtonPressed() {
-		return drivingJoystick.getRawButton(Constants.SHOOTER_BUTTON);
+		SmartDashboard.putBoolean("Shooter Button",
+			leftJoystick.getRawButton(Constants.SHOOTER_BUTTON));
+		return leftJoystick.getRawButton(Constants.SHOOTER_BUTTON);
 	}
 	/**
 	 * Get the value of the intake button.
 	 * @return True if button is pressed
 	 */
 	public boolean isIntakeButtonPressed() {
+		SmartDashboard.putBoolean("Intake Button",
+			leftJoystick.getRawButton(Constants.INTAKE_BUTTON));
 		return leftJoystick.getRawButton(Constants.INTAKE_BUTTON);
 	}
 	/**
@@ -68,6 +74,8 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isTerminalReleaseButtonPressed() {
+		SmartDashboard.putBoolean("Terminal Release Button",
+			leftJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON));
 		return leftJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
 	}
 	/**
@@ -75,14 +83,18 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isAscendingButtonPressed() {
-		return rightJoystick.getRawButton(Constants.ASCEND_BUTTON);
+		SmartDashboard.putBoolean("Ascending Button",
+			leftJoystick.getRawButton(1));
+		return rightJoystick.getRawButton(1);
 	}
 	/**
 	 * Get the value of the descending button.
 	 * @return True if button is pressed
 	 */
 	public boolean isDescendingButtonPressed() {
-		return rightJoystick.getRawButton(Constants.DESCEND_BUTTON);
+		SmartDashboard.putBoolean("Descending Button",
+			leftJoystick.getRawButton(2));
+		return rightJoystick.getRawButton(2);
 	}
 
 	/* ------------------------ Right Joystick ------------------------ */
@@ -92,6 +104,7 @@ public class TeleopInput {
 	 * @return Axis value
 	 */
 	public double getRightJoystickY() {
+		SmartDashboard.putNumber("Right Joystick", rightJoystick.getY());
 		return rightJoystick.getY();
 	}
 
@@ -101,6 +114,7 @@ public class TeleopInput {
 	 * @return Angle
 	 */
 	public double getSteerAngle() {
+		SmartDashboard.putNumber("Wheel", steeringWheel.getX());
 		return steeringWheel.getX();
 	}
 
@@ -110,6 +124,7 @@ public class TeleopInput {
 	 * @return Y-Axis value
 	 */
 	public double getDrivingJoystickY() {
+		SmartDashboard.putNumber("Driving Joystick", drivingJoystick.getY());
 		return drivingJoystick.getY();
 	}
 
@@ -118,6 +133,7 @@ public class TeleopInput {
 	 * @return Trigger button's state
 	 */
 	public boolean getTriggerPressed() {
+		SmartDashboard.putBoolean("Driving Trigger", drivingJoystick.getTrigger());
 		return drivingJoystick.getTrigger();
 	}
 
@@ -126,6 +142,8 @@ public class TeleopInput {
 	 * @return true if the forward driving button is pressed
 	 */
 	public boolean isForwardDrivingButtonPressed() {
+		SmartDashboard.putBoolean("Driving Forward",
+			drivingJoystick.getRawButton(Constants.DRIVING_FORWARD_BUTTON));
 		return drivingJoystick.getRawButton(Constants.DRIVING_FORWARD_BUTTON);
 	}
 
@@ -134,6 +152,8 @@ public class TeleopInput {
 	 * @return true if the backward driving button is pressed
 	 */
 	public boolean isBackwardDrivingButtonPressed() {
+		SmartDashboard.putBoolean("Driving Backward",
+			drivingJoystick.getRawButton(Constants.DRIVING_FORWARD_BUTTON));
 		return drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON);
 	}
 
@@ -142,6 +162,8 @@ public class TeleopInput {
 	 * @return true if the button to turn to hangar is released
 	 */
 	public boolean getHangarButton() {
+		SmartDashboard.putBoolean("Turn to Hangar",
+			drivingJoystick.getRawButton(Constants.TURN_TO_HANGAR_BUTTON));
 		return drivingJoystick.getRawButton(Constants.TURN_TO_HANGAR_BUTTON);
 	}
 
