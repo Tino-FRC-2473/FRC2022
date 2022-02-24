@@ -35,17 +35,17 @@ public class PurePursuit {
 			Translation2d startPoint = keyPoints.get(i - 1);
 			Translation2d endPoint = keyPoints.get(i);
 
-			Vector v = new Vector(endPoint.getX() - startPoint.getX(),
+			Translation2d startToEnd = new Translation2d(endPoint.getX() - startPoint.getX(),
 				endPoint.getY() - startPoint.getY());
 
-			double numPoints = Math.ceil(Math.abs(v.getNorm()) / SPACING);
+			double numPoints = Math.ceil(Math.abs(startToEnd.getNorm()) / SPACING);
 
-			v = v.normalize().times(SPACING);
+			startToEnd = startToEnd.div(startToEnd.getNorm()).times(SPACING);
 
 			for (int j = 0; j <= (int) numPoints; j++) {
-				Vector tempV = v.times(j);
+				Translation2d segmentToNextPt = startToEnd.times(j);
 
-				Translation2d toInject = startPoint.plus(tempV);
+				Translation2d toInject = startPoint.plus(segmentToNextPt);
 				pathPoints.add(toInject);
 			}
 		}
