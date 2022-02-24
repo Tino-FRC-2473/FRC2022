@@ -362,7 +362,7 @@ public class DriveFSMSystem {
 		double error = inches - currentPosInches;
 
 		// Checks if either the encoder value is equal to the inches required (reached destination)
-		// or checks if the robot has hit a wall (encoder value is not chaning and motor power is
+		// or checks if the robot has hit a wall (encoder value is not changing and motor power is
 		// not zero)
 		if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN)
 			|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
