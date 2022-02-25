@@ -92,6 +92,10 @@ public class LimeLight {
 		return mLimeLight;
 	}
 
+	public void update() {
+		outputToShuffleboard();
+	}
+
 	/**
 	 * Updates limelight data by calling outputToShuffleboard.
 	 */
