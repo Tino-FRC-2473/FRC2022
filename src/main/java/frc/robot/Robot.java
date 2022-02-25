@@ -18,7 +18,6 @@ import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.GrabberFSM;
 import frc.robot.systems.BallHandlingFSM;
 import frc.robot.systems.CompressorSystem;
-import frc.robot.systems.CameraFSM;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -28,12 +27,12 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 
 	private AutoSelector autoSelector = new AutoSelector();
+	private LimeLight limelight;
 
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
 	private BallHandlingFSM ballSystem;
 	private GrabberFSM grabberSystem;
-	private CameraFSM cameraSystem;
 
 	// Constants
 	private static final boolean RUN_COMPRESSOR = false;
@@ -56,9 +55,11 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
-		cameraSystem = new CameraFSM();
+
+		// new PowerDistribution(1, ModuleType.kRev).setSwitchableChannel(true);
 
 		autoSelector.updateModeChooser();
+		limelight = new LimeLight();
 	}
 
 	@Override
@@ -68,7 +69,6 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
-		cameraSystem.reset();
 		autoSelector.updateModeChooser();
 	}
 
@@ -77,7 +77,6 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.update(input);
 		ballSystem.update(null, driveFsmSystem.getCurrentState());
 		grabberSystem.update(null);
-		cameraSystem.update(null);
 	}
 
 	@Override
@@ -87,7 +86,7 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
-		cameraSystem.reset();
+		limelight.update();
 	}
 
 	@Override
@@ -95,7 +94,7 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.update(input);
 		ballSystem.update(input, driveFsmSystem.getCurrentState());
 		grabberSystem.update(input);
-		cameraSystem.update(input);
+		limelight.update();
 	}
 
 	@Override
