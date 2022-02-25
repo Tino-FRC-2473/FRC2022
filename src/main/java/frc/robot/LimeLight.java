@@ -92,10 +92,14 @@ public class LimeLight {
 		return mLimeLight;
 	}
 
+	public void update() {
+		outputToShuffleboard();
+	}
+
 	/**
 	 * Outputs data to Shuffleboard.
 	 */
-	public void outputToShuffleboard() {
+	private void outputToShuffleboard() {
 		SmartDashboard.putBoolean("Has Target", hasValidTargets());
 		SmartDashboard.putNumber("Horizontal Offset", getXAngle());
 		SmartDashboard.putNumber("Vertical Offset", getYAngle());
