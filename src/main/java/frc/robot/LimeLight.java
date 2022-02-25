@@ -6,7 +6,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class LimeLight {
-	private static LimeLight m_LimeLight;
+	private static LimeLight mLimeLight;
 
 	private NetworkTable table;
 
@@ -86,10 +86,10 @@ public class LimeLight {
 	 * @return The LimeLight instance
 	 */
 	public static LimeLight getInstance() {
-		if(m_LimeLight == null) {
-			m_LimeLight = new LimeLight();
+		if(mLimeLight == null) {
+			mLimeLight = new LimeLight();
 		}
-		return m_LimeLight;
+		return mLimeLight;
 	}
 
 	/**
