@@ -79,6 +79,15 @@ public class TeleopInput {
 		return leftJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
 	}
 	/**
+	 * Get the value of the intake retract button.
+	 * @return True if button is pressed
+	 */
+	public boolean wasToggleIntakeButtonPressed() {
+		SmartDashboard.putBoolean("Deploy Intake Button",
+			leftJoystick.getRawButton(Constants.TOGGLE_INTAKE_BUTTON));
+		return leftJoystick.getRawButtonPressed(Constants.TOGGLE_INTAKE_BUTTON);
+	}
+	/**
 	 * Get the value of the ascending button.
 	 * @return True if button is pressed
 	 */

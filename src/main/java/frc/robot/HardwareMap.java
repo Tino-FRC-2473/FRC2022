@@ -19,4 +19,6 @@ public final class HardwareMap {
 	// Pneumatics channel numbers
 	public static final int PCM_CHANNEL_PUSH_BOT_SOLENOID = 0;
 	public static final int PCM_CHANNEL_PULL_BOT_SOLENOID = 1;
+	public static final int PCM_CHANNEL_INTAKE_RETRACT_SOLENOID = 2;
+	public static final int PCM_CHANNEL_INTAKE_RELEASE_SOLENOID = 3;
 }

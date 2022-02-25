@@ -62,7 +62,6 @@ public class DriveModes {
 
 		//if the left and right joysticks are close to the same value
 		//make the power equal (makes driving straight easier)
-		System.out.println("diff: " + (leftAdjustedInput - rightAdjustedInput));
 		if (Math.abs(leftAdjustedInput - rightAdjustedInput)
 			< Constants.TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF) {
 			rightAdjustedInput = leftAdjustedInput;

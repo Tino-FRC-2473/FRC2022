@@ -61,6 +61,7 @@ public class Constants {
 	public static final int DRIVING_JOYSTICK_PORT = 3;
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
+	public static final int TOGGLE_INTAKE_BUTTON = 7;
 	public static final int TURN_TO_HANGAR_BUTTON = 3;
 	public static final int SHOOTER_BUTTON = 1;
 	public static final int INTAKE_BUTTON = 2;
@@ -77,5 +78,9 @@ public class Constants {
 	public static final double HORIZONTAL_HEADING_CORRECTION_DEG = 1;
 	public static final double ZERO_THRESHOLD = 0.01;
 
+	//Intake Shooter Constants
+	public static final double PUSH_TIME_SECONDS = 1;
+	public static final double INTAKE_MOTOR_VOLTAGE = 2; 
+	public static final int BALL_PROXIMITY_THRESHOLD = 55;
 }
 
