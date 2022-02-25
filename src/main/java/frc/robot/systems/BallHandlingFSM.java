@@ -177,7 +177,8 @@ public class BallHandlingFSM {
 
 					return FSMState.FIRING;
 				} else if (isShooterSolenoidExtended
-						&& Timer.getFPGATimestamp() - pushCommandTimeStamp > Constants.PUSH_TIME_SECONDS) {
+						&& Timer.getFPGATimestamp() - pushCommandTimeStamp
+						> Constants.PUSH_TIME_SECONDS) {
 					return FSMState.RETRACTING;
 				} else if (input.wasToggleIntakeButtonPressed()) {
 					if (isIntakeMechRetracted) {
@@ -195,7 +196,8 @@ public class BallHandlingFSM {
 
 			case INTAKING:
 				if (isShooterSolenoidExtended
-						&& Timer.getFPGATimestamp() - pushCommandTimeStamp > Constants.PUSH_TIME_SECONDS) {
+						&& Timer.getFPGATimestamp() - pushCommandTimeStamp
+						> Constants.PUSH_TIME_SECONDS) {
 					return FSMState.RETRACTING;
 				} else if (!isShooterSolenoidExtended && input.isShooterButtonPressed()) {
 					pushCommandTimeStamp = Timer.getFPGATimestamp();
@@ -209,7 +211,8 @@ public class BallHandlingFSM {
 
 			case RELEASING:
 				if (isShooterSolenoidExtended
-						&& Timer.getFPGATimestamp() - pushCommandTimeStamp > Constants.PUSH_TIME_SECONDS) {
+						&& Timer.getFPGATimestamp() - pushCommandTimeStamp
+						> Constants.PUSH_TIME_SECONDS) {
 					return FSMState.RETRACTING;
 				} else if (!isShooterSolenoidExtended && input.isShooterButtonPressed()) {
 					pushCommandTimeStamp = Timer.getFPGATimestamp();
@@ -220,10 +223,10 @@ public class BallHandlingFSM {
 				} else {
 					return FSMState.IDLE;
 				}
-			
+
 			case RETRACT_INTAKE_MECH:
 				return FSMState.IDLE;
-			
+
 			case RELEASE_INTAKE_MECH:
 				return FSMState.IDLE;
 
