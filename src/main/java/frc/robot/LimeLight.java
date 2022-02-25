@@ -86,7 +86,7 @@ public class LimeLight {
 	 * @return The LimeLight instance
 	 */
 	public static LimeLight getInstance() {
-		if(mLimeLight == null) {
+		if (mLimeLight == null) {
 			mLimeLight = new LimeLight();
 		}
 		return mLimeLight;
