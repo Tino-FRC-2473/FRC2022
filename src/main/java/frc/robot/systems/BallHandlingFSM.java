@@ -66,7 +66,7 @@ public class BallHandlingFSM {
 		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID,
 			HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
-		
+
 		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_INTAKE_RELEASE_SOLENOID,
 			HardwareMap.PCM_CHANNEL_INTAKE_RETRACT_SOLENOID);
