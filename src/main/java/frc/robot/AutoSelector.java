@@ -6,10 +6,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class AutoSelector {
 	enum DesiredMode {
-		RED_3_BALL,
-		BLUE_3_BALL,
-		RED_2_BALL,
-		BLUE_2_BALL,
+		RED_3_BALL_A,
+		BLUE_3_BALL_A,
+		RED_3_BALL_B,
+		BLUE_3_BALL_B,
 		RED_1_BALL,
 		BLUE_1_BALL
 	}
@@ -25,10 +25,10 @@ public class AutoSelector {
 	 */
 	public AutoSelector() {
 		modeChooser = new SendableChooser<>();
-		modeChooser.setDefaultOption("3 Ball Red", DesiredMode.RED_3_BALL);
-		modeChooser.addOption("3 Ball Blue", DesiredMode.RED_3_BALL);
-		modeChooser.addOption("2 Ball Red", DesiredMode.RED_2_BALL);
-		modeChooser.addOption("2 Ball Blue", DesiredMode.BLUE_2_BALL);
+		modeChooser.setDefaultOption("3 Ball Red", DesiredMode.RED_3_BALL_A);
+		modeChooser.addOption("3 Ball Blue", DesiredMode.BLUE_3_BALL_A);
+		modeChooser.addOption("2 Ball Red", DesiredMode.RED_3_BALL_B);
+		modeChooser.addOption("2 Ball Blue", DesiredMode.BLUE_3_BALL_B);
 		modeChooser.addOption("1 Ball Red", DesiredMode.RED_1_BALL);
 		modeChooser.addOption("1 Ball Blue", DesiredMode.BLUE_1_BALL);
 		SmartDashboard.putData("Auto mode", modeChooser);
@@ -40,7 +40,7 @@ public class AutoSelector {
 	public void updateModeChooser() {
 		DesiredMode desiredMode = modeChooser.getSelected();
 		if (mDesiredMode != desiredMode) {
-			System.out.println("Auto selection changed: desiredMode->" + desiredMode.name());
+			mDesiredMode = desiredMode;
 		}
 	}
 
@@ -49,6 +49,14 @@ public class AutoSelector {
 	*/
 	public void reset() {
 		mDesiredMode = null;
+	}
+
+	/**
+	 * Gets the current auto from Shuffleboard.
+	 * @return name of current auto
+	 */
+	public String getSelectedAuto() {
+		return modeChooser.getSelected().name();
 	}
 
 	/**
