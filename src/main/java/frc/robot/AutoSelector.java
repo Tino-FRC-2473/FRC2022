@@ -25,10 +25,10 @@ public class AutoSelector {
 	 */
 	public AutoSelector() {
 		modeChooser = new SendableChooser<>();
-		modeChooser.setDefaultOption("3 Ball Red", DesiredMode.RED_3_BALL_A);
-		modeChooser.addOption("3 Ball Blue", DesiredMode.BLUE_3_BALL_A);
-		modeChooser.addOption("2 Ball Red", DesiredMode.RED_3_BALL_B);
-		modeChooser.addOption("2 Ball Blue", DesiredMode.BLUE_3_BALL_B);
+		modeChooser.setDefaultOption("3 Ball Red A", DesiredMode.RED_3_BALL_A);
+		modeChooser.addOption("3 Ball Blue A", DesiredMode.BLUE_3_BALL_A);
+		modeChooser.addOption("3 Ball Red B", DesiredMode.RED_3_BALL_B);
+		modeChooser.addOption("3 Ball Blue B", DesiredMode.BLUE_3_BALL_B);
 		modeChooser.addOption("1 Ball Red", DesiredMode.RED_1_BALL);
 		modeChooser.addOption("1 Ball Blue", DesiredMode.BLUE_1_BALL);
 		SmartDashboard.putData("Auto mode", modeChooser);
