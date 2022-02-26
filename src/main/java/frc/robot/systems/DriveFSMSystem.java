@@ -56,7 +56,7 @@ public class DriveFSMSystem {
 	private double leftPower = 0;
 	private double rightPower = 0;
 	private double previousEncoderCount = 0;
-	private Timer timer;
+	private Timer stateTimer;
 	private double currentTime = 0;
 	private boolean isDrivingForward = true;
 
@@ -101,7 +101,7 @@ public class DriveFSMSystem {
 
 		gyro = new AHRS(SPI.Port.kMXP);
 
-		timer = new Timer();
+		stateTimer = new Timer();
 
 		// Reset state machine
 		// reset();
@@ -116,43 +116,14 @@ public class DriveFSMSystem {
 		return currentState;
 	}
 	/**
-	 * Reset this system to its autonomous state. This may be called from mode init
+	 * Reset this system to its intial state. This may be called from mode init
 	 * when the robot is enabled.
 	 *
 	 * Note this is distinct from the one-time initialization in the constructor
 	 * as it may be called multiple times in a boot cycle,
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
-	public void resetAutonomous() {
-
-		rightMotor.getEncoder().setPosition(0);
-		leftMotor.getEncoder().setPosition(0);
-
-		gyro.reset();
-		gyro.zeroYaw();
-
-		finishedMovingStraight = false;
-		finishedTurning = false;
-		finishedPurePursuitPath = false;
-
-		currentState = FSMState.PURE_PURSUIT;
-
-		timer.reset();
-		timer.start();
-
-		// Call one tick of update to ensure outputs reflect start state
-		update(null);
-	}
-
-	/**
-	 * Reset this system to its teleop state. This may be called from mode init
-	 * when the robot is enabled.
-	 *
-	 * Note this is distinct from the one-time initialization in the constructor
-	 * as it may be called multiple times in a boot cycle,
-	 * Ex. if the robot is enabled, disabled, then reenabled.
-	 */
-	public void resetTeleop() {
+	public void reset() {
 
 		rightMotor.getEncoder().setPosition(0);
 		leftMotor.getEncoder().setPosition(0);
@@ -166,12 +137,13 @@ public class DriveFSMSystem {
 
 		currentState = FSMState.TELEOP_STATE;
 
-		timer.reset();
-		timer.start();
+		stateTimer.reset();
+		stateTimer.start();
 
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
 	}
+
 	/**
 	 * Update FSM based on new inputs. This function only calls the FSM state
 	 * specific handlers.
@@ -179,14 +151,9 @@ public class DriveFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
-		double updatedTime = timer.get();
+		double updatedTime = stateTimer.get();
 		currentTime = updatedTime;
 		gyroAngle = getHeading();
-		if (currentTime > 1) {
-			System.out.println("gyro: " + gyroAngle);
-			timer.reset();
-			currentTime = 0;
-		}
 
 		updateLineOdometry();
 		updateArcOdometry();
@@ -302,7 +269,7 @@ public class DriveFSMSystem {
 				if (finishedPurePursuitPath) {
 					finishedPurePursuitPath = false;
 					ppController = new PurePursuit(pointsToHub);
-					timer.reset();
+					stateTimer.reset();
 					return FSMState.PURE_PURSUIT_TO_HUB;
 				}
 				return FSMState.PURE_PURSUIT;
@@ -310,7 +277,7 @@ public class DriveFSMSystem {
 			case PURE_PURSUIT_TO_HUB:
 				if (finishedPurePursuitPath) {
 					finishedPurePursuitPath = false;
-					timer.reset();
+					stateTimer.reset();
 					return FSMState.TURN_TO_HUB;
 				}
 				return FSMState.PURE_PURSUIT_TO_HUB;
@@ -412,7 +379,7 @@ public class DriveFSMSystem {
 	*/
 	private void handleTurnState(TeleopInput input, double degrees, double maxRunTime) {
 
-		if (timer.get() > maxRunTime) {
+		if (stateTimer.get() > maxRunTime) {
 			finishedTurning = true;
 			leftMotor.set(0);
 			rightMotor.set(0);
@@ -591,7 +558,7 @@ public class DriveFSMSystem {
 	}
 
 	private void handlePurePursuit(double maxRunTime) {
-		if (timer.get() > maxRunTime) {
+		if (stateTimer.get() > maxRunTime) {
 			finishedPurePursuitPath = true;
 			leftMotor.set(0);
 			rightMotor.set(0);
@@ -614,7 +581,7 @@ public class DriveFSMSystem {
 	}
 
 	private void handlePurePursuitBackward(double maxRunTime) {
-		if (timer.get() > maxRunTime) {
+		if (stateTimer.get() > maxRunTime) {
 			finishedPurePursuitPath = true;
 			leftMotor.set(0);
 			rightMotor.set(0);
