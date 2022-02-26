@@ -35,7 +35,7 @@ public class GrabberFSM {
 	 */
 	public GrabberFSM() {
 		// Perform hardware init
-		motor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_SHOOTER, CANSparkMax.MotorType.kBrushless);
+		motor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_GRABBER, CANSparkMax.MotorType.kBrushless);
 
 		// Reset state machine
 		reset();

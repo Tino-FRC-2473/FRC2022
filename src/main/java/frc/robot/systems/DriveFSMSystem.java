@@ -3,6 +3,7 @@ package frc.robot.systems;
 // WPILib Imports
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Third party Hardware Imports
@@ -16,7 +17,6 @@ import frc.robot.drive.DrivePower;
 import frc.robot.drive.Functions;
 import frc.robot.trajectory.AutoPaths;
 import frc.robot.trajectory.Kinematics;
-import frc.robot.trajectory.Point;
 import frc.robot.trajectory.PurePursuit;
 import frc.robot.HardwareMap;
 import frc.robot.Constants;
@@ -35,7 +35,8 @@ public class DriveFSMSystem {
 		TELEOP_STATE,
 		PURE_PURSUIT,
 		PURE_PURSUIT_TO_HUB,
-		TURN_TO_HUB
+		TURN_TO_HUB,
+		DEPOSIT_BALL_IDLE
 	}
 
 	/* ======================== Private variables ======================== */
@@ -45,24 +46,23 @@ public class DriveFSMSystem {
 	private boolean finishedPurePursuitPath;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	private Point robotPosLine = Constants.PP_R2_START_POINT;
-	// private double robotXPosLine = 0;
-	// private double robotYPosLine = 0;
+	private Translation2d robotPosLine = Constants.PP_R1_START_POINT;
+	// private Translation2d robotPosLine = new Translation2d(0, 0);
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	private Point robotPosArc = Constants.PP_R2_START_POINT;
-	// private double robotXPosArc = 0;
-	// private double robotYPosArc = 0;
+	private Translation2d robotPosArc = Constants.PP_R1_START_POINT;
+	// private Translation2d robotPosArc = new Translation2d(0, 0);
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
-	private Timer timer;
+	private double previousEncoderCount = 0;
+	private Timer stateTimer;
 	private double currentTime = 0;
 	private boolean isDrivingForward = true;
 
 	private PurePursuit ppController;
-	private ArrayList<Point> ballPoints = new ArrayList<>();
-	private ArrayList<Point> pointsToHub = new ArrayList<>();
+	private ArrayList<Translation2d> ballPoints = new ArrayList<>();
+	private ArrayList<Translation2d> pointsToHub = new ArrayList<>();
 
 
 	// Hardware devices should be owned by one and only one system. They must
@@ -87,24 +87,24 @@ public class DriveFSMSystem {
 		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
 											CANSparkMax.MotorType.kBrushless);
 
-		// ballPoints.add(new Point(-20.5, -60));
-		// ballPoints.add(new Point(-26, -151));
-		// ballPoints.add(new Point(-80, -88));
-		// ballPoints.add(new Point(-40, -90));
-		// pointsToHub.add(new Point(-40, -90));
-		// pointsToHub.add(new Point(-30, -60));
+		// ballPoints.add(new Translation2d(-20.5, -60));
+		// ballPoints.add(new Translation2d(-26, -151));
+		// ballPoints.add(new Translation2d(-80, -88));
+		// ballPoints.add(new Translation2d(-40, -90));
+		// pointsToHub.add(new Translation2d(-40, -90));
+		// pointsToHub.add(new Translation2d(-30, -60));
 
-		ballPoints = AutoPaths.r2BallPath();
-		pointsToHub = AutoPaths.r2HubPath();
+		ballPoints = AutoPaths.r1BallPath();
+		pointsToHub = AutoPaths.r1HubPath();
 
 		ppController = new PurePursuit(ballPoints);
 
 		gyro = new AHRS(SPI.Port.kMXP);
 
-		timer = new Timer();
+		stateTimer = new Timer();
 
 		// Reset state machine
-		reset();
+		// reset();
 	}
 
 	/* ======================== Public methods ======================== */
@@ -116,7 +116,7 @@ public class DriveFSMSystem {
 		return currentState;
 	}
 	/**
-	 * Reset this system to its start state. This may be called from mode init
+	 * Reset this system to its intial state. This may be called from mode init
 	 * when the robot is enabled.
 	 *
 	 * Note this is distinct from the one-time initialization in the constructor
@@ -137,12 +137,13 @@ public class DriveFSMSystem {
 
 		currentState = FSMState.TELEOP_STATE;
 
-		timer.reset();
-		timer.start();
+		stateTimer.reset();
+		stateTimer.start();
 
 		// Call one tick of update to ensure outputs reflect start state
 		update(null);
 	}
+
 	/**
 	 * Update FSM based on new inputs. This function only calls the FSM state
 	 * specific handlers.
@@ -150,7 +151,7 @@ public class DriveFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
-		double updatedTime = timer.get();
+		double updatedTime = stateTimer.get();
 		currentTime = updatedTime;
 		gyroAngle = getHeading();
 
@@ -167,31 +168,37 @@ public class DriveFSMSystem {
 				break;
 
 			case FORWARD_STATE_10_IN:
-				handleForwardOrBackwardState(input, Constants.RUN_1_LEAVE_TARMAC_DIST);
+				handleForwardOrBackwardState(input, Constants.RUN_2_LEAVE_TARMAC_DIST);
 				break;
 
 			case BACK_TO_TARMAC:
-				handleForwardOrBackwardState(input, Constants.RUN_1_BACK_TO_TARMAC_DIST);
+				handleForwardOrBackwardState(input, Constants.RUN_2_BACK_TO_TARMAC_DIST);
 				break;
 
 			case BACK_TO_HUB:
-				handleForwardOrBackwardState(input, Constants.RUN_1_BACK_TO_HUB_DIST);
+				handleForwardOrBackwardState(input, Constants.RUN_2_BACK_TO_HUB_DIST);
 				break;
 
 			case TURN_STATE:
-				handleTurnState(input, Constants.RUN_1_TURN_TO_HUB_ANGLE);
+				handleTurnState(input, Constants.RUN_1_TURN_TO_HUB_ANGLE,
+						Constants.PP_TURN_RUN_TIME_SEC);
 				break;
 
 			case PURE_PURSUIT:
-				handlePurePursuit();
+				handlePurePursuit(Constants.PP_BALL_MAX_RUN_TIME_SEC);
 				break;
 
 			case PURE_PURSUIT_TO_HUB:
-				handlePurePursuitBackward();
+				handlePurePursuitBackward(Constants.PP_TO_HUB_MAX_RUN_TIME_SEC);
 				break;
 
 			case TURN_TO_HUB:
-				handleTurnState(input, Constants.PP_R2_HUB_ANGLE_DEG);
+				handleTurnState(input, Constants.PP_R2_HUB_ANGLE_DEG,
+						Constants.PP_TURN_RUN_TIME_SEC);
+				break;
+
+			case DEPOSIT_BALL_IDLE:
+				handleBallDepositIdleState(input);
 				break;
 
 			default:
@@ -262,6 +269,7 @@ public class DriveFSMSystem {
 				if (finishedPurePursuitPath) {
 					finishedPurePursuitPath = false;
 					ppController = new PurePursuit(pointsToHub);
+					stateTimer.reset();
 					return FSMState.PURE_PURSUIT_TO_HUB;
 				}
 				return FSMState.PURE_PURSUIT;
@@ -269,6 +277,7 @@ public class DriveFSMSystem {
 			case PURE_PURSUIT_TO_HUB:
 				if (finishedPurePursuitPath) {
 					finishedPurePursuitPath = false;
+					stateTimer.reset();
 					return FSMState.TURN_TO_HUB;
 				}
 				return FSMState.PURE_PURSUIT_TO_HUB;
@@ -280,6 +289,13 @@ public class DriveFSMSystem {
 					return FSMState.TURN_TO_HUB;
 				}
 				return FSMState.TELEOP_STATE;
+
+			case DEPOSIT_BALL_IDLE:
+				if (true) {
+					return FSMState.PURE_PURSUIT;
+				} else {
+					return FSMState.DEPOSIT_BALL_IDLE;
+				}
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
@@ -315,8 +331,8 @@ public class DriveFSMSystem {
 		double error = inches - currentPosInches;
 
 		// Checks if either the encoder value is equal to the inches required (reached destination)
-		// or checks if the robot has hit a wall (encoder value is not chaning but motor power is
-	// not zero)
+		// or checks if the robot has hit a wall (encoder value is not changing and motor power is
+		// not zero)
 		if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN)
 			|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
 
@@ -329,15 +345,19 @@ public class DriveFSMSystem {
 		double speed = Constants.KP_MOVE_STRAIGHT * error;
 
 		if (speed >= Constants.MOTOR_RUN_POWER) {
-			setPowerForAllMotors(Constants.MOTOR_MAX_RUN_POWER_ACCELERATION
-				* (-Math.pow((Constants.MOTOR_MAX_POWER_RATIO_ACCELERATION
-				* Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2)
-				+ Constants.MOTOR_INITAL_POWER_ACCELERATION));
+			setPowerForAllMotors(Constants.MOTOR_RUN_POWER);
+			// setPowerForAllMotors(Constants.MOTOR_MAX_RUN_POWER_ACCELERATION
+			// 	* (-Math.pow((Constants.MOTOR_MAX_POWER_RATIO_ACCELERATION
+			// 	* Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2)
+			// 	+ Constants.MOTOR_INITAL_POWER_ACCELERATION));
 		} else if (speed <= -Constants.MOTOR_RUN_POWER) {
 			setPowerForAllMotors(-Constants.MOTOR_RUN_POWER);
 		} else {
 			setPowerForAllMotors(speed);
 		}
+
+		previousEncoderCount = currrentPosTicks;
+		System.out.println("Previous Encoder Count: " + previousEncoderCount);
 	}
 
 	/**
@@ -355,12 +375,21 @@ public class DriveFSMSystem {
 	* @param input Global TeleopInput if robot in teleop mode or null if
 	*        the robot is in autonomous mode.
 	* @param degrees The final angle of the robot after the desired turn
+	* @param maxRunTime the maximum time the state can run for (in seconds)
 	*/
-	private void handleTurnState(TeleopInput input, double degrees) {
+	private void handleTurnState(TeleopInput input, double degrees, double maxRunTime) {
 
+		if (stateTimer.get() > maxRunTime) {
+			finishedTurning = true;
+			leftMotor.set(0);
+			rightMotor.set(0);
+			return;
+		}
 		double error = degrees - getHeading();
 		if (Math.abs(error) <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
 			finishedTurning = true;
+			leftMotor.set(0);
+			rightMotor.set(0);
 			return;
 		}
 		double power = error / Constants.TURN_ERROR_POWER_RATIO;
@@ -405,11 +434,11 @@ public class DriveFSMSystem {
 			isDrivingForward = false;
 		}
 
-		// DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
-		// 	steerAngle, currentLeftPower,
-		// 	currentRightPower, isDrivingForward);
+		DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
+			steerAngle, currentLeftPower,
+			currentRightPower, isDrivingForward);
 
-		DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
+		// DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
 		// multiple speed modes
 		if (input.getTriggerPressed()) {
@@ -425,21 +454,48 @@ public class DriveFSMSystem {
 			currentRightPower));
 
 		// turning in place
-		// if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
-		//     power = Functions.turnInPlace(rightJoystickY, steerAngle);
-		// }
+		if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+			power = Functions.turnInPlace(rightJoystickY, steerAngle);
+		}
 
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
 
-		if (input.getTopPressed()) {
+		if (input.getHangarButton()) {
 			if (Math.abs(gyroAngle - Constants.HANGAR_TURN_TARGET_ANGLE)
-				> Constants.HANGAR_TURN_ERROR
+				> Constants.AUTOALIGN_TURN_ERROR
 				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
 				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
 
-				leftPower = Constants.HANGAR_TURN_SPEED;
-				rightPower = Constants.HANGAR_TURN_SPEED;
+				double error = Constants.HANGAR_TURN_TARGET_ANGLE - gyroAngle;
+				double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
+				if (turnPower < Constants.TELEOP_MIN_TURN_POWER) {
+					turnPower = Constants.TELEOP_MIN_TURN_POWER;
+				}
+
+				turnPower *= error < 0 && error > -180 ? -1 : 1;
+
+				leftPower = turnPower;
+				rightPower = turnPower;
+			}
+		}
+
+		if (input.getTerminalButton()) {
+			if (Math.abs(gyroAngle - Constants.TERMINAL_TURN_TARGET_ANGLE)
+				> Constants.AUTOALIGN_TURN_ERROR
+				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
+				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+
+				double error = Constants.TERMINAL_TURN_TARGET_ANGLE - gyroAngle;
+				double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
+				if (turnPower < Constants.TELEOP_MIN_TURN_POWER) {
+					turnPower = Constants.TELEOP_MIN_TURN_POWER;
+				}
+
+				turnPower *= error < 0 && error > -180 ? -1 : 1;
+
+				leftPower = turnPower;
+				rightPower = turnPower;
 			}
 		}
 
@@ -452,7 +508,7 @@ public class DriveFSMSystem {
 	 * Updates the robot's position assuming the robot moves in an line.
 	 * @return the robot's new position
 	 */
-	public Point updateLineOdometry() {
+	public Translation2d updateLineOdometry() {
 
 		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
 			+ rightMotor.getEncoder().getPosition()) / 2.0);
@@ -463,8 +519,7 @@ public class DriveFSMSystem {
 		double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
 		double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
 		double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
-		robotPosLine.addX(dX);
-		robotPosLine.addY(dY);
+		robotPosLine.plus(new Translation2d(dX, dY));
 
 		prevEncoderPosLine = currentEncoderPos;
 		return robotPosLine;
@@ -474,7 +529,7 @@ public class DriveFSMSystem {
 	 * Updates the robot's position assuming the robot moves in an arc.
 	 * @return the robot's new position
 	 */
-	public Point updateArcOdometry() {
+	public Translation2d updateArcOdometry() {
 		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
 			+ rightMotor.getEncoder().getPosition()) / 2.0);
 		robotPosArc = Kinematics.updateArcOdometry(gyroAngle, prevGyroAngle,
@@ -490,7 +545,7 @@ public class DriveFSMSystem {
 	 * Gets the robot position from the arc-based odometry calculations.
 	 * @return the robot's position
 	 */
-	public Point getRobotPosArc() {
+	public Translation2d getRobotPosArc() {
 		return robotPosArc;
 	}
 
@@ -498,12 +553,18 @@ public class DriveFSMSystem {
 	 * Gets the robot position from the line-based odometry calculations.
 	 * @return the robot's position
 	 */
-	public Point getRobotPosLine() {
+	public Translation2d getRobotPosLine() {
 		return robotPosLine;
 	}
 
-	private void handlePurePursuit() {
-		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
+	private void handlePurePursuit(double maxRunTime) {
+		if (stateTimer.get() > maxRunTime) {
+			finishedPurePursuitPath = true;
+			leftMotor.set(0);
+			rightMotor.set(0);
+			return;
+		}
+		Translation2d target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
 			leftMotor.set(0);
@@ -512,14 +573,21 @@ public class DriveFSMSystem {
 
 		}
 
-		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, true);
+		Translation2d motorSpeeds = Kinematics.inversekinematics(gyroAngle,
+			robotPosArc, target, true);
 		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
 		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
 	}
 
-	private void handlePurePursuitBackward() {
-		Point target = ppController.findLookahead(getRobotPosArc(), getHeading());
+	private void handlePurePursuitBackward(double maxRunTime) {
+		if (stateTimer.get() > maxRunTime) {
+			finishedPurePursuitPath = true;
+			leftMotor.set(0);
+			rightMotor.set(0);
+			return;
+		}
+		Translation2d target = ppController.findLookahead(getRobotPosArc(), getHeading());
 		if (target == null) {
 			finishedPurePursuitPath = true;
 			leftMotor.set(0);
@@ -528,10 +596,17 @@ public class DriveFSMSystem {
 
 		}
 
-		Point motorSpeeds = Kinematics.inversekinematics(gyroAngle, robotPosArc, target, false);
+		Translation2d motorSpeeds = Kinematics.inversekinematics(gyroAngle,
+			robotPosArc, target, false);
 		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
 		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
+	}
+
+	private void handleBallDepositIdleState(TeleopInput input) {
+
+		leftMotor.set(0);
+		rightMotor.set(0);
 	}
 
 	private void outputToShuffleboard() {

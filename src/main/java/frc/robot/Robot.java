@@ -8,7 +8,8 @@ import com.revrobotics.REVPhysicsSim;
 
 // WPILib Imports
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.Compressor;
+
+// WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -25,7 +26,6 @@ import frc.robot.systems.CameraFSM;
  */
 public class Robot extends TimedRobot {
 	private TeleopInput input;
-	private Compressor pneumaticsCompressor;
 
 	private AutoSelector autoSelector = new AutoSelector();
 
@@ -75,7 +75,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
-		ballSystem.update(null);
+		ballSystem.update(null, driveFsmSystem.getCurrentState());
 		grabberSystem.update(null);
 		cameraSystem.update(null);
 	}
@@ -93,7 +93,7 @@ public class Robot extends TimedRobot {
 	@Override
 	public void teleopPeriodic() {
 		driveFsmSystem.update(input);
-		ballSystem.update(input);
+		ballSystem.update(input, driveFsmSystem.getCurrentState());
 		grabberSystem.update(input);
 		cameraSystem.update(input);
 	}
@@ -131,8 +131,6 @@ public class Robot extends TimedRobot {
 		for (int i = 0; i < sparkMaxs.length; i++) {
 			REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
 		}
-
-		System.out.println("-------- Simulation Init --------");
 	}
 
 	@Override
