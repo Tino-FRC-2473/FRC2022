@@ -14,8 +14,6 @@ public class AutoSelector {
 		BLUE_1_BALL
 	}
 
-	private DesiredMode mDesiredMode = null;
-
 	private SendableChooser<DesiredMode> modeChooser;
 
 	/**
@@ -35,23 +33,6 @@ public class AutoSelector {
 	}
 
 	/**
-	* Updates the auto mode when driver selects different auto.
-	*/
-	public void updateModeChooser() {
-		DesiredMode desiredMode = modeChooser.getSelected();
-		if (mDesiredMode != desiredMode) {
-			mDesiredMode = desiredMode;
-		}
-	}
-
-	/**
-	* Resets the selected auto.
-	*/
-	public void reset() {
-		mDesiredMode = null;
-	}
-
-	/**
 	 * Gets the current auto from Shuffleboard.
 	 * @return name of current auto
 	 */
@@ -63,6 +44,6 @@ public class AutoSelector {
 	* Outputs the current auto to Shuffleboard.
 	*/
 	public void outputToShuffleboard() {
-		SmartDashboard.putString("Auto Mode selected", mDesiredMode.name());
+		SmartDashboard.putString("Auto Mode selected", modeChooser.getSelected().name());
 	}
 }

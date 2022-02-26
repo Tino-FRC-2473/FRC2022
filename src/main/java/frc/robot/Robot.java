@@ -27,7 +27,7 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 
 	private AutoSelector autoSelector = new AutoSelector();
-	private LimeLight limelight;
+	private LimeLight limelight = new LimeLight();
 
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
@@ -55,9 +55,6 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
-
-		autoSelector.updateModeChooser();
-		limelight = new LimeLight();
 	}
 
 	@Override
@@ -67,7 +64,7 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
-		autoSelector.updateModeChooser();
+		autoSelector.outputToShuffleboard();
 	}
 
 	@Override
@@ -99,13 +96,10 @@ public class Robot extends TimedRobot {
 	public void disabledInit() {
 		System.out.println("-------- Disabled Init --------");
 		SmartDashboard.putString("Match Cycle", "DISABLED");
-		autoSelector.reset();
-		autoSelector.updateModeChooser();
 	}
 
 	@Override
 	public void disabledPeriodic() {
-		autoSelector.updateModeChooser();
 	}
 
 	@Override
