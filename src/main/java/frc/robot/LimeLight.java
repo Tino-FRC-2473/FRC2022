@@ -100,13 +100,6 @@ public class LimeLight {
 	}
 
 	/**
-	 * Updates limelight data by calling outputToShuffleboard.
-	 */
-	public void update() {
-		outputToShuffleboard();
-	}
-
-	/**
 	 * Outputs data to Shuffleboard.
 	 */
 	private void outputToShuffleboard() {
