@@ -56,8 +56,6 @@ public class Robot extends TimedRobot {
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
 
-		// new PowerDistribution(1, ModuleType.kRev).setSwitchableChannel(true);
-
 		autoSelector.updateModeChooser();
 		limelight = new LimeLight();
 	}
