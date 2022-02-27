@@ -93,7 +93,7 @@ public class TeleopInput {
 	 */
 	public boolean isAscendingButtonPressed() {
 		SmartDashboard.putBoolean("Ascending Button",
-			leftJoystick.getRawButton(1));
+			rightJoystick.getRawButton(1));
 		return rightJoystick.getRawButton(1);
 	}
 	/**
@@ -102,7 +102,7 @@ public class TeleopInput {
 	 */
 	public boolean isDescendingButtonPressed() {
 		SmartDashboard.putBoolean("Descending Button",
-			leftJoystick.getRawButton(2));
+			rightJoystick.getRawButton(2));
 		return rightJoystick.getRawButton(2);
 	}
 
@@ -162,18 +162,26 @@ public class TeleopInput {
 	 */
 	public boolean isBackwardDrivingButtonPressed() {
 		SmartDashboard.putBoolean("Driving Backward",
-			drivingJoystick.getRawButton(Constants.DRIVING_FORWARD_BUTTON));
+			drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON));
 		return drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON);
 	}
 
 	/**
-	 * Checks if the top button of the driving joystick is released.
-	 * @return true if the top driving button is released
+	 * Checks if the button to turn to hangar on the driving joystick is released.
+	 * @return true if the button to turn to hangar is released
 	 */
-	public boolean getTopPressed() {
+	public boolean getHangarButton() {
 		SmartDashboard.putBoolean("Turn to Hangar",
 			drivingJoystick.getRawButton(Constants.TURN_TO_HANGAR_BUTTON));
 		return drivingJoystick.getRawButton(Constants.TURN_TO_HANGAR_BUTTON);
+	}
+
+	/**
+	 * Checks if the button to turn to terminal on the driving joystick is released.
+	 * @return true if the button to turn to terminal is released
+	 */
+	public boolean getTerminalButton() {
+		return drivingJoystick.getRawButton(Constants.TURN_TO_TERMINAL_BUTTON);
 	}
 
 	/* ======================== Private methods ======================== */

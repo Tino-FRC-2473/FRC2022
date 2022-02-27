@@ -8,7 +8,8 @@ import com.revrobotics.REVPhysicsSim;
 
 // WPILib Imports
 import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.wpilibj.Compressor;
+
+// WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -17,7 +18,6 @@ import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.GrabberFSM;
 import frc.robot.systems.BallHandlingFSM;
 import frc.robot.systems.CompressorSystem;
-import frc.robot.systems.CameraFSM;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -25,15 +25,14 @@ import frc.robot.systems.CameraFSM;
  */
 public class Robot extends TimedRobot {
 	private TeleopInput input;
-	private Compressor pneumaticsCompressor;
 
 	private AutoSelector autoSelector = new AutoSelector();
+	private LimeLight limelight = new LimeLight();
 
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
 	private BallHandlingFSM ballSystem;
 	private GrabberFSM grabberSystem;
-	private CameraFSM cameraSystem;
 
 	// Constants
 	private static final boolean RUN_COMPRESSOR = false;
@@ -56,9 +55,6 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
-		cameraSystem = new CameraFSM();
-
-		autoSelector.updateModeChooser();
 	}
 
 	@Override
@@ -68,16 +64,14 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
-		cameraSystem.reset();
-		autoSelector.updateModeChooser();
+		autoSelector.outputToShuffleboard();
 	}
 
 	@Override
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
-		ballSystem.update(null);
+		ballSystem.update(null, driveFsmSystem.getCurrentState());
 		grabberSystem.update(null);
-		cameraSystem.update(null);
 	}
 
 	@Override
@@ -87,28 +81,25 @@ public class Robot extends TimedRobot {
 		driveFsmSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
-		cameraSystem.reset();
+		limelight.update();
 	}
 
 	@Override
 	public void teleopPeriodic() {
 		driveFsmSystem.update(input);
-		ballSystem.update(input);
+		ballSystem.update(input, driveFsmSystem.getCurrentState());
 		grabberSystem.update(input);
-		cameraSystem.update(input);
+		limelight.update();
 	}
 
 	@Override
 	public void disabledInit() {
 		System.out.println("-------- Disabled Init --------");
 		SmartDashboard.putString("Match Cycle", "DISABLED");
-		autoSelector.reset();
-		autoSelector.updateModeChooser();
 	}
 
 	@Override
 	public void disabledPeriodic() {
-		autoSelector.updateModeChooser();
 	}
 
 	@Override
@@ -131,8 +122,6 @@ public class Robot extends TimedRobot {
 		for (int i = 0; i < sparkMaxs.length; i++) {
 			REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
 		}
-
-		System.out.println("-------- Simulation Init --------");
 	}
 
 	@Override

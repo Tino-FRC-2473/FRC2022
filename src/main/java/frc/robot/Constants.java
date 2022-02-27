@@ -1,6 +1,7 @@
 package frc.robot;
 
-import frc.robot.trajectory.Point;
+// WPILib Imports
+import edu.wpi.first.math.geometry.Translation2d;
 
 public class Constants {
 	//Drive Constants
@@ -11,8 +12,8 @@ public class Constants {
 	public static final double TELEOP_ANGLE_POWER_RATIO = 90.0;
 	public static final double MAX_POWER = 1;
 	public static final double REDUCED_MAX_POWER = 0.5;
-	public static final double TELEOP_MIN_TURN_POWER = 0.05;
-	public static final double TELEOP_MIN_MOVE_POWER = 0.05;
+	public static final double TELEOP_MIN_TURN_POWER = 0.03;
+	public static final double TELEOP_MIN_MOVE_POWER = 0.02;
 	public static final double JOYSTICK_INPUT_ADJUSTMENT = 2.0;
 	public static final double TURN_ERROR_POWER_RATIO = 360;
 	public static final double MIN_TURN_POWER = 0.0625;
@@ -25,15 +26,16 @@ public class Constants {
 	public static final double REVOLUTIONS_PER_INCH
 		= GEAR_RATIO * ENCODER_CONSTANT / (Math.PI * WHEEL_DIAMETER_INCHES);
 	public static final double ODOMETRY_MIN_THETA = 1.0;
-	public static final double MOTOR_RUN_POWER = 0.2;
+	public static final double MOTOR_RUN_POWER = 0.1;
 	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.35;
 	public static final double MOTOR_INITAL_POWER_ACCELERATION = 0.6;
 	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
 	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.3;
 	public static final double TRACKWIDTH_IN = 20.72;
-	public static final double HANGAR_TURN_ERROR = 5;
-	public static final double HANGAR_TURN_SPEED = 0.3;
+	public static final double AUTOALIGN_TURN_ERROR = 5;
+	public static final double AUTOALIGN_TURN_SPEED = 0.2;
 	public static final double HANGAR_TURN_TARGET_ANGLE = 180;
+	public static final double TERMINAL_TURN_TARGET_ANGLE = 90;
 
 	//Path constants
 	// For Run 1 the start angle is 26.73
@@ -55,24 +57,40 @@ public class Constants {
 	public static final double RUN_3_BACK_TO_HUB_DIST = -49.306;
 
 	//Teleop Input Constants
+
+	//Left Joystick
 	public static final int LEFT_JOYSTICK_PORT = 0;
-	public static final int RIGHT_JOYSTICK_PORT = 1;
-	public static final int STEERING_WHEEL_PORT = 2;
-	public static final int DRIVING_JOYSTICK_PORT = 3;
-	public static final int DRIVING_FORWARD_BUTTON = 4;
-	public static final int DRIVING_BACKWARDS_BUTTON = 5;
-	public static final int TOGGLE_INTAKE_BUTTON = 7;
-	public static final int TURN_TO_HANGAR_BUTTON = 3;
 	public static final int SHOOTER_BUTTON = 1;
 	public static final int INTAKE_BUTTON = 2;
 	public static final int TERMINAL_RELEASE_BUTTON = 3;
+	public static final int ASCEND_BUTTON = 4;
+	public static final int DESCEND_BUTTON = 5;
+	public static final int TOGGLE_INTAKE_BUTTON = 7;
+
+	//Right Joystick
+	public static final int RIGHT_JOYSTICK_PORT = 1;
+
+	//Steering Wheel
+	public static final int STEERING_WHEEL_PORT = 2;
+
+	//Driving Joystick
+	public static final int DRIVING_JOYSTICK_PORT = 3;
+	public static final int TURN_TO_TERMINAL_BUTTON = 2;
+	public static final int TURN_TO_HANGAR_BUTTON = 3;
+	public static final int DRIVING_FORWARD_BUTTON = 4;
+	public static final int DRIVING_BACKWARDS_BUTTON = 5;
 
 	//Pure Pursuit Constants
 	public static final double MAX_IN_TO_POINT = 36;
 	public static final double PP_MAX_SPEED = 0.2;
+	public static final double PP_BALL_MAX_RUN_TIME_SEC = 7.0;
+	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 5.0;
+	public static final double PP_TURN_RUN_TIME_SEC = 2.0;
 
-	public static final Point PP_R2_START_POINT = new Point(80, -60);
+	public static final Translation2d PP_R2_START_POINT = new Translation2d(80, -60);
 	public static final double PP_R2_HUB_ANGLE_DEG = 339.0;
+
+	public static final Translation2d PP_R1_START_POINT = new Translation2d(52, -19);
 
 	//Inverse Kinematics Constants
 	public static final double HORIZONTAL_HEADING_CORRECTION_DEG = 1;

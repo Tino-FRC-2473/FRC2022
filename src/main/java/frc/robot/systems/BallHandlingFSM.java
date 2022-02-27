@@ -65,8 +65,13 @@ public class BallHandlingFSM {
 	public BallHandlingFSM() {
 		// Perform hardware init
 		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+<<<<<<< HEAD
 			HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID,
 			HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
+=======
+		HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID,
+		HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
+>>>>>>> main
 
 		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
 			HardwareMap.PCM_CHANNEL_INTAKE_RELEASE_SOLENOID,
@@ -107,15 +112,22 @@ public class BallHandlingFSM {
 		isShooterSolenoidExtended = false;
 		isIntakeMechRetracted = true;
 		// Call one tick of update to ensure outputs reflect start state
-		update(null);
+		update(null, DriveFSMSystem.FSMState.PURE_PURSUIT);
 	}
 	/**
-	 * Update FSM based on new inputs. This function only calls the FSM state
-	 * specific handlers.
+	 * Update FSM based on new inputs in Autonomous. This function only calls
+	 * the FSM state specific handlers.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
+	 * @param driveState Current FSMState of DriveFSMSystem.
 	 */
+<<<<<<< HEAD
 	public void update(TeleopInput input) {
+=======
+	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
+		updateIsInShootingPositionIndicator(false);
+
+>>>>>>> main
 		switch (currentState) {
 			case START_STATE:
 				handleStartState(input);
@@ -151,7 +163,7 @@ public class BallHandlingFSM {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
-		currentState = nextState(input);
+		currentState = nextState(input, driveState);
 	}
 
 	/* ======================== Private methods ======================== */
@@ -162,10 +174,20 @@ public class BallHandlingFSM {
 	 * values to decide what state to go to.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
+	 * @param driveState Current FSMState of DriveFSMSystem.
 	 * @return FSM state for the next iteration
 	 */
-	private FSMState nextState(TeleopInput input) {
+	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		if (input == null) {
+			if (!isSolenoidExtended
+					&& driveState == DriveFSMSystem.FSMState.DEPOSIT_BALL_IDLE) {
+				pushCommandTimeStamp = Timer.getFPGATimestamp();
+
+				return FSMState.FIRING;
+			} else if (isSolenoidExtended
+					&& Timer.getFPGATimestamp() - pushCommandTimeStamp > PUSH_TIME_SECONDS) {
+				return FSMState.RETRACTING;
+			}
 			return FSMState.IDLE;
 		}
 

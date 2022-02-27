@@ -1,5 +1,8 @@
 package frc.robot.trajectory;
 
+// WPILib Imports
+import edu.wpi.first.math.geometry.Translation2d;
+
 import frc.robot.Constants;
 
 public class Kinematics {
@@ -15,14 +18,14 @@ public class Kinematics {
 	 * @param robotPos current robot position
 	 * @return new robot position
 	 */
-	public static Point updateLineOdometry(double gyroAngle,
-		double currentEncoderPos, double prevEncoderPos, Point robotPos) {
+	public static Translation2d updateLineOdometry(double gyroAngle,
+		double currentEncoderPos, double prevEncoderPos, Translation2d robotPos) {
 		// double currentEncoderPos = ((-leftEncoderPos + rightEncoderPos) / 2.0);
 		double dEncoder = (currentEncoderPos - prevEncoderPos) / Constants.REVOLUTIONS_PER_INCH;
 		double dX = dEncoder * Math.cos(Math.toRadians(gyroAngle));
 		double dY = dEncoder * Math.sin(Math.toRadians(gyroAngle));
 
-		return new Point(robotPos.getX() + dX, robotPos.getY() + dY);
+		return new Translation2d(robotPos.getX() + dX, robotPos.getY() + dY);
 	}
 
 	/**
@@ -35,8 +38,9 @@ public class Kinematics {
 	 * @param robotPos current robot position
 	 * @return new robot position
 	 */
-	public static Point updateArcOdometry(double gyroAngle,
-		double prevGyroAngle, double currentEncoderPos, double prevEncoderPos, Point robotPos) {
+	public static Translation2d updateArcOdometry(double gyroAngle,
+		double prevGyroAngle, double currentEncoderPos, double prevEncoderPos,
+			Translation2d robotPos) {
 		double theta = Math.abs(gyroAngle - prevGyroAngle);
 		double arcLength = (currentEncoderPos - prevEncoderPos) / Constants.REVOLUTIONS_PER_INCH;
 		if (Math.abs(theta) < Constants.ODOMETRY_MIN_THETA) {
@@ -50,7 +54,7 @@ public class Kinematics {
 		double robotNewXPos = circleX + radius * Math.cos(Math.toRadians(beta));
 		double robotNewYPos = circleY + radius * Math.sin(Math.toRadians(beta));
 
-		return new Point(robotNewXPos, robotNewYPos);
+		return new Translation2d(robotNewXPos, robotNewYPos);
 	}
 
 	/**
@@ -62,11 +66,11 @@ public class Kinematics {
 	 * or backwards
 	 * @return the motor powers to needed to move to the target position
 	 */
-	public static Point inversekinematics(double gyroHeading, Point robotPos,
-		Point targetPos, boolean isRobotGoingForward) {
+	public static Translation2d inversekinematics(double gyroHeading, Translation2d robotPos,
+		Translation2d targetPos, boolean isRobotGoingForward) {
 
 		//new target position relative to the robot
-		Point newtargetPos = new Point(targetPos.getX() - robotPos.getX(),
+		Translation2d newtargetPos = new Translation2d(targetPos.getX() - robotPos.getX(),
 			targetPos.getY() - robotPos.getY());
 
 		//slope of the line form the robot to the center of the circle that
@@ -80,7 +84,8 @@ public class Kinematics {
 
 		//midpoint between the robot and the target point
 		//this is point A
-		Point midpoint = new Point(newtargetPos.getX() / 2.0, newtargetPos.getY() / 2.0);
+		Translation2d midpoint = new Translation2d(newtargetPos.getX() / 2.0,
+			newtargetPos.getY() / 2.0);
 
 		//slope of the line from the robot to the target point
 		double mRT;
@@ -98,26 +103,26 @@ public class Kinematics {
 		}
 
 		//center of the circle that defines the arc
-		Point center = new Point(0, 0);
+		Translation2d center = new Translation2d(0, 0);
 
 		//if mRC - mRT is close to 0, center.getX() will have a divide by 0 error
 		if (Math.abs(mRC - mRT) < Constants.ZERO_THRESHOLD) {
-			center.setX((newtargetPos.getX() * mRC + newtargetPos.getY() * mRC * mRT)
-				/ (2.0 * (mRC - mRT < 0 ? -1 : 1) * Constants.ZERO_THRESHOLD));
+			center = new Translation2d((newtargetPos.getX() * mRC + newtargetPos.getY() * mRC * mRT)
+			/ (2.0 * (mRC - mRT < 0 ? -1 : 1) * Constants.ZERO_THRESHOLD), center.getY());
 			//if the heading is one way and the target point is 180 deg
 			//in the other direction, set the center of the circle at ~(0, 0)
 			if (gyroHeading > 270 && gyroHeading < 90 & newtargetPos.getX() < 0) {
-				center.setY(0);
+				center = new Translation2d(center.getX(), 0);
 			} else if (gyroHeading < 270 && gyroHeading > 90 & newtargetPos.getX() > 0) {
-				center.setY(0);
+				center = new Translation2d(center.getX(), 0);
 			} else {
-				center.setY(-center.getX() / mRC);
+				center = new Translation2d(center.getX(), -center.getX() / mRC);
 			}
 
 		} else {
-			center.setX((newtargetPos.getX() * mRC + newtargetPos.getY() * mRC * mRT)
-				/ (2.0 * (mRC - mRT)));
-			center.setY(-center.getX() / mRC);
+			center = new Translation2d((newtargetPos.getX() * mRC + newtargetPos.getY() * mRC * mRT)
+			/ (2.0 * (mRC - mRT)), center.getY());
+			center = new Translation2d(center.getX(), -center.getX() / mRC);
 		}
 
 		//radius of the circle
@@ -160,16 +165,16 @@ public class Kinematics {
 			|| targetAngle - gyroHeading < -180) {
 			//left side is the inner side
 			if (isRobotGoingForward) {
-				return new Point(powerInner, powerOuter);
+				return new Translation2d(powerInner, powerOuter);
 			} else {
-				return new Point(-powerInner, -powerOuter);
+				return new Translation2d(-powerInner, -powerOuter);
 			}
 		} else {
 			//right side is the inner side
 			if (isRobotGoingForward) {
-				return new Point(powerOuter, powerInner);
+				return new Translation2d(powerOuter, powerInner);
 			} else {
-				return new Point(-powerOuter, -powerInner);
+				return new Translation2d(-powerOuter, -powerInner);
 			}
 		}
 	}
@@ -181,8 +186,8 @@ public class Kinematics {
 	 * @param targetPos target position
 	 * @return the motor powers to needed to move to the target position
 	 */
-	public static Point inversekinematics(double gyroHeading, Point robotPos,
-		Point targetPos) {
+	public static Translation2d inversekinematics(double gyroHeading, Translation2d robotPos,
+		Translation2d targetPos) {
 
 		return inversekinematics(gyroHeading, robotPos, targetPos, true);
 	}
