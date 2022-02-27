@@ -93,8 +93,8 @@ public class TeleopInput {
 	 */
 	public boolean isAscendingButtonPressed() {
 		SmartDashboard.putBoolean("Ascending Button",
-			rightJoystick.getRawButton(1));
-		return rightJoystick.getRawButton(1);
+			rightJoystick.getRawButton(Constants.ASCEND_BUTTON));
+		return rightJoystick.getRawButton(Constants.ASCEND_BUTTON);
 	}
 	/**
 	 * Get the value of the descending button.
@@ -102,8 +102,8 @@ public class TeleopInput {
 	 */
 	public boolean isDescendingButtonPressed() {
 		SmartDashboard.putBoolean("Descending Button",
-			rightJoystick.getRawButton(2));
-		return rightJoystick.getRawButton(2);
+			rightJoystick.getRawButton(Constants.DESCEND_BUTTON));
+		return rightJoystick.getRawButton(Constants.DESCEND_BUTTON);
 	}
 
 	/* ------------------------ Right Joystick ------------------------ */
