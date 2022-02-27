@@ -176,7 +176,8 @@ public class BallHandlingFSM {
 
 				return FSMState.FIRING;
 			} else if (isShooterSolenoidExtended
-					&& Timer.getFPGATimestamp() - pushCommandTimeStamp > Constants.PUSH_TIME_SECONDS) {
+					&& Timer.getFPGATimestamp() - pushCommandTimeStamp
+					> Constants.PUSH_TIME_SECONDS) {
 				return FSMState.RETRACTING;
 			}
 			return FSMState.IDLE;
