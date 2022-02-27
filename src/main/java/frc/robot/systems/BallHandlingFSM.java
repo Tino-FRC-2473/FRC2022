@@ -321,8 +321,8 @@ public class BallHandlingFSM {
 	private void handleIntakingState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeMotor.setVoltage(
-			getBallInMech() == IntakeMechBallStates.NONE ?
-				-Constants.INTAKE_MOTOR_VOLTAGE : 0);
+			getBallInMech() == IntakeMechBallStates.NONE
+				? -Constants.INTAKE_MOTOR_VOLTAGE : 0);
 	}
 	/**
 	 * Handle behavior in RELEASING.
