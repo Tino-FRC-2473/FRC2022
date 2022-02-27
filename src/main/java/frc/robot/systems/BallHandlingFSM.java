@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ColorSensorV3;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxLimitSwitch.Type;
 
 // Robot Imports
 import frc.robot.TeleopInput;
@@ -75,8 +74,6 @@ public class BallHandlingFSM {
 		intakeMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_INTAKE,
 			MotorType.kBrushless);
 
-		intakeMotor.getForwardLimitSwitch(Type.kNormallyClosed);
-		intakeMotor.getReverseLimitSwitch(Type.kNormallyClosed);
 		ballDetector = new ColorSensorV3(I2C.Port.kOnboard);
 		pDH = new PowerDistribution(1, ModuleType.kRev);
 
