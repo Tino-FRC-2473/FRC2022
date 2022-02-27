@@ -65,13 +65,8 @@ public class BallHandlingFSM {
 	public BallHandlingFSM() {
 		// Perform hardware init
 		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-<<<<<<< HEAD
 			HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID,
 			HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
-=======
-		HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID,
-		HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
->>>>>>> main
 
 		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
 			HardwareMap.PCM_CHANNEL_INTAKE_RELEASE_SOLENOID,
@@ -121,13 +116,9 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 * @param driveState Current FSMState of DriveFSMSystem.
 	 */
-<<<<<<< HEAD
-	public void update(TeleopInput input) {
-=======
 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		updateIsInShootingPositionIndicator(false);
 
->>>>>>> main
 		switch (currentState) {
 			case START_STATE:
 				handleStartState(input);
@@ -179,13 +170,13 @@ public class BallHandlingFSM {
 	 */
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		if (input == null) {
-			if (!isSolenoidExtended
+			if (!isShooterSolenoidExtended
 					&& driveState == DriveFSMSystem.FSMState.DEPOSIT_BALL_IDLE) {
 				pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 				return FSMState.FIRING;
-			} else if (isSolenoidExtended
-					&& Timer.getFPGATimestamp() - pushCommandTimeStamp > PUSH_TIME_SECONDS) {
+			} else if (isShooterSolenoidExtended
+					&& Timer.getFPGATimestamp() - pushCommandTimeStamp > Constants.PUSH_TIME_SECONDS) {
 				return FSMState.RETRACTING;
 			}
 			return FSMState.IDLE;
