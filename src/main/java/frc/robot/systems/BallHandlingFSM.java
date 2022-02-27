@@ -24,6 +24,7 @@ public class BallHandlingFSM {
 	// FSM state definitions
 	public enum FSMState {
 		IDLE,
+		START_STATE,
 		FIRING,
 		RETRACTING,
 		RETRACT_INTAKE_MECH,
@@ -101,7 +102,7 @@ public class BallHandlingFSM {
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
 	public void reset() {
-		currentState = FSMState.IDLE;
+		currentState = FSMState.START_STATE;
 
 		isShooterSolenoidExtended = false;
 		isIntakeMechRetracted = true;
@@ -115,12 +116,10 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
-		// System.out.println("RED: " + ballDetector.getRed()
-		// 				+ "\nGREEN: " + ballDetector.getGreen()
-		// 				+ "\nBLUE: " + ballDetector.getBlue()
-		// 				+ "\nDIST: " + ballDetector.getProximity());
-
 		switch (currentState) {
+			case START_STATE:
+				handleStartState(input);
+
 			case IDLE:
 				handleIdleState(input);
 				break;
@@ -171,6 +170,9 @@ public class BallHandlingFSM {
 		}
 
 		switch (currentState) {
+			case START_STATE:
+				return FSMState.IDLE;
+
 			case IDLE:
 				if (!isShooterSolenoidExtended && input.isShooterButtonPressed()) {
 					pushCommandTimeStamp = Timer.getFPGATimestamp();
@@ -265,6 +267,15 @@ public class BallHandlingFSM {
 		intakeMotor.setVoltage(0);
 	}
 	/**
+	 * Handle behavior in START_STATE.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleStartState(TeleopInput input) {
+		handleRetractIntakeMechState(input);
+		handleRetractingState(input);
+	}
+	/**
 	 * Handle behavior in FIRING.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
@@ -309,7 +320,9 @@ public class BallHandlingFSM {
 	 */
 	private void handleIntakingState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
-		intakeMotor.setVoltage(-Constants.INTAKE_MOTOR_VOLTAGE);
+		intakeMotor.setVoltage(
+			getBallInMech() == IntakeMechBallStates.NONE ?
+				-Constants.INTAKE_MOTOR_VOLTAGE : 0);
 	}
 	/**
 	 * Handle behavior in RELEASING.
@@ -346,7 +359,7 @@ public class BallHandlingFSM {
 	 * @return The type of ball in the intake mechanism
 	 */
 	public IntakeMechBallStates getBallInMech() {
-		if (isBallInIntake()) {
+		if (!isBallInIntake()) {
 			return IntakeMechBallStates.NONE;
 		} else if (ballDetector.getRed() > ballDetector.getBlue()) {
 			return IntakeMechBallStates.RED;
