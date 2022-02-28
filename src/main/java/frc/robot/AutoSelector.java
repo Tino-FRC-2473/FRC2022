@@ -6,10 +6,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class AutoSelector {
 	enum DesiredMode {
-		RED_3_BALL_A,
-		BLUE_3_BALL_A,
-		RED_3_BALL_B,
-		BLUE_3_BALL_B,
+		RED_3_BALL,
+		BLUE_3_BALL,
+		RED_2_BALL,
+		BLUE_2_BALL,
 		RED_1_BALL,
 		BLUE_1_BALL
 	}
@@ -23,12 +23,12 @@ public class AutoSelector {
 	 */
 	public AutoSelector() {
 		modeChooser = new SendableChooser<>();
-		modeChooser.setDefaultOption("3 Ball Red A", DesiredMode.RED_3_BALL_A);
-		modeChooser.addOption("3 Ball Blue A", DesiredMode.BLUE_3_BALL_A);
-		modeChooser.addOption("3 Ball Red B", DesiredMode.RED_3_BALL_B);
-		modeChooser.addOption("3 Ball Blue B", DesiredMode.BLUE_3_BALL_B);
-		modeChooser.addOption("1 Ball Red", DesiredMode.RED_1_BALL);
-		modeChooser.addOption("1 Ball Blue", DesiredMode.BLUE_1_BALL);
+		modeChooser.setDefaultOption("Red 3 Ball", DesiredMode.RED_3_BALL);
+		modeChooser.addOption("Blue 3 Ball A", DesiredMode.BLUE_3_BALL);
+		modeChooser.addOption("Red 2 Ball", DesiredMode.RED_2_BALL);
+		modeChooser.addOption("Blue 2 Ball", DesiredMode.BLUE_2_BALL);
+		modeChooser.addOption("Red 1 Ball", DesiredMode.RED_1_BALL);
+		modeChooser.addOption("Blue 1 Ball", DesiredMode.BLUE_1_BALL);
 		SmartDashboard.putData("Auto mode", modeChooser);
 	}
 
