@@ -122,6 +122,8 @@ public class DriveFSMSystem {
 	 * Note this is distinct from the one-time initialization in the constructor
 	 * as it may be called multiple times in a boot cycle,
 	 * Ex. if the robot is enabled, disabled, then reenabled.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
 	 */
 	public void reset(TeleopInput input) {
 
@@ -306,8 +308,6 @@ public class DriveFSMSystem {
 	/* ------------------------ FSM state handlers ------------------------ */
 	/**
 	 * Handle behavior in START_STATE.
-	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
 	 */
 	private void handleStartState() {
 		setPowerForAllMotors(0); //start with all motors set to 0

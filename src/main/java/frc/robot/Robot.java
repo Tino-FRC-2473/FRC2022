@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 
 		//Init Compressor
-		CompressorSystem compressorSystem = new CompressorSystem(RUN_COMPRESSOR);
+		new CompressorSystem(RUN_COMPRESSOR);
 
 		//Init Driver Inputs
 		input = new TeleopInput();
