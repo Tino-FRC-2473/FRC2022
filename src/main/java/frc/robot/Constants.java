@@ -68,9 +68,6 @@ public class Constants {
 	public static final int DESCEND_BUTTON = 5;
 	public static final int TOGGLE_INTAKE_BUTTON = 7;
 
-	//Right Joystick
-	public static final int RIGHT_JOYSTICK_PORT = 1;
-
 	//Steering Wheel
 	public static final int STEERING_WHEEL_PORT = 2;
 
