@@ -61,7 +61,7 @@ public class Robot extends TimedRobot {
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
 		SmartDashboard.putString("Match Cycle", "AUTONOMOUS");
-		driveFsmSystem.reset();
+		driveFsmSystem.reset(null);
 		ballSystem.reset();
 		grabberSystem.reset();
 		autoSelector.outputToShuffleboard();
@@ -78,7 +78,7 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		SmartDashboard.putString("Match Cycle", "TELEOP");
-		driveFsmSystem.reset();
+		driveFsmSystem.reset(input);
 		ballSystem.reset();
 		grabberSystem.reset();
 		limelight.update();
