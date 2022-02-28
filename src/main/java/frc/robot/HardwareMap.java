@@ -6,17 +6,14 @@ package frc.robot;
  */
 public final class HardwareMap {
 	// ID numbers for devices on the CAN bus
-	public static final int CAN_ID_SPARK_DRIVE_FRONT_RIGHT = 1;
-	public static final int CAN_ID_SPARK_DRIVE_BACK_RIGHT = 2;
-	public static final int CAN_ID_SPARK_DRIVE_FRONT_LEFT = 3;
-	public static final int CAN_ID_SPARK_DRIVE_BACK_LEFT = 4;
-	public static final int CAN_ID_SPARK_INTAKE = 7;
-	public static final int CAN_ID_SPARK_SHOOTER = 10;
 	public static final int CAN_ID_SPARK_GRABBER = 8;
+	public static final int CAN_ID_SPARK_INTAKE = 10;
 	public static final int CAN_ID_SPARK_DRIVE_LEFT = 6;
 	public static final int CAN_ID_SPARK_DRIVE_RIGHT = 5;
 
 	// Pneumatics channel numbers
-	public static final int PCM_CHANNEL_PUSH_BOT_SOLENOID = 1;
-	public static final int PCM_CHANNEL_PULL_BOT_SOLENOID = 0;
+	public static final int PCM_CHANNEL_PUSH_BOT_SOLENOID = 0;
+	public static final int PCM_CHANNEL_PULL_BOT_SOLENOID = 1;
+	public static final int PCM_CHANNEL_INTAKE_RETRACT_SOLENOID = 2;
+	public static final int PCM_CHANNEL_INTAKE_RELEASE_SOLENOID = 3;
 }
