@@ -14,7 +14,7 @@ public class DriveModes {
 	* 							forward driving setup
 	* @return return the powers to set the left and right motors
 	*/
-	public static DrivePower arcadedrive(double joystickY, double steerAngle,
+	public static DrivePower arcadeDrive(double joystickY, double steerAngle,
 		double currentLeftPower, double currentRightPower, boolean isDrivingForward) {
 
 		double adjustedInput = Functions.calcForwardPower(joystickY);

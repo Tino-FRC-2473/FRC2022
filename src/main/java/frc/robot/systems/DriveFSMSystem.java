@@ -434,7 +434,7 @@ public class DriveFSMSystem {
 			isDrivingForward = false;
 		}
 
-		DrivePower targetPower = DriveModes.arcadedrive(rightJoystickY,
+		DrivePower targetPower = DriveModes.arcadeDrive(rightJoystickY,
 			steerAngle, currentLeftPower,
 			currentRightPower, isDrivingForward);
 

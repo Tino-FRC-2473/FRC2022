@@ -86,10 +86,14 @@ public class Constants {
 	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 5.0;
 	public static final double PP_TURN_RUN_TIME_SEC = 2.0;
 
-	public static final Translation2d PP_R2_START_POINT = new Translation2d(80, -60);
-	public static final double PP_R2_HUB_ANGLE_DEG = 339.0;
+	//Pure Pursuit Start Points and Angles
+	public static final Translation2d PP_R2_START_POINT = new Translation2d(90.653, 0);
+	public static final double PP_R2_HUB_ANGLE_DEG = 1.500;
 
 	public static final Translation2d PP_R1_START_POINT = new Translation2d(52, -19);
+
+	public static final Translation2d PP_R3_START_POINT = new Translation2d(52, -19);
+	public static final double PP_R3_HUB_ANGLE_DEG = 339.0;
 
 	//Inverse Kinematics Constants
 	public static final double HORIZONTAL_HEADING_CORRECTION_DEG = 1;
