@@ -36,6 +36,7 @@ public class Constants {
 	public static final double AUTOALIGN_TURN_SPEED = 0.2;
 	public static final double HANGAR_TURN_TARGET_ANGLE = 180;
 	public static final double TERMINAL_TURN_TARGET_ANGLE = 90;
+	public static final double TIME_FOR_AUTO_SHOOT = 0.8;
 
 	//Path constants
 	// For Run 1 the start angle is 26.73

@@ -135,7 +135,7 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.TELEOP_STATE;
+		currentState = FSMState.START_STATE;
 
 		stateTimer.reset();
 		stateTimer.start();
@@ -224,7 +224,7 @@ public class DriveFSMSystem {
 				if (input != null) {
 					return FSMState.TELEOP_STATE;
 				} else {
-					return FSMState.START_STATE;
+					return FSMState.DEPOSIT_BALL_IDLE;
 				}
 
 			case TELEOP_STATE:
@@ -291,7 +291,7 @@ public class DriveFSMSystem {
 				return FSMState.TELEOP_STATE;
 
 			case DEPOSIT_BALL_IDLE:
-				if (true) {
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_AUTO_SHOOT)) {
 					return FSMState.PURE_PURSUIT;
 				} else {
 					return FSMState.DEPOSIT_BALL_IDLE;
@@ -604,7 +604,6 @@ public class DriveFSMSystem {
 	}
 
 	private void handleBallDepositIdleState(TeleopInput input) {
-
 		leftMotor.set(0);
 		rightMotor.set(0);
 	}

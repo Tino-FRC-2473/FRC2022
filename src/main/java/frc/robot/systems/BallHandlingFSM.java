@@ -63,11 +63,11 @@ public class BallHandlingFSM {
 	 */
 	public BallHandlingFSM() {
 		// Perform hardware init
-		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID,
 			HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
 
-		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_INTAKE_RELEASE_SOLENOID,
 			HardwareMap.PCM_CHANNEL_INTAKE_RETRACT_SOLENOID);
 
