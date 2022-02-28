@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -151,6 +152,7 @@ public class BallHandlingFSM {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
+		outputToShuffleboard();
 		currentState = nextState(input, driveState);
 	}
 
@@ -381,5 +383,12 @@ public class BallHandlingFSM {
 
 	private void updateIsInShootingPositionIndicator(boolean isInShootingPosition) {
 		pDH.setSwitchableChannel(isInShootingPosition);
+	}
+
+	/**
+	 * Outputs data to Shuffleboard.
+	 */
+	private void outputToShuffleboard() {
+		SmartDashboard.putString("Ball In Intake", getBallInMech().toString());
 	}
 }
