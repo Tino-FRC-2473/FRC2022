@@ -65,6 +65,7 @@ public class Constants {
 	public static final int TERMINAL_RELEASE_BUTTON = 3;
 	public static final int ASCEND_BUTTON = 4;
 	public static final int DESCEND_BUTTON = 5;
+	public static final int TOGGLE_INTAKE_BUTTON = 7;
 
 	//Right Joystick
 	public static final int RIGHT_JOYSTICK_PORT = 1;
@@ -99,5 +100,9 @@ public class Constants {
 	public static final double HORIZONTAL_HEADING_CORRECTION_DEG = 1;
 	public static final double ZERO_THRESHOLD = 0.01;
 
+	//Intake Shooter Constants
+	public static final double PUSH_TIME_SECONDS = 1;
+	public static final double INTAKE_MOTOR_VOLTAGE = 5;
+	public static final int BALL_PROXIMITY_THRESHOLD = 68;
 }
 

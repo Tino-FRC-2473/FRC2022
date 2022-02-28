@@ -79,13 +79,22 @@ public class TeleopInput {
 		return leftJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
 	}
 	/**
+	 * Get the value of the intake retract button.
+	 * @return True if button is pressed
+	 */
+	public boolean wasToggleIntakeButtonPressed() {
+		SmartDashboard.putBoolean("Deploy Intake Button",
+			leftJoystick.getRawButton(Constants.TOGGLE_INTAKE_BUTTON));
+		return leftJoystick.getRawButtonPressed(Constants.TOGGLE_INTAKE_BUTTON);
+	}
+	/**
 	 * Get the value of the ascending button.
 	 * @return True if button is pressed
 	 */
 	public boolean isAscendingButtonPressed() {
 		SmartDashboard.putBoolean("Ascending Button",
-			rightJoystick.getRawButton(1));
-		return rightJoystick.getRawButton(1);
+			rightJoystick.getRawButton(Constants.ASCEND_BUTTON));
+		return rightJoystick.getRawButton(Constants.ASCEND_BUTTON);
 	}
 	/**
 	 * Get the value of the descending button.
@@ -93,8 +102,8 @@ public class TeleopInput {
 	 */
 	public boolean isDescendingButtonPressed() {
 		SmartDashboard.putBoolean("Descending Button",
-			rightJoystick.getRawButton(2));
-		return rightJoystick.getRawButton(2);
+			rightJoystick.getRawButton(Constants.DESCEND_BUTTON));
+		return rightJoystick.getRawButton(Constants.DESCEND_BUTTON);
 	}
 
 	/* ------------------------ Right Joystick ------------------------ */
