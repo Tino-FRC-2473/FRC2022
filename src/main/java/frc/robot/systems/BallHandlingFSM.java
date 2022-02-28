@@ -157,6 +157,7 @@ public class BallHandlingFSM {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
+		outputToShuffleboard();
 		currentState = nextState(input, driveState);
 	}
 
@@ -389,5 +390,12 @@ public class BallHandlingFSM {
 
 	private void updateIsInShootingPositionIndicator(boolean isInShootingPosition) {
 		pDH.setSwitchableChannel(isInShootingPosition);
+	}
+
+	/**
+	 * Outputs data to Shuffleboard.
+	 */
+	private void outputToShuffleboard() {
+		SmartDashboard.putString("Ball In Intake", getBallInMech().toString());
 	}
 }
