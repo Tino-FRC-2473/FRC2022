@@ -44,7 +44,7 @@ public class TeleopInput {
 	/* ------------------------ Left Joystick ------------------------ */
 
 	/**
-	 * Get Y axis of Mech Joystick.
+	 * Get Y axis of Left Joystick.
 	 * @return Axis value
 	 */
 	public double getLeftJoystickY() {
