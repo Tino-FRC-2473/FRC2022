@@ -81,6 +81,8 @@ public class BallHandlingFSM {
 		// Reset state machine
 		pushCommandTimeStamp = Timer.getFPGATimestamp() - Constants.PUSH_TIME_SECONDS;
 		reset();
+		handleRetractIntakeMechState(null);
+		handleRetractingState(null);
 	}
 
 	/* ======================== Public methods ======================== */

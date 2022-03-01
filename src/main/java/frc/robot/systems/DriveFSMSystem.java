@@ -104,7 +104,7 @@ public class DriveFSMSystem {
 		stateTimer = new Timer();
 
 		// Reset state machine
-		reset();
+		reset(null);
 	}
 
 	/* ======================== Public methods ======================== */
