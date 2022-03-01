@@ -174,7 +174,7 @@ public class BallHandlingFSM {
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		if (input == null) {
 			if (!isShooterSolenoidExtended
-					&& driveState == DriveFSMSystem.FSMState.DEPOSIT_BALL_IDLE) {
+					&& driveState == DriveFSMSystem.FSMState.DEPOSIT_PRELOAD_BALL_IDLE) {
 				pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 				return FSMState.FIRING;

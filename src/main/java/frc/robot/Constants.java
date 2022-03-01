@@ -35,7 +35,7 @@ public class Constants {
 	public static final double AUTOALIGN_TURN_ERROR = 5;
 	public static final double AUTOALIGN_TURN_SPEED = 0.2;
 	public static final double HANGAR_TURN_TARGET_ANGLE = 180;
-	public static final double TERMINAL_TURN_TARGET_ANGLE = 90;
+	public static final double RED_TERMINAL_ANGLE_DEG = 43.752;
 	public static final double TIME_FOR_AUTO_SHOOT = 0.8;
 
 	//Path constants
@@ -87,6 +87,7 @@ public class Constants {
 	public static final double PP_BALL_MAX_RUN_TIME_SEC = 15.0;
 	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 15.0;
 	public static final double PP_TURN_RUN_TIME_SEC = 2.0;
+	public static final double PP_TERMINAL_BALL_WAIT_TIME_SEC = 4.0;
 
 	//Pure Pursuit Start Points and Angles
 	public static final Translation2d PP_R2_START_POINT = new Translation2d(90.653, 0);

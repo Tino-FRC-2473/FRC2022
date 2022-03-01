@@ -36,7 +36,10 @@ public class DriveFSMSystem {
 		PURE_PURSUIT,
 		PURE_PURSUIT_TO_HUB,
 		TURN_TO_HUB,
-		DEPOSIT_BALL_IDLE
+		DEPOSIT_BALL_IDLE,
+		DEPOSIT_PRELOAD_BALL_IDLE,
+		WAIT_TO_RECEIVE_BALLS,
+		TURN_TO_TERMINAL
 	}
 
 	/* ======================== Private variables ======================== */
@@ -44,6 +47,7 @@ public class DriveFSMSystem {
 	private boolean finishedMovingStraight;
 	private boolean finishedTurning;
 	private boolean finishedPurePursuitPath;
+	private boolean isStateFinished = false;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
 	private Translation2d robotPosLine = Constants.PP_R3_START_POINT;
@@ -57,7 +61,6 @@ public class DriveFSMSystem {
 	private double rightPower = 0;
 	private double previousEncoderCount = 0;
 	private Timer stateTimer;
-	private double currentTime = 0;
 	private boolean isDrivingForward = true;
 
 	private PurePursuit ppController;
@@ -86,13 +89,6 @@ public class DriveFSMSystem {
 											CANSparkMax.MotorType.kBrushless);
 		leftMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_DRIVE_LEFT,
 											CANSparkMax.MotorType.kBrushless);
-
-		// ballPoints.add(new Translation2d(-20.5, -60));
-		// ballPoints.add(new Translation2d(-26, -151));
-		// ballPoints.add(new Translation2d(-80, -88));
-		// ballPoints.add(new Translation2d(-40, -90));
-		// pointsToHub.add(new Translation2d(-40, -90));
-		// pointsToHub.add(new Translation2d(-30, -60));
 
 		ballPoints = AutoPaths.r3BallPath();
 		pointsToHub = AutoPaths.r3HubPath();
@@ -137,7 +133,11 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.START_STATE;
+		if (input == null) {
+			currentState = FSMState.DEPOSIT_BALL_IDLE;
+		} else {
+			currentState = FSMState.TELEOP_STATE;
+		}
 
 		stateTimer.reset();
 		stateTimer.start();
@@ -153,8 +153,6 @@ public class DriveFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
-		double updatedTime = stateTimer.get();
-		currentTime = updatedTime;
 		gyroAngle = getHeading();
 
 		updateLineOdometry();
@@ -199,11 +197,24 @@ public class DriveFSMSystem {
 				break;
 
 			case TURN_TO_HUB:
-				handleTurnState(input, Constants.PP_R2_HUB_ANGLE_DEG,
+				handleTurnState(input, Constants.PP_R3_HUB_ANGLE_DEG,
 						Constants.PP_TURN_RUN_TIME_SEC);
 				break;
 
 			case DEPOSIT_BALL_IDLE:
+				handleBallDepositIdleState(input);
+				break;
+
+			case TURN_TO_TERMINAL:
+				handleTurnState(input, Constants.RED_TERMINAL_ANGLE_DEG,
+					Constants.PP_TURN_RUN_TIME_SEC);
+				break;
+
+			case WAIT_TO_RECEIVE_BALLS:
+				handleWaitToReceiveBallsState(input, Constants.PP_TERMINAL_BALL_WAIT_TIME_SEC);
+				break;
+
+			case DEPOSIT_PRELOAD_BALL_IDLE:
 				handleBallDepositIdleState(input);
 				break;
 
@@ -230,7 +241,7 @@ public class DriveFSMSystem {
 				if (input != null) {
 					return FSMState.TELEOP_STATE;
 				} else {
-					return FSMState.DEPOSIT_BALL_IDLE;
+					return FSMState.DEPOSIT_PRELOAD_BALL_IDLE;
 				}
 
 			case TELEOP_STATE:
@@ -276,7 +287,7 @@ public class DriveFSMSystem {
 					finishedPurePursuitPath = false;
 					ppController = new PurePursuit(pointsToHub);
 					stateTimer.reset();
-					return FSMState.PURE_PURSUIT_TO_HUB;
+					return FSMState.TURN_TO_TERMINAL;
 				}
 				return FSMState.PURE_PURSUIT;
 
@@ -302,6 +313,32 @@ public class DriveFSMSystem {
 					return FSMState.PURE_PURSUIT;
 				} else {
 					return FSMState.DEPOSIT_BALL_IDLE;
+				}
+
+			case TURN_TO_TERMINAL:
+				if (finishedTurning) {
+					finishedTurning = false;
+					stateTimer.reset();
+				} else {
+					return FSMState.TURN_TO_TERMINAL;
+				}
+				return FSMState.WAIT_TO_RECEIVE_BALLS;
+
+			case WAIT_TO_RECEIVE_BALLS:
+				if (isStateFinished) {
+					isStateFinished = false;
+					stateTimer.reset();
+					return FSMState.PURE_PURSUIT_TO_HUB;
+				} else {
+					return FSMState.WAIT_TO_RECEIVE_BALLS;
+				}
+
+			case DEPOSIT_PRELOAD_BALL_IDLE:
+				if (stateTimer.hasElapsed(Constants.PUSH_TIME_SECONDS)) {
+					stateTimer.reset();
+					return FSMState.PURE_PURSUIT;
+				} else {
+					return FSMState.DEPOSIT_PRELOAD_BALL_IDLE;
 				}
 
 			default:
@@ -487,12 +524,12 @@ public class DriveFSMSystem {
 		}
 
 		if (input.getTerminalButton()) {
-			if (Math.abs(gyroAngle - Constants.TERMINAL_TURN_TARGET_ANGLE)
+			if (Math.abs(gyroAngle - Constants.RED_TERMINAL_ANGLE_DEG)
 				> Constants.AUTOALIGN_TURN_ERROR
 				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
 				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
 
-				double error = Constants.TERMINAL_TURN_TARGET_ANGLE - gyroAngle;
+				double error = Constants.RED_TERMINAL_ANGLE_DEG - gyroAngle;
 				double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
 				if (turnPower < Constants.TELEOP_MIN_TURN_POWER) {
 					turnPower = Constants.TELEOP_MIN_TURN_POWER;
@@ -610,6 +647,14 @@ public class DriveFSMSystem {
 	}
 
 	private void handleBallDepositIdleState(TeleopInput input) {
+		leftMotor.set(0);
+		rightMotor.set(0);
+	}
+
+	private void handleWaitToReceiveBallsState(TeleopInput input, double waitTime) {
+		if (stateTimer.get() > waitTime) {
+			isStateFinished = true;
+		}
 		leftMotor.set(0);
 		rightMotor.set(0);
 	}
