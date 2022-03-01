@@ -46,11 +46,11 @@ public class DriveFSMSystem {
 	private boolean finishedPurePursuitPath;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	private Translation2d robotPosLine = Constants.PP_R1_START_POINT;
+	private Translation2d robotPosLine = Constants.PP_R3_START_POINT;
 	// private Translation2d robotPosLine = new Translation2d(0, 0);
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	private Translation2d robotPosArc = Constants.PP_R1_START_POINT;
+	private Translation2d robotPosArc = Constants.PP_R3_START_POINT;
 	// private Translation2d robotPosArc = new Translation2d(0, 0);
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
@@ -94,8 +94,8 @@ public class DriveFSMSystem {
 		// pointsToHub.add(new Translation2d(-40, -90));
 		// pointsToHub.add(new Translation2d(-30, -60));
 
-		ballPoints = AutoPaths.r1BallPath();
-		pointsToHub = AutoPaths.r1HubPath();
+		ballPoints = AutoPaths.r3BallPath();
+		pointsToHub = AutoPaths.r3HubPath();
 
 		ppController = new PurePursuit(ballPoints);
 
@@ -104,7 +104,7 @@ public class DriveFSMSystem {
 		stateTimer = new Timer();
 
 		// Reset state machine
-		// reset();
+		reset();
 	}
 
 	/* ======================== Public methods ======================== */
@@ -135,7 +135,7 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.TELEOP_STATE;
+		currentState = FSMState.DEPOSIT_BALL_IDLE;
 
 		stateTimer.reset();
 		stateTimer.start();
@@ -157,6 +157,10 @@ public class DriveFSMSystem {
 
 		updateLineOdometry();
 		updateArcOdometry();
+		System.out.println("odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
+		System.out.println("left: " + leftMotor.getEncoder().getPosition());
+		System.out.println("right: " + rightMotor.getEncoder().getPosition());
+
 
 		switch (currentState) {
 			case START_STATE:
@@ -288,10 +292,11 @@ public class DriveFSMSystem {
 				} else {
 					return FSMState.TURN_TO_HUB;
 				}
-				return FSMState.TELEOP_STATE;
+				return FSMState.DEPOSIT_BALL_IDLE;
 
 			case DEPOSIT_BALL_IDLE:
-				if (true) {
+				if (stateTimer.hasElapsed(Constants.PUSH_TIME_SECONDS)) {
+					stateTimer.reset();
 					return FSMState.PURE_PURSUIT;
 				} else {
 					return FSMState.DEPOSIT_BALL_IDLE;
@@ -407,7 +412,8 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		double angle = 90 - gyro.getYaw();
+		// double angle = 90 - gyro.getYaw();
+		double angle = Constants.PP_R3_HUB_ANGLE_DEG - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
 		}

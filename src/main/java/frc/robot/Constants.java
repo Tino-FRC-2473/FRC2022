@@ -81,10 +81,10 @@ public class Constants {
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
 
 	//Pure Pursuit Constants
-	public static final double MAX_IN_TO_POINT = 36;
+	public static final double MAX_IN_TO_POINT = 30;
 	public static final double PP_MAX_SPEED = 0.2;
-	public static final double PP_BALL_MAX_RUN_TIME_SEC = 7.0;
-	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 5.0;
+	public static final double PP_BALL_MAX_RUN_TIME_SEC = 15.0;
+	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 15.0;
 	public static final double PP_TURN_RUN_TIME_SEC = 2.0;
 
 	//Pure Pursuit Start Points and Angles

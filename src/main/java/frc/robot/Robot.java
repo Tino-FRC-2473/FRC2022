@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
 	private GrabberFSM grabberSystem;
 
 	// Constants
-	private static final boolean RUN_COMPRESSOR = false;
+	private static final boolean RUN_COMPRESSOR = true;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
