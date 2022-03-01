@@ -19,6 +19,7 @@ public class TeleopInput {
 	private Joystick mechJoystick;
 	private Joystick steeringWheel;
 	private Joystick drivingJoystick;
+	private Joystick leftJoystick;
 
 
 	/* ======================== Constructor ======================== */
@@ -28,10 +29,11 @@ public class TeleopInput {
 	 * by WPILib until teleop mode.
 	 */
 	public TeleopInput() {
-		mechJoystick = new Joystick(Constants.LEFT_JOYSTICK_PORT);
+		mechJoystick = new Joystick(Constants.MECH_JOYSTICK_PORT);
 
 		steeringWheel = new Joystick(Constants.STEERING_WHEEL_PORT);
 		drivingJoystick = new Joystick(Constants.DRIVING_JOYSTICK_PORT);
+		leftJoystick = new Joystick(Constants.LEFT_JOYSTICK_PORT);
 	}
 
 	/* ======================== Public methods ======================== */
@@ -39,16 +41,19 @@ public class TeleopInput {
 	// Method names should be descriptive of the behavior, so the
 	// control mapping is hidden from other classes.
 
-	/* ------------------------ Mech Joystick ------------------------ */
+	/* ------------------------ Left Joystick ------------------------ */
 
 	/**
-	 * Get Y axis of Left Joystick.
+	 * Get Y axis of Mech Joystick.
 	 * @return Axis value
 	 */
 	public double getLeftJoystickY() {
-		SmartDashboard.putNumber("Mech Joystick", mechJoystick.getY());
-		return mechJoystick.getY();
+		SmartDashboard.putNumber("Left Joystick", leftJoystick.getY());
+		return leftJoystick.getY();
 	}
+
+	/* ------------------------ Mech Joystick ------------------------ */
+
 	/**
 	 * Get the value of the shooter button.
 	 * @return True if button is pressed
@@ -77,7 +82,7 @@ public class TeleopInput {
 		return mechJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
 	}
 	/**
-	 * Get the value of the intake retract button.
+	 * Get the value of the intake toggle button.
 	 * @return True if button is pressed
 	 */
 	public boolean wasToggleIntakeButtonPressed() {

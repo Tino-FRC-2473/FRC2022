@@ -137,7 +137,7 @@ public class DriveFSMSystem {
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
-		currentState = FSMState.DEPOSIT_BALL_IDLE;
+		currentState = FSMState.START_STATE;
 
 		stateTimer.reset();
 		stateTimer.start();
@@ -225,7 +225,6 @@ public class DriveFSMSystem {
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input) {
-		System.out.println(currentState);
 		switch (currentState) {
 			case START_STATE:
 				if (input != null) {
