@@ -122,8 +122,10 @@ public class DriveFSMSystem {
 	 * Note this is distinct from the one-time initialization in the constructor
 	 * as it may be called multiple times in a boot cycle,
 	 * Ex. if the robot is enabled, disabled, then reenabled.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
 	 */
-	public void reset() {
+	public void reset(TeleopInput input) {
 
 		rightMotor.getEncoder().setPosition(0);
 		leftMotor.getEncoder().setPosition(0);
@@ -141,7 +143,7 @@ public class DriveFSMSystem {
 		stateTimer.start();
 
 		// Call one tick of update to ensure outputs reflect start state
-		update(null);
+		update(input);
 	}
 
 	/**
@@ -164,7 +166,7 @@ public class DriveFSMSystem {
 
 		switch (currentState) {
 			case START_STATE:
-				handleStartState(input);
+				handleStartState();
 				break;
 
 			case TELEOP_STATE:
@@ -223,12 +225,13 @@ public class DriveFSMSystem {
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input) {
+		System.out.println(currentState);
 		switch (currentState) {
 			case START_STATE:
 				if (input != null) {
 					return FSMState.TELEOP_STATE;
 				} else {
-					return FSMState.START_STATE;
+					return FSMState.DEPOSIT_BALL_IDLE;
 				}
 
 			case TELEOP_STATE:
@@ -310,10 +313,8 @@ public class DriveFSMSystem {
 	/* ------------------------ FSM state handlers ------------------------ */
 	/**
 	 * Handle behavior in START_STATE.
-	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
 	 */
-	private void handleStartState(TeleopInput input) {
+	private void handleStartState() {
 		setPowerForAllMotors(0); //start with all motors set to 0
 	}
 	/**
@@ -610,7 +611,6 @@ public class DriveFSMSystem {
 	}
 
 	private void handleBallDepositIdleState(TeleopInput input) {
-
 		leftMotor.set(0);
 		rightMotor.set(0);
 	}

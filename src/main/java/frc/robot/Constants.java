@@ -36,6 +36,7 @@ public class Constants {
 	public static final double AUTOALIGN_TURN_SPEED = 0.2;
 	public static final double HANGAR_TURN_TARGET_ANGLE = 180;
 	public static final double TERMINAL_TURN_TARGET_ANGLE = 90;
+	public static final double TIME_FOR_AUTO_SHOOT = 0.8;
 
 	//Path constants
 	// For Run 1 the start angle is 26.73
@@ -66,9 +67,6 @@ public class Constants {
 	public static final int ASCEND_BUTTON = 4;
 	public static final int DESCEND_BUTTON = 5;
 	public static final int TOGGLE_INTAKE_BUTTON = 7;
-
-	//Right Joystick
-	public static final int RIGHT_JOYSTICK_PORT = 1;
 
 	//Steering Wheel
 	public static final int STEERING_WHEEL_PORT = 2;
