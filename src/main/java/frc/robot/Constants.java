@@ -103,7 +103,7 @@ public class Constants {
 	public static final double ZERO_THRESHOLD = 0.01;
 
 	//Intake Shooter Constants
-	public static final double PUSH_TIME_SECONDS = 1;
+	public static final double PUSH_TIME_SECONDS = 0.7;
 	public static final double INTAKE_MOTOR_VOLTAGE = 5;
 	public static final int BALL_PROXIMITY_THRESHOLD = 68;
 }

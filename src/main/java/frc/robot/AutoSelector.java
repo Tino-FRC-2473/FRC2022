@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class AutoSelector {
-	enum DesiredMode {
+	public enum DesiredMode {
 		RED_3_BALL_A,
 		BLUE_3_BALL_A,
 		RED_3_BALL_B,
@@ -36,8 +36,8 @@ public class AutoSelector {
 	 * Gets the current auto from Shuffleboard.
 	 * @return name of current auto
 	 */
-	public String getSelectedAuto() {
-		return modeChooser.getSelected().name();
+	public DesiredMode getSelectedAuto() {
+		return modeChooser.getSelected();
 	}
 
 	/**

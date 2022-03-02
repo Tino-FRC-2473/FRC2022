@@ -65,6 +65,7 @@ public class Robot extends TimedRobot {
 		ballSystem.reset();
 		grabberSystem.reset();
 		autoSelector.outputToShuffleboard();
+		driveFsmSystem.setAutoPath(autoSelector.getSelectedAuto());
 	}
 
 	@Override

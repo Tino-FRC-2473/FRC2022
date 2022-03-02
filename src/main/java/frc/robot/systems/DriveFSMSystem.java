@@ -20,6 +20,7 @@ import frc.robot.trajectory.Kinematics;
 import frc.robot.trajectory.PurePursuit;
 import frc.robot.HardwareMap;
 import frc.robot.Constants;
+import frc.robot.AutoSelector.DesiredMode;
 
 // Java Imports
 import java.util.ArrayList;
@@ -36,7 +37,8 @@ public class DriveFSMSystem {
 		PURE_PURSUIT,
 		PURE_PURSUIT_TO_HUB,
 		TURN_TO_HUB,
-		DEPOSIT_BALL_IDLE,
+		DEPOSIT_FIRST_BALL_IDLE,
+		DEPOSIT_SECOND_BALL_IDLE,
 		DEPOSIT_PRELOAD_BALL_IDLE,
 		WAIT_TO_RECEIVE_BALLS,
 		TURN_TO_TERMINAL
@@ -62,6 +64,9 @@ public class DriveFSMSystem {
 	private double previousEncoderCount = 0;
 	private Timer stateTimer;
 	private boolean isDrivingForward = true;
+
+	private DesiredMode autoPath;
+
 
 	private PurePursuit ppController;
 	private ArrayList<Translation2d> ballPoints = new ArrayList<>();
@@ -134,7 +139,7 @@ public class DriveFSMSystem {
 		finishedPurePursuitPath = false;
 
 		if (input == null) {
-			currentState = FSMState.DEPOSIT_BALL_IDLE;
+			currentState = FSMState.DEPOSIT_PRELOAD_BALL_IDLE;
 		} else {
 			currentState = FSMState.TELEOP_STATE;
 		}
@@ -201,7 +206,11 @@ public class DriveFSMSystem {
 						Constants.PP_TURN_RUN_TIME_SEC);
 				break;
 
-			case DEPOSIT_BALL_IDLE:
+			case DEPOSIT_FIRST_BALL_IDLE:
+				handleBallDepositIdleState(input);
+				break;
+
+			case DEPOSIT_SECOND_BALL_IDLE:
 				handleBallDepositIdleState(input);
 				break;
 
@@ -305,14 +314,22 @@ public class DriveFSMSystem {
 				} else {
 					return FSMState.TURN_TO_HUB;
 				}
-				return FSMState.DEPOSIT_BALL_IDLE;
+				return FSMState.DEPOSIT_FIRST_BALL_IDLE;
 
-			case DEPOSIT_BALL_IDLE:
-				if (stateTimer.hasElapsed(Constants.PUSH_TIME_SECONDS)) {
+			case DEPOSIT_FIRST_BALL_IDLE:
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_AUTO_SHOOT)) {
 					stateTimer.reset();
-					return FSMState.PURE_PURSUIT;
+					return FSMState.DEPOSIT_SECOND_BALL_IDLE;
 				} else {
-					return FSMState.DEPOSIT_BALL_IDLE;
+					return FSMState.DEPOSIT_FIRST_BALL_IDLE;
+				}
+
+			case DEPOSIT_SECOND_BALL_IDLE:
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_AUTO_SHOOT)) {
+					stateTimer.reset();
+					return FSMState.TELEOP_STATE;
+				} else {
+					return FSMState.DEPOSIT_SECOND_BALL_IDLE;
 				}
 
 			case TURN_TO_TERMINAL:
@@ -334,7 +351,7 @@ public class DriveFSMSystem {
 				}
 
 			case DEPOSIT_PRELOAD_BALL_IDLE:
-				if (stateTimer.hasElapsed(Constants.PUSH_TIME_SECONDS)) {
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_AUTO_SHOOT)) {
 					stateTimer.reset();
 					return FSMState.PURE_PURSUIT;
 				} else {
@@ -661,5 +678,13 @@ public class DriveFSMSystem {
 
 	private void outputToShuffleboard() {
 		SmartDashboard.putNumber("Gyro heading", getHeading());
+	}
+
+	/**
+	 * Sets the autonomous path to run.
+	 * @param path the path to run
+	 */
+	public void setAutoPath(DesiredMode path) {
+		autoPath = path;
 	}
 }
