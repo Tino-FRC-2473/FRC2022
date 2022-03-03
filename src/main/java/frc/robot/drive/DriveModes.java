@@ -29,10 +29,18 @@ public class DriveModes {
 
 		if (steerAngle > 0) {
 			targetRightPower = -adjustedInput * adjustedSteering;
-			targetLeftPower = adjustedInput;
+			targetLeftPower = adjustedInput * (1 + 2 * Math.abs(steerAngle));
 		} else {
 			targetLeftPower = adjustedInput * adjustedSteering;
-			targetRightPower = -adjustedInput;
+			targetRightPower = -adjustedInput * (1 + 2 * Math.abs(steerAngle));
+		}
+
+		//checks if the magnitude of the target powers is less than 1
+		if (Math.abs(targetLeftPower) > 1.0) {
+			targetLeftPower /= Math.abs(targetLeftPower);
+		}
+		if (Math.abs(targetRightPower) > 1.0) {
+			targetRightPower /= Math.abs(targetRightPower);
 		}
 
 		//reversible driving (currently set on buttons 5 and 6)

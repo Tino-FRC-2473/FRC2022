@@ -105,6 +105,13 @@ public class DriveFSMSystem {
 		ppController = new PurePursuit(ballPoints);
 
 		gyro = new AHRS(SPI.Port.kMXP);
+		gyro.reset();
+		gyro.zeroYaw();
+		while (gyro.isCalibrating()) {
+
+		}
+		System.out.println("gyrooo: " + getHeading());
+		System.out.println("iscalibrating: " + gyro.isCalibrating());
 
 		timer = new Timer();
 
@@ -135,15 +142,14 @@ public class DriveFSMSystem {
 		backLeftMotor.getEncoder().setPosition(0);
 		backRightMotor.getEncoder().setPosition(0);
 
-		gyro.reset();
-		gyro.zeroYaw();
+		// gyro.reset();
+		// gyro.zeroYaw();
 
 		finishedMovingStraight = false;
 		finishedTurning = false;
 		finishedPurePursuitPath = false;
 
 		currentState = FSMState.TELEOP_STATE;
-
 		timer.reset();
 		timer.start();
 
@@ -160,6 +166,7 @@ public class DriveFSMSystem {
 		double updatedTime = timer.get();
 		currentTime = updatedTime;
 		gyroAngle = getHeading();
+		System.out.println("gyro angle: " + gyroAngle);
 
 		updateLineOdometry();
 		updateArcOdometry();
@@ -389,6 +396,7 @@ public class DriveFSMSystem {
 	*/
 	public double getHeading() {
 		double angle = 90 - gyro.getYaw();
+		System.out.println("raw: " + gyro.getYaw());
 		if (angle < 0) {
 			angle += 360;
 		}

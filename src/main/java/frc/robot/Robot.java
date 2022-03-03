@@ -42,6 +42,7 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
+		System.out.println("simon000: " + driveFsmSystem.getHeading());
 		// ballSystem = new BallHandlingFSM();
 	}
 
@@ -62,6 +63,7 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		driveFsmSystem.reset();
+		// System.out.println("simon: " + driveFsmSystem.getHeading());
 		// ballSystem.reset();
 	}
 
