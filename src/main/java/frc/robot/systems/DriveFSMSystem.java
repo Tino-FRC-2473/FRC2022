@@ -41,7 +41,9 @@ public class DriveFSMSystem {
 		DEPOSIT_SECOND_BALL_IDLE,
 		DEPOSIT_PRELOAD_BALL_IDLE,
 		WAIT_TO_RECEIVE_BALLS,
-		TURN_TO_TERMINAL
+		TURN_TO_TERMINAL,
+		HANGAR_TURN_STATE,
+		TERMINAL_TURN_STATE
 	}
 
 	/* ======================== Private variables ======================== */
@@ -162,10 +164,11 @@ public class DriveFSMSystem {
 
 		updateLineOdometry();
 		updateArcOdometry();
-		System.out.println("odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
-		System.out.println("left: " + leftMotor.getEncoder().getPosition());
-		System.out.println("right: " + rightMotor.getEncoder().getPosition());
+		// System.out.println("odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
+		// System.out.println("left: " + leftMotor.getEncoder().getPosition());
+		// System.out.println("right: " + rightMotor.getEncoder().getPosition());
 
+		System.out.println("Current State: " + currentState);
 
 		switch (currentState) {
 			case START_STATE:
@@ -219,6 +222,14 @@ public class DriveFSMSystem {
 					Constants.PP_TURN_RUN_TIME_SEC);
 				break;
 
+			case HANGAR_TURN_STATE:
+				handleHangarTurnState(input);
+				break;
+
+			case TERMINAL_TURN_STATE:
+				handleTerminalTurnState(input);
+				break;
+
 			case WAIT_TO_RECEIVE_BALLS:
 				handleWaitToReceiveBallsState(input, Constants.PP_TERMINAL_BALL_WAIT_TIME_SEC);
 				break;
@@ -254,7 +265,13 @@ public class DriveFSMSystem {
 				}
 
 			case TELEOP_STATE:
-				return FSMState.TELEOP_STATE;
+				if (input.getHangarButton()) {
+					return FSMState.HANGAR_TURN_STATE;
+				} else if (input.getTerminalButton()) {
+					return FSMState.TERMINAL_TURN_STATE;
+				} else {
+					return FSMState.TELEOP_STATE;
+				}
 
 			case FORWARD_STATE_10_IN:
 				if (finishedMovingStraight) {
@@ -340,6 +357,24 @@ public class DriveFSMSystem {
 					return FSMState.TURN_TO_TERMINAL;
 				}
 				return FSMState.WAIT_TO_RECEIVE_BALLS;
+
+			case HANGAR_TURN_STATE:
+				if (input.getHangarButton() && Math.abs(input.getLeftJoystickY())
+					< Constants.TELEOP_MIN_MOVE_POWER
+					&& Math.abs(input.getDrivingJoystickY()) < Constants.TELEOP_MIN_MOVE_POWER) {
+					return FSMState.HANGAR_TURN_STATE;
+				} else {
+					return FSMState.TELEOP_STATE;
+				}
+
+			case TERMINAL_TURN_STATE:
+				if (input.getTerminalButton() && Math.abs(input.getLeftJoystickY())
+					< Constants.TELEOP_MIN_MOVE_POWER
+					&& Math.abs(input.getDrivingJoystickY()) < Constants.TELEOP_MIN_MOVE_POWER) {
+					return FSMState.TERMINAL_TURN_STATE;
+				} else {
+					return FSMState.TELEOP_STATE;
+				}
 
 			case WAIT_TO_RECEIVE_BALLS:
 				if (isStateFinished) {
@@ -477,6 +512,11 @@ public class DriveFSMSystem {
 		return angle;
 	}
 
+	/**
+	* Handle behavior in TELEOP_STATE.
+	* @param input Global TeleopInput if robot in teleop mode or null if
+	*        the robot is in autonomous mode.
+	*/
 	private void handleTeleOpState(TeleopInput input) {
 		if (input == null) {
 			return;
@@ -521,47 +561,71 @@ public class DriveFSMSystem {
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
 
-		if (input.getHangarButton()) {
-			if (Math.abs(gyroAngle - Constants.HANGAR_TURN_TARGET_ANGLE)
-				> Constants.AUTOALIGN_TURN_ERROR
-				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
-				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
-
-				double error = Constants.HANGAR_TURN_TARGET_ANGLE - gyroAngle;
-				double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
-				if (turnPower < Constants.TELEOP_MIN_TURN_POWER) {
-					turnPower = Constants.TELEOP_MIN_TURN_POWER;
-				}
-
-				turnPower *= error < 0 && error > -180 ? -1 : 1;
-
-				leftPower = turnPower;
-				rightPower = turnPower;
-			}
-		}
-
-		if (input.getTerminalButton()) {
-			if (Math.abs(gyroAngle - Constants.RED_TERMINAL_ANGLE_DEG)
-				> Constants.AUTOALIGN_TURN_ERROR
-				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
-				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
-
-				double error = Constants.RED_TERMINAL_ANGLE_DEG - gyroAngle;
-				double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
-				if (turnPower < Constants.TELEOP_MIN_TURN_POWER) {
-					turnPower = Constants.TELEOP_MIN_TURN_POWER;
-				}
-
-				turnPower *= error < 0 && error > -180 ? -1 : 1;
-
-				leftPower = turnPower;
-				rightPower = turnPower;
-			}
-		}
-
 		rightMotor.set(rightPower);
 		leftMotor.set(leftPower);
 
+	}
+
+	/**
+	* Handle behavior in HANGAR_TURN_STATE.
+	* @param input Global TeleopInput if robot in teleop mode or null if
+	*        the robot is in autonomous mode.
+	*/
+	private void handleHangarTurnState(TeleopInput input) {
+
+		double leftJoystickY = input.getLeftJoystickY();
+		double rightJoystickY = input.getDrivingJoystickY();
+
+		if (Math.abs(gyroAngle - Constants.HANGAR_TURN_TARGET_ANGLE)
+				> Constants.AUTOALIGN_TURN_ERROR
+				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
+				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+
+			double error = Constants.HANGAR_TURN_TARGET_ANGLE - gyroAngle;
+			double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
+			if (turnPower < Constants.TELEOP_MIN_TURN_POWER) {
+				turnPower = Constants.TELEOP_MIN_TURN_POWER;
+			}
+
+			turnPower *= error < 0 && error > -180 ? -1 : 1;
+
+			leftPower = turnPower;
+			rightPower = turnPower;
+
+			rightMotor.set(rightPower);
+			leftMotor.set(leftPower);
+		}
+	}
+
+	/**
+	* Handle behavior in TERMINAL_TURN_STATE.
+	* @param input Global TeleopInput if robot in teleop mode or null if
+	*        the robot is in autonomous mode.
+	*/
+	private void handleTerminalTurnState(TeleopInput input) {
+
+		double leftJoystickY = input.getLeftJoystickY();
+		double rightJoystickY = input.getDrivingJoystickY();
+
+		if (Math.abs(gyroAngle - Constants.RED_TERMINAL_ANGLE_DEG)
+				> Constants.AUTOALIGN_TURN_ERROR
+				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
+				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+
+			double error = Constants.RED_TERMINAL_ANGLE_DEG - gyroAngle;
+			double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
+			if (turnPower < Constants.TELEOP_MIN_TURN_POWER) {
+				turnPower = Constants.TELEOP_MIN_TURN_POWER;
+			}
+
+			turnPower *= error < 0 && error > -180 ? -1 : 1;
+
+			leftPower = turnPower;
+			rightPower = turnPower;
+
+			rightMotor.set(rightPower);
+			leftMotor.set(leftPower);
+		}
 	}
 
 	/**
