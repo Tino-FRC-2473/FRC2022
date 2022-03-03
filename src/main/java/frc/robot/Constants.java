@@ -20,11 +20,11 @@ public class Constants {
 	public static final double TURN_ERROR_THRESHOLD_DEGREE = 1.0;
 	public static final double TELEOP_ACCELERATION_CONSTANT = 0.05;
 	public static final double TELEOP_ACCELERATION_MIN = 0.1;
-	public static final double ENCODER_CONSTANT = 1.0551; //1.0814;
+	public static final double ENCODER_CONSTANT = 1.0814;
 	public static final double COUNTS_PER_MOTOR_REVOLUTION = 42;
 	public static final double GEAR_RATIO = 8.0; //26.0 * 4.67 / 12.0;
 	public static final double REVOLUTIONS_PER_INCH
-		= GEAR_RATIO * ENCODER_CONSTANT / (Math.PI * WHEEL_DIAMETER_INCHES);
+		= GEAR_RATIO / (Math.PI * WHEEL_DIAMETER_INCHES * ENCODER_CONSTANT);
 	public static final double ODOMETRY_MIN_THETA = 1.0;
 	public static final double MOTOR_RUN_POWER = 0.1;
 	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.35;

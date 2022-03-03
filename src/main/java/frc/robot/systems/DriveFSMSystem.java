@@ -52,12 +52,12 @@ public class DriveFSMSystem {
 	private boolean isStateFinished = false;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	// private Translation2d robotPosLine = Constants.PP_R3_START_POINT;
-	private Translation2d robotPosLine = new Translation2d(0, 0);
+	private Translation2d robotPosLine = Constants.PP_R3_START_POINT;
+	// private Translation2d robotPosLine = new Translation2d(0, 0);
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	// private Translation2d robotPosArc = Constants.PP_R3_START_POINT;
-	private Translation2d robotPosArc = new Translation2d(0, 0);
+	private Translation2d robotPosArc = Constants.PP_R3_START_POINT;
+	// private Translation2d robotPosArc = new Translation2d(0, 0);
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
@@ -445,17 +445,22 @@ public class DriveFSMSystem {
 			rightMotor.set(0);
 			return;
 		}
-		double error = getHeading() - degrees;
+		double error = degrees - getHeading();
+		if (error > 180) {
+			error -= 360;
+		}
 		if (Math.abs(error) <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
 			finishedTurning = true;
 			leftMotor.set(0);
 			rightMotor.set(0);
 			return;
 		}
-		double power = error / Constants.TURN_ERROR_POWER_RATIO;
-		if (Math.abs(power) < Constants.MIN_TURN_POWER) {
-			power = Constants.MIN_TURN_POWER * (power < 0 ? -1 : 1);
+		double power = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
+		if (power < Constants.MIN_TURN_POWER) {
+			power = Constants.MIN_TURN_POWER;
 		}
+
+		power *= (error < 0 && error > -180) ? -1 : 1;
 
 		leftMotor.set(power);
 		rightMotor.set(power);
@@ -467,8 +472,8 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		double angle = 90 - gyro.getYaw();
-		// double angle = Constants.PP_R3_HUB_ANGLE_DEG - gyro.getYaw();
+		// double angle = 90 - gyro.getYaw();
+		double angle = Constants.PP_R3_HUB_ANGLE_DEG - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
 		}
