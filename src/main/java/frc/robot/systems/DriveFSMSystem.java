@@ -52,12 +52,12 @@ public class DriveFSMSystem {
 	private boolean isStateFinished = false;
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
-	private Translation2d robotPosLine = Constants.PP_R3_START_POINT;
-	// private Translation2d robotPosLine = new Translation2d(0, 0);
+	// private Translation2d robotPosLine = Constants.PP_R3_START_POINT;
+	private Translation2d robotPosLine = new Translation2d(0, 0);
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
-	private Translation2d robotPosArc = Constants.PP_R3_START_POINT;
-	// private Translation2d robotPosArc = new Translation2d(0, 0);
+	// private Translation2d robotPosArc = Constants.PP_R3_START_POINT;
+	private Translation2d robotPosArc = new Translation2d(0, 0);
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
@@ -162,7 +162,8 @@ public class DriveFSMSystem {
 
 		updateLineOdometry();
 		updateArcOdometry();
-		System.out.println("odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
+		System.out.println("arc odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
+		System.out.println("line odo: " + robotPosLine.getX() + " " + robotPosLine.getY());
 		System.out.println("left: " + leftMotor.getEncoder().getPosition());
 		System.out.println("right: " + rightMotor.getEncoder().getPosition());
 
@@ -444,7 +445,7 @@ public class DriveFSMSystem {
 			rightMotor.set(0);
 			return;
 		}
-		double error = degrees - getHeading();
+		double error = getHeading() - degrees;
 		if (Math.abs(error) <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
 			finishedTurning = true;
 			leftMotor.set(0);
@@ -466,8 +467,8 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		// double angle = 90 - gyro.getYaw();
-		double angle = Constants.PP_R3_HUB_ANGLE_DEG - gyro.getYaw();
+		double angle = 90 - gyro.getYaw();
+		// double angle = Constants.PP_R3_HUB_ANGLE_DEG - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
 		}
@@ -569,17 +570,16 @@ public class DriveFSMSystem {
 	 * @return the robot's new position
 	 */
 	public Translation2d updateLineOdometry() {
-
-		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
-			+ rightMotor.getEncoder().getPosition()) / 2.0);
-
-		double adjustedAngle = gyroAngle;
+		// double adjustedAngle = gyroAngle;
 		double currentEncoderPos = ((-leftMotor.getEncoder().getPosition()
 			+ rightMotor.getEncoder().getPosition()) / 2.0);
-		double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
-		double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
-		double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
-		robotPosLine.plus(new Translation2d(dX, dY));
+		// double dEncoder = (currentEncoderPos - prevEncoderPosLine)
+			// / Constants.REVOLUTIONS_PER_INCH;
+		// double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
+		// double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
+		// robotPosLine.plus(new Translation2d(dX, dY));
+		robotPosLine = Kinematics.updateLineOdometry(gyroAngle, currentEncoderPos,
+			prevEncoderPosLine, robotPosLine);
 
 		prevEncoderPosLine = currentEncoderPos;
 		return robotPosLine;
