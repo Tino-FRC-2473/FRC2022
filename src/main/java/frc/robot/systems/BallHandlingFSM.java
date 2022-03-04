@@ -29,7 +29,6 @@ public class BallHandlingFSM {
 		RETRACTING,
 		RETRACT_INTAKE_MECH,
 		RELEASE_INTAKE_MECH,
-		INTAKING,
 		RELEASING
 	}
 
@@ -146,10 +145,6 @@ public class BallHandlingFSM {
 				handleReleaseIntakeMechState(input);
 				break;
 
-			case INTAKING:
-				handleIntakingState(input);
-				break;
-
 			case RELEASING:
 				handleReleasingState(input);
 				break;
@@ -205,25 +200,8 @@ public class BallHandlingFSM {
 					} else {
 						return FSMState.RETRACT_INTAKE_MECH;
 					}
-				} else if (input.isIntakeButtonPressed()) {
-					return FSMState.INTAKING;
 				} else if (input.isTerminalReleaseButtonPressed()) {
 					return FSMState.RELEASING;
-				} else {
-					return FSMState.IDLE;
-				}
-
-			case INTAKING:
-				if (isShooterSolenoidExtended
-						&& Timer.getFPGATimestamp() - pushCommandTimeStamp
-						> Constants.PUSH_TIME_SECONDS) {
-					return FSMState.RETRACTING;
-				} else if (!isShooterSolenoidExtended && input.isShooterButtonPressed()) {
-					pushCommandTimeStamp = Timer.getFPGATimestamp();
-
-					return FSMState.FIRING;
-				} else if (input.isIntakeButtonPressed()) {
-					return FSMState.INTAKING;
 				} else {
 					return FSMState.IDLE;
 				}
@@ -250,18 +228,14 @@ public class BallHandlingFSM {
 				return FSMState.IDLE;
 
 			case FIRING:
-				if (input.isIntakeButtonPressed()) {
-					return FSMState.INTAKING;
-				} else if (input.isTerminalReleaseButtonPressed()) {
+				if (input.isTerminalReleaseButtonPressed()) {
 					return FSMState.RELEASING;
 				} else {
 					return FSMState.IDLE;
 				}
 
 			case RETRACTING:
-				if (input.isIntakeButtonPressed()) {
-					return FSMState.INTAKING;
-				} else if (input.isTerminalReleaseButtonPressed()) {
+				if (input.isTerminalReleaseButtonPressed()) {
 					return FSMState.RELEASING;
 				} else {
 					return FSMState.IDLE;
@@ -281,8 +255,9 @@ public class BallHandlingFSM {
 	private void handleIdleState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeDeploySolenoid.set(DoubleSolenoid.Value.kOff);
-		intakeMotor.setVoltage(0);
-	}
+		intakeMotor.setVoltage(
+			getBallInMech() == IntakeMechBallStates.NONE
+				? -Constants.INTAKE_MOTOR_VOLTAGE : 0);	}
 	/**
 	 * Handle behavior in START_STATE.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
@@ -329,17 +304,6 @@ public class BallHandlingFSM {
 	private void handleReleaseIntakeMechState(TeleopInput input) {
 		isIntakeMechRetracted = false;
 		intakeDeploySolenoid.set(DoubleSolenoid.Value.kForward);
-	}
-	/**
-	 * Handle behavior in INTAKING.
-	 * @param input Global TeleopInput if robot in teleop mode or null if
-	 *        the robot is in autonomous mode.
-	 */
-	private void handleIntakingState(TeleopInput input) {
-		pushSolenoid.set(DoubleSolenoid.Value.kOff);
-		intakeMotor.setVoltage(
-			getBallInMech() == IntakeMechBallStates.NONE
-				? -Constants.INTAKE_MOTOR_VOLTAGE : 0);
 	}
 	/**
 	 * Handle behavior in RELEASING.
