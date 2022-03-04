@@ -124,4 +124,13 @@ public class PurePursuit {
 			? pathPoints.get(lookaheadPointIndex) : pathPoints.get(pathPoints.size() - 1);
 		return lookaheadPoint;
 	}
+
+	/**
+	 * asdf.
+	 * @return asdf
+	 */
+	public boolean isNearEnd(double numPoints) {
+		return (pathPoints.size() - 1 - numPoints) <= lastClosestPointIndex;
+	}
+
 }

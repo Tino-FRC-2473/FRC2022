@@ -640,8 +640,15 @@ public class DriveFSMSystem {
 
 		Translation2d motorSpeeds = Kinematics.inversekinematics(gyroAngle,
 			robotPosArc, target, true);
+		if (ppController.isNearEnd(12)) {
+			leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED / 4.0);
+			rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED / 4.0);
+		}
 		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
 		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
+
+		System.out.println("left power: " + leftMotor.get());
+		System.out.println("right power: " + rightMotor.get());
 
 	}
 

@@ -108,4 +108,11 @@ public class LimeLight {
 		SmartDashboard.putNumber("Vertical Offset", getYAngle());
 		SmartDashboard.putNumber("Area", getArea());
 	}
+
+	/**
+	 * Turns off Limelight.
+	 */
+	public void setOffLimelight() {
+		table.getEntry("ledMode").setNumber(1);
+	}
 }

@@ -27,7 +27,7 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 
 	private AutoSelector autoSelector = new AutoSelector();
-	private LimeLight limelight = new LimeLight();
+	private LimeLight limelight;
 
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
@@ -55,6 +55,8 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
+		limelight = new LimeLight();
+		limelight.setOffLimelight();
 	}
 
 	@Override
