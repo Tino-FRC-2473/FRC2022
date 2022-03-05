@@ -312,6 +312,7 @@ public class DriveFSMSystem {
 			case TURN_TO_HUB:
 				if (finishedTurning) {
 					finishedTurning = false;
+					stateTimer.reset();
 				} else {
 					return FSMState.TURN_TO_HUB;
 				}

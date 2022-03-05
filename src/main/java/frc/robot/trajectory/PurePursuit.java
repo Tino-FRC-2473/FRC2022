@@ -126,8 +126,10 @@ public class PurePursuit {
 	}
 
 	/**
-	 * asdf.
-	 * @return asdf
+	 * Checks if the robot is near the end of the path.
+	 * @param numPoints
+	 * @return Whether the robot is within a certain
+	 * amount of points to the end points
 	 */
 	public boolean isNearEnd(double numPoints) {
 		return (pathPoints.size() - 1 - numPoints) <= lastClosestPointIndex;

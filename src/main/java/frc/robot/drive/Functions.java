@@ -46,8 +46,8 @@ public class Functions {
 	 * @param steeringInput the input from the steering wheel
 	 * @return the adjusted steering power
 	 */
-	public static double calcSteeringPower(double steeringInput) {
-		return 1 - Math.abs(2 * steeringInput);
+	public static DrivePower calcSteeringPower(double steeringInput) {
+		return new DrivePower(1 + 2 * steeringInput, 1 - 2 * steeringInput);
 	}
 
 	/**
