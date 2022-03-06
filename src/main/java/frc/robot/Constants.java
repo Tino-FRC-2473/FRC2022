@@ -93,6 +93,7 @@ public class Constants {
 	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 15.0;
 	public static final double PP_TURN_RUN_TIME_SEC = 2.0;
 	public static final double PP_TERMINAL_BALL_WAIT_TIME_SEC = 3.5;
+	public static final int PP_SLOW_DOWN_NUM_POINTS = 8;
 
 	//Pure Pursuit Start Points and Angles
 	public static final Translation2d PP_R2_START_POINT = new Translation2d(90.653, 0);

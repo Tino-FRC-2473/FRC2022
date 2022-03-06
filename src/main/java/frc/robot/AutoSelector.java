@@ -49,6 +49,16 @@ public class AutoSelector {
 	}
 
 	/**
+	 * Returns if a red auto path is selected.
+	 * @return true if a red auto path is selected
+	 */
+	public boolean isRedAutoSelected() {
+		return (getSelectedAuto() == DesiredMode.RED_1_BALL)
+			|| (getSelectedAuto() == DesiredMode.RED_3_BALL_A)
+			|| (getSelectedAuto() == DesiredMode.RED_3_BALL_B);
+	}
+
+	/**
 	* Outputs the current auto to Shuffleboard.
 	*/
 	public void outputToShuffleboard() {

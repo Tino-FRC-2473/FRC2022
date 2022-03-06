@@ -120,10 +120,14 @@ public class LimeLight {
 
 	/**
 	 * Displays alliance color for CV.
-	 * @param allianceColor color of current alliance
+	 * @param isRedAutoSelected is a red auto path selected
 	 */
-	public void setAllianceColor(String allianceColor) {
-		table.getEntry("llrobot").setString(allianceColor);
+	public void setAllianceColor(boolean isRedAutoSelected) {
+		if (isRedAutoSelected) {
+			table.getEntry("llrobot").setDouble(0);
+		} else {
+			table.getEntry("llrobot").setDouble(1);
+		}
 	}
 
 	/**

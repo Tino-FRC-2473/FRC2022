@@ -57,7 +57,6 @@ public class Robot extends TimedRobot {
 		grabberSystem = new GrabberFSM();
 		limelight = new LimeLight();
 		limelight.setOffLimelight();
-		limelight.setAllianceColor(autoSelector.getSelectedAuto().toString());
 	}
 
 	@Override
@@ -68,6 +67,7 @@ public class Robot extends TimedRobot {
 		ballSystem.reset();
 		grabberSystem.reset();
 		autoSelector.outputToShuffleboard();
+		limelight.setAllianceColor(autoSelector.isRedAutoSelected());
 		driveFsmSystem.setAutoPath(autoSelector.getSelectedAuto());
 	}
 
