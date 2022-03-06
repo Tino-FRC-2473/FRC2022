@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
 	private GrabberFSM grabberSystem;
 
 	// Constants
-	private static final boolean RUN_COMPRESSOR = true;
+	private static final boolean RUN_COMPRESSOR = false;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -57,6 +57,7 @@ public class Robot extends TimedRobot {
 		grabberSystem = new GrabberFSM();
 		limelight = new LimeLight();
 		limelight.setOffLimelight();
+		limelight.setAllianceColor(autoSelector.getSelectedAuto().toString());
 	}
 
 	@Override
@@ -93,6 +94,7 @@ public class Robot extends TimedRobot {
 		ballSystem.update(input, driveFsmSystem.getCurrentState());
 		grabberSystem.update(input);
 		limelight.update();
+		driveFsmSystem.setCVBallPos(limelight.getBallPosition());
 	}
 
 	@Override

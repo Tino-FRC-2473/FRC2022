@@ -14,6 +14,8 @@ public class LimeLight {
 	private NetworkTableEntry ty;
 	private NetworkTableEntry ta;
 
+	private double[] defaultValue = new double[] {-1, -1};
+
 	/**
 	 * LimeLight Constructor.
 	 */
@@ -114,5 +116,21 @@ public class LimeLight {
 	 */
 	public void setOffLimelight() {
 		table.getEntry("ledMode").setNumber(1);
+	}
+
+	/**
+	 * Displays alliance color for CV.
+	 * @param allianceColor color of current alliance
+	 */
+	public void setAllianceColor(String allianceColor) {
+		table.getEntry("llrobot").setString(allianceColor);
+	}
+
+	/**
+	 * Gets data about the ball position from network tables.
+	 * @return an array of doubles in the following formath [distance, angle]
+	 */
+	public double[] getBallPosition() {
+		return table.getEntry("llpython").getDoubleArray(defaultValue);
 	}
 }

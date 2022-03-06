@@ -38,6 +38,10 @@ public class Constants {
 	public static final double RED_TERMINAL_ANGLE_DEG = 43.752;
 	public static final double TIME_FOR_AUTO_SHOOT = 0.8;
 
+	//CV Ball Detection Constants
+	public static final double DETECTED_BALL_MAX_POWER = 0.2;
+	public static final Translation2d LIMELIGHT_POS = new Translation2d(12.0, 0.0);
+
 	//Path constants
 	// For Run 1 the start angle is 26.73
 	public static final double RUN_1_LEAVE_TARMAC_DIST = 42.686;
@@ -80,14 +84,15 @@ public class Constants {
 	public static final int TURN_TO_HANGAR_BUTTON = 3;
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
+	public static final int DRIVING_TO_BALL_BUTTON = 6;
 
 	//Pure Pursuit Constants
-	public static final double MAX_IN_TO_POINT = 30;
-	public static final double PP_MAX_SPEED = 0.2;
+	public static final double MAX_IN_TO_POINT = 48;
+	public static final double PP_MAX_SPEED = 0.6;
 	public static final double PP_BALL_MAX_RUN_TIME_SEC = 15.0;
 	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 15.0;
 	public static final double PP_TURN_RUN_TIME_SEC = 2.0;
-	public static final double PP_TERMINAL_BALL_WAIT_TIME_SEC = 5.0;
+	public static final double PP_TERMINAL_BALL_WAIT_TIME_SEC = 3.5;
 
 	//Pure Pursuit Start Points and Angles
 	public static final Translation2d PP_R2_START_POINT = new Translation2d(90.653, 0);

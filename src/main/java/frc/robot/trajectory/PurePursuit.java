@@ -12,8 +12,8 @@ public class PurePursuit {
 	private ArrayList<Translation2d> keyPoints = new ArrayList<>();
 	private ArrayList<Translation2d> pathPoints = new ArrayList<>();
 	private int lastClosestPointIndex = 0;
-	// lookahead point is this many inches ahead
-	private final int lookaheadDistance = 6;
+	// lookahead point is this many points ahead
+	private final int lookaheadDistance = 8;
 
 	// in inches
 	private static final double SPACING = 6.0;

@@ -4,7 +4,7 @@ package frc.robot.systems;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -66,6 +66,7 @@ public class DriveFSMSystem {
 	private boolean isDrivingForward = true;
 
 	private DesiredMode autoPath;
+	private double[] cvBallPos = new double[] {0, 0};
 
 
 	private PurePursuit ppController;
@@ -149,6 +150,9 @@ public class DriveFSMSystem {
 
 		// Call one tick of update to ensure outputs reflect start state
 		update(input);
+
+		robotPosArc = Constants.PP_R3_START_POINT;
+
 	}
 
 	/**
@@ -164,8 +168,8 @@ public class DriveFSMSystem {
 		updateArcOdometry();
 		System.out.println("arc odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
 		System.out.println("line odo: " + robotPosLine.getX() + " " + robotPosLine.getY());
-		System.out.println("left: " + leftMotor.getEncoder().getPosition());
-		System.out.println("right: " + rightMotor.getEncoder().getPosition());
+		// System.out.println("left: " + leftMotor.get());
+		// System.out.println("right: " + rightMotor.get());
 
 
 		switch (currentState) {
@@ -208,10 +212,12 @@ public class DriveFSMSystem {
 				break;
 
 			case DEPOSIT_FIRST_BALL_IDLE:
+				System.out.println("depositing first ball");
 				handleBallDepositIdleState(input);
 				break;
 
 			case DEPOSIT_SECOND_BALL_IDLE:
+				System.out.println("depositing second ball");
 				handleBallDepositIdleState(input);
 				break;
 
@@ -231,7 +237,6 @@ public class DriveFSMSystem {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
-		outputToShuffleboard();
 		currentState = nextState(input);
 	}
 
@@ -565,7 +570,21 @@ public class DriveFSMSystem {
 				rightPower = turnPower;
 			}
 		}
+		System.out.println("dist: " + cvBallPos[0]);
+		System.out.println("angle: " + cvBallPos[1]);
 
+		if (input.getCVBallButton() && cvBallPos[0] != -1 && cvBallPos[1] != -1) {
+			Translation2d cvTargetPos = new Translation2d(cvBallPos[0],
+				Rotation2d.fromDegrees(cvBallPos[1]));
+			cvTargetPos = cvTargetPos.plus(Constants.LIMELIGHT_POS);
+			System.out.println("target: " + cvTargetPos.toString());
+			Translation2d desiredPowers = Kinematics.inversekinematics(0,
+				new Translation2d(0, 0), cvTargetPos);
+			leftPower = desiredPowers.getY() * Constants.DETECTED_BALL_MAX_POWER;
+			rightPower = desiredPowers.getX() * Constants.DETECTED_BALL_MAX_POWER;
+		}
+
+		System.out.println("right power: " + rightPower);
 		rightMotor.set(rightPower);
 		leftMotor.set(leftPower);
 
@@ -641,15 +660,17 @@ public class DriveFSMSystem {
 
 		Translation2d motorSpeeds = Kinematics.inversekinematics(gyroAngle,
 			robotPosArc, target, true);
-		if (ppController.isNearEnd(12)) {
-			leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED / 4.0);
-			rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED / 4.0);
+		if (ppController.isNearEnd(8)) {
+			System.out.println(true);
+			leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED / 2);
+			rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED / 2);
+		} else {
+			leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
+			rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 		}
-		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
-		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
 
-		System.out.println("left power: " + leftMotor.get());
-		System.out.println("right power: " + rightMotor.get());
+		// System.out.println("left power: " + leftMotor.get());
+		// System.out.println("right power: " + rightMotor.get());
 
 	}
 
@@ -689,9 +710,6 @@ public class DriveFSMSystem {
 		rightMotor.set(0);
 	}
 
-	private void outputToShuffleboard() {
-		SmartDashboard.putNumber("Gyro heading", getHeading());
-	}
 
 	/**
 	 * Sets the autonomous path to run.
@@ -699,5 +717,13 @@ public class DriveFSMSystem {
 	 */
 	public void setAutoPath(DesiredMode path) {
 		autoPath = path;
+	}
+
+	/**
+	 * Sets the detected ball position obtained by the limelight camera.
+	 * @param pos the detected ball's position
+	 */
+	public void setCVBallPos(double[] pos) {
+		cvBallPos = pos;
 	}
 }
