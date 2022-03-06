@@ -27,14 +27,6 @@ public class DriveModes {
 		double targetLeftPower = 0;
 		double targetRightPower = 0;
 
-		// if (steerAngle > 0) {
-		// 	targetRightPower = -adjustedInput * adjustedSteering;
-		// 	targetLeftPower = adjustedInput * (1 + 2 * Math.abs(steerAngle));
-		// } else {
-		// 	targetLeftPower = adjustedInput * adjustedSteering;
-		// 	targetRightPower = -adjustedInput * (1 + 2 * Math.abs(steerAngle));
-		// }
-
 		targetRightPower = -adjustedInput * adjustedSteering.getRightPower();
 		targetLeftPower = adjustedInput * adjustedSteering.getLeftPower();
 
@@ -48,13 +40,6 @@ public class DriveModes {
 
 		//reversible driving (currently set on buttons 5 and 6)
 		if (!isDrivingForward) {
-			// if (steerAngle > 0) {
-			// 	targetLeftPower = -adjustedInput * adjustedSteering;
-			// 	targetRightPower = adjustedInput;
-			// } else {
-			// 	targetRightPower = adjustedInput * adjustedSteering;
-			// 	targetLeftPower = -adjustedInput;
-			// }
 			targetLeftPower = -adjustedInput * adjustedSteering.getLeftPower();
 			targetRightPower = adjustedInput * adjustedSteering.getRightPower();
 
