@@ -13,7 +13,7 @@ public class PurePursuit {
 	private ArrayList<Translation2d> pathPoints = new ArrayList<>();
 	private int lastClosestPointIndex = 0;
 	// lookahead point is this many points ahead
-	private final int lookaheadDistance = 8;
+	private static final int LOOKAHEAD_DISTACE = 8;
 
 	// in inches
 	private static final double SPACING = 6.0;
@@ -56,7 +56,7 @@ public class PurePursuit {
 		ArrayList<Double> tempDistances = new ArrayList<>();
 
 		// store distances from robot to each path point in temp list
-		for (int i = lastClosestPointIndex; i < lastClosestPointIndex + lookaheadDistance; i++) {
+		for (int i = lastClosestPointIndex; i < lastClosestPointIndex + LOOKAHEAD_DISTACE; i++) {
 			if (i >= pathPoints.size()) {
 				break;
 			}
@@ -110,7 +110,7 @@ public class PurePursuit {
 		// prevent OOB errors
 		int lookaheadPointIndex = lastClosestPointIndex;
 		for (int i = lastClosestPointIndex + 1;
-			i <= lastClosestPointIndex + lookaheadDistance; i++) {
+			i <= lastClosestPointIndex + LOOKAHEAD_DISTACE; i++) {
 
 			if (i >= pathPoints.size()) {
 				break;
