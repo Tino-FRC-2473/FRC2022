@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -80,6 +81,8 @@ public class BallHandlingFSM {
 		// Reset state machine
 		pushCommandTimeStamp = Timer.getFPGATimestamp() - Constants.PUSH_TIME_SECONDS;
 		reset();
+		handleRetractIntakeMechState(null);
+		handleRetractingState(null);
 	}
 
 	/* ======================== Public methods ======================== */
@@ -115,6 +118,9 @@ public class BallHandlingFSM {
 	 */
 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		updateIsInShootingPositionIndicator(false);
+		System.out.println(ballDetector.getProximity());
+		SmartDashboard.putBoolean("Red Ball", getBallInMech() == IntakeMechBallStates.RED);
+		SmartDashboard.putBoolean("Blue Ball", getBallInMech() == IntakeMechBallStates.BLUE);
 
 		switch (currentState) {
 			case START_STATE:
@@ -168,7 +174,9 @@ public class BallHandlingFSM {
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		if (input == null) {
 			if (!isShooterSolenoidExtended
-					&& driveState == DriveFSMSystem.FSMState.DEPOSIT_BALL_IDLE) {
+					&& (driveState == DriveFSMSystem.FSMState.DEPOSIT_PRELOAD_BALL_IDLE
+					|| driveState == DriveFSMSystem.FSMState.DEPOSIT_FIRST_BALL_IDLE
+					|| driveState == DriveFSMSystem.FSMState.DEPOSIT_SECOND_BALL_IDLE)) {
 				pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 				return FSMState.FIRING;

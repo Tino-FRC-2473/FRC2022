@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class AutoSelector {
-	enum DesiredMode {
+	public enum DesiredMode {
 		RED_3_BALL_A,
 		BLUE_3_BALL_A,
 		RED_3_BALL_B,
@@ -23,21 +23,39 @@ public class AutoSelector {
 	 */
 	public AutoSelector() {
 		modeChooser = new SendableChooser<>();
-		modeChooser.setDefaultOption("3 Ball Red A", DesiredMode.RED_3_BALL_A);
-		modeChooser.addOption("3 Ball Blue A", DesiredMode.BLUE_3_BALL_A);
-		modeChooser.addOption("3 Ball Red B", DesiredMode.RED_3_BALL_B);
-		modeChooser.addOption("3 Ball Blue B", DesiredMode.BLUE_3_BALL_B);
-		modeChooser.addOption("1 Ball Red", DesiredMode.RED_1_BALL);
-		modeChooser.addOption("1 Ball Blue", DesiredMode.BLUE_1_BALL);
+		modeChooser.setDefaultOption("Red 3 Ball A", DesiredMode.RED_3_BALL_A);
+		modeChooser.addOption("Blue 3 Ball A", DesiredMode.BLUE_3_BALL_A);
+		modeChooser.addOption("Red 3 Ball B", DesiredMode.RED_3_BALL_B);
+		modeChooser.addOption("Blue 3 Ball B", DesiredMode.BLUE_3_BALL_B);
+		modeChooser.addOption("Red 1 Ball", DesiredMode.RED_1_BALL);
+		modeChooser.addOption("Blue 1 Ball", DesiredMode.BLUE_1_BALL);
 		SmartDashboard.putData("Auto mode", modeChooser);
+	}
+
+	/**
+	 * Returns current auto selector.
+	 * @return auto selector
+	 */
+	public SendableChooser<DesiredMode> getAutoSelector() {
+		return modeChooser;
 	}
 
 	/**
 	 * Gets the current auto from Shuffleboard.
 	 * @return name of current auto
 	 */
-	public String getSelectedAuto() {
-		return modeChooser.getSelected().name();
+	public DesiredMode getSelectedAuto() {
+		return modeChooser.getSelected();
+	}
+
+	/**
+	 * Returns if a red auto path is selected.
+	 * @return true if a red auto path is selected
+	 */
+	public boolean isRedAutoSelected() {
+		return (getSelectedAuto() == DesiredMode.RED_1_BALL)
+			|| (getSelectedAuto() == DesiredMode.RED_3_BALL_A)
+			|| (getSelectedAuto() == DesiredMode.RED_3_BALL_B);
 	}
 
 	/**

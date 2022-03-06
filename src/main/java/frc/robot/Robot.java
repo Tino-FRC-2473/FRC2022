@@ -27,7 +27,7 @@ public class Robot extends TimedRobot {
 	private TeleopInput input;
 
 	private AutoSelector autoSelector = new AutoSelector();
-	private LimeLight limelight = new LimeLight();
+	private LimeLight limelight;
 
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
@@ -35,7 +35,7 @@ public class Robot extends TimedRobot {
 	private GrabberFSM grabberSystem;
 
 	// Constants
-	private static final boolean RUN_COMPRESSOR = false;
+	private static final boolean RUN_COMPRESSOR = true;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -46,7 +46,7 @@ public class Robot extends TimedRobot {
 		System.out.println("robotInit");
 
 		//Init Compressor
-		CompressorSystem compressorSystem = new CompressorSystem(RUN_COMPRESSOR);
+		new CompressorSystem(RUN_COMPRESSOR);
 
 		//Init Driver Inputs
 		input = new TeleopInput();
@@ -55,16 +55,20 @@ public class Robot extends TimedRobot {
 		driveFsmSystem = new DriveFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
+		limelight = new LimeLight();
+		limelight.setOffLimelight();
 	}
 
 	@Override
 	public void autonomousInit() {
 		System.out.println("-------- Autonomous Init --------");
 		SmartDashboard.putString("Match Cycle", "AUTONOMOUS");
-		driveFsmSystem.reset();
+		driveFsmSystem.reset(null);
 		ballSystem.reset();
 		grabberSystem.reset();
 		autoSelector.outputToShuffleboard();
+		limelight.setAllianceColor(autoSelector.isRedAutoSelected());
+		driveFsmSystem.setAutoPath(autoSelector.getSelectedAuto());
 	}
 
 	@Override
@@ -78,7 +82,7 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		SmartDashboard.putString("Match Cycle", "TELEOP");
-		driveFsmSystem.reset();
+		driveFsmSystem.reset(input);
 		ballSystem.reset();
 		grabberSystem.reset();
 		limelight.update();
@@ -90,6 +94,7 @@ public class Robot extends TimedRobot {
 		ballSystem.update(input, driveFsmSystem.getCurrentState());
 		grabberSystem.update(input);
 		limelight.update();
+		driveFsmSystem.setCVBallPos(limelight.getBallPosition());
 	}
 
 	@Override

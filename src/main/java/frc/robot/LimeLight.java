@@ -14,6 +14,8 @@ public class LimeLight {
 	private NetworkTableEntry ty;
 	private NetworkTableEntry ta;
 
+	private double[] defaultValue = new double[] {-1, -1};
+
 	/**
 	 * LimeLight Constructor.
 	 */
@@ -107,5 +109,32 @@ public class LimeLight {
 		SmartDashboard.putNumber("Horizontal Offset", getXAngle());
 		SmartDashboard.putNumber("Vertical Offset", getYAngle());
 		SmartDashboard.putNumber("Area", getArea());
+	}
+
+	/**
+	 * Turns off Limelight.
+	 */
+	public void setOffLimelight() {
+		table.getEntry("ledMode").setNumber(1);
+	}
+
+	/**
+	 * Displays alliance color for CV.
+	 * @param isRedAutoSelected is a red auto path selected
+	 */
+	public void setAllianceColor(boolean isRedAutoSelected) {
+		if (isRedAutoSelected) {
+			table.getEntry("llrobot").setDouble(0);
+		} else {
+			table.getEntry("llrobot").setDouble(1);
+		}
+	}
+
+	/**
+	 * Gets data about the ball position from network tables.
+	 * @return an array of doubles in the following formath [distance, angle]
+	 */
+	public double[] getBallPosition() {
+		return table.getEntry("llpython").getDoubleArray(defaultValue);
 	}
 }

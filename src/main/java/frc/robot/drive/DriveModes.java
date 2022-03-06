@@ -14,11 +14,11 @@ public class DriveModes {
 	* 							forward driving setup
 	* @return return the powers to set the left and right motors
 	*/
-	public static DrivePower arcadedrive(double joystickY, double steerAngle,
+	public static DrivePower arcadeDrive(double joystickY, double steerAngle,
 		double currentLeftPower, double currentRightPower, boolean isDrivingForward) {
 
 		double adjustedInput = Functions.calcForwardPower(joystickY);
-		double adjustedSteering = Functions.calcSteeringPower(steerAngle);
+		DrivePower adjustedSteering = Functions.calcSteeringPower(steerAngle);
 
 		if (joystickY < 0 && adjustedInput > 0) {
 			adjustedInput *= -1;
@@ -27,22 +27,28 @@ public class DriveModes {
 		double targetLeftPower = 0;
 		double targetRightPower = 0;
 
-		if (steerAngle > 0) {
-			targetRightPower = -adjustedInput * adjustedSteering;
-			targetLeftPower = adjustedInput;
-		} else {
-			targetLeftPower = adjustedInput * adjustedSteering;
-			targetRightPower = -adjustedInput;
+		targetRightPower = -adjustedInput * adjustedSteering.getRightPower();
+		targetLeftPower = adjustedInput * adjustedSteering.getLeftPower();
+
+		//checks if the magnitude of the target powers is greater than 1
+		if (Math.abs(targetLeftPower) > 1.0) {
+			targetLeftPower /= Math.abs(targetLeftPower);
+		}
+		if (Math.abs(targetRightPower) > 1.0) {
+			targetRightPower /= Math.abs(targetRightPower);
 		}
 
 		//reversible driving (currently set on buttons 5 and 6)
 		if (!isDrivingForward) {
-			if (steerAngle > 0) {
-				targetLeftPower = -adjustedInput * adjustedSteering;
-				targetRightPower = adjustedInput;
-			} else {
-				targetRightPower = adjustedInput * adjustedSteering;
-				targetLeftPower = -adjustedInput;
+			targetLeftPower = -adjustedInput * adjustedSteering.getLeftPower();
+			targetRightPower = adjustedInput * adjustedSteering.getRightPower();
+
+			//checks if the magnitude of the target powers is greater than 1
+			if (Math.abs(targetLeftPower) > 1.0) {
+				targetLeftPower /= Math.abs(targetLeftPower);
+			}
+			if (Math.abs(targetRightPower) > 1.0) {
+				targetRightPower /= Math.abs(targetRightPower);
 			}
 		}
 

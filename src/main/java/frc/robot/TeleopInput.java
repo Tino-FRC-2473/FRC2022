@@ -16,10 +16,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class TeleopInput {
 	/* ======================== Private variables ======================== */
 	// Input objects
-	private Joystick leftJoystick;
-	private Joystick rightJoystick;
+	private Joystick mechJoystick;
 	private Joystick steeringWheel;
 	private Joystick drivingJoystick;
+	private Joystick leftJoystick;
 
 
 	/* ======================== Constructor ======================== */
@@ -29,11 +29,11 @@ public class TeleopInput {
 	 * by WPILib until teleop mode.
 	 */
 	public TeleopInput() {
-		leftJoystick = new Joystick(Constants.LEFT_JOYSTICK_PORT);
-		rightJoystick = new Joystick(Constants.RIGHT_JOYSTICK_PORT);
+		mechJoystick = new Joystick(Constants.MECH_JOYSTICK_PORT);
 
 		steeringWheel = new Joystick(Constants.STEERING_WHEEL_PORT);
 		drivingJoystick = new Joystick(Constants.DRIVING_JOYSTICK_PORT);
+		leftJoystick = new Joystick(Constants.LEFT_JOYSTICK_PORT);
 	}
 
 	/* ======================== Public methods ======================== */
@@ -48,17 +48,19 @@ public class TeleopInput {
 	 * @return Axis value
 	 */
 	public double getLeftJoystickY() {
-		SmartDashboard.putNumber("Left Joystick", leftJoystick.getY());
 		return leftJoystick.getY();
 	}
+
+	/* ------------------------ Mech Joystick ------------------------ */
+
 	/**
 	 * Get the value of the shooter button.
 	 * @return True if button is pressed
 	 */
 	public boolean isShooterButtonPressed() {
 		SmartDashboard.putBoolean("Shooter Button",
-			leftJoystick.getRawButton(Constants.SHOOTER_BUTTON));
-		return leftJoystick.getRawButton(Constants.SHOOTER_BUTTON);
+			mechJoystick.getRawButton(Constants.SHOOTER_BUTTON));
+		return mechJoystick.getRawButton(Constants.SHOOTER_BUTTON);
 	}
 	/**
 	 * Get the value of the intake button.
@@ -66,55 +68,36 @@ public class TeleopInput {
 	 */
 	public boolean isIntakeButtonPressed() {
 		SmartDashboard.putBoolean("Intake Button",
-			leftJoystick.getRawButton(Constants.INTAKE_BUTTON));
-		return leftJoystick.getRawButton(Constants.INTAKE_BUTTON);
+			mechJoystick.getRawButton(Constants.INTAKE_BUTTON));
+		return mechJoystick.getRawButton(Constants.INTAKE_BUTTON);
 	}
 	/**
 	 * Get the value of the terminal release button.
 	 * @return True if button is pressed
 	 */
 	public boolean isTerminalReleaseButtonPressed() {
-		SmartDashboard.putBoolean("Terminal Release Button",
-			leftJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON));
-		return leftJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
+		return mechJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
 	}
 	/**
-	 * Get the value of the intake retract button.
+	 * Get the value of the intake toggle button.
 	 * @return True if button is pressed
 	 */
 	public boolean wasToggleIntakeButtonPressed() {
-		SmartDashboard.putBoolean("Deploy Intake Button",
-			leftJoystick.getRawButton(Constants.TOGGLE_INTAKE_BUTTON));
-		return leftJoystick.getRawButtonPressed(Constants.TOGGLE_INTAKE_BUTTON);
+		return mechJoystick.getRawButtonPressed(Constants.TOGGLE_INTAKE_BUTTON);
 	}
 	/**
 	 * Get the value of the ascending button.
 	 * @return True if button is pressed
 	 */
 	public boolean isAscendingButtonPressed() {
-		SmartDashboard.putBoolean("Ascending Button",
-			rightJoystick.getRawButton(Constants.ASCEND_BUTTON));
-		return rightJoystick.getRawButton(Constants.ASCEND_BUTTON);
+		return mechJoystick.getRawButton(Constants.ASCEND_BUTTON);
 	}
 	/**
 	 * Get the value of the descending button.
 	 * @return True if button is pressed
 	 */
 	public boolean isDescendingButtonPressed() {
-		SmartDashboard.putBoolean("Descending Button",
-			rightJoystick.getRawButton(Constants.DESCEND_BUTTON));
-		return rightJoystick.getRawButton(Constants.DESCEND_BUTTON);
-	}
-
-	/* ------------------------ Right Joystick ------------------------ */
-
-	/**
-	 * Get Y axis of Right Joystick.
-	 * @return Axis value
-	 */
-	public double getRightJoystickY() {
-		SmartDashboard.putNumber("Right Joystick", rightJoystick.getY());
-		return rightJoystick.getY();
+		return mechJoystick.getRawButton(Constants.DESCEND_BUTTON);
 	}
 
 	/* ------------------------ Wheel ------------------------ */
@@ -151,8 +134,6 @@ public class TeleopInput {
 	 * @return true if the forward driving button is pressed
 	 */
 	public boolean isForwardDrivingButtonPressed() {
-		SmartDashboard.putBoolean("Driving Forward",
-			drivingJoystick.getRawButton(Constants.DRIVING_FORWARD_BUTTON));
 		return drivingJoystick.getRawButton(Constants.DRIVING_FORWARD_BUTTON);
 	}
 
@@ -161,8 +142,6 @@ public class TeleopInput {
 	 * @return true if the backward driving button is pressed
 	 */
 	public boolean isBackwardDrivingButtonPressed() {
-		SmartDashboard.putBoolean("Driving Backward",
-			drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON));
 		return drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON);
 	}
 
@@ -177,11 +156,19 @@ public class TeleopInput {
 	}
 
 	/**
-	 * Checks if the button to turn to terminal on the driving joystick is released.
-	 * @return true if the button to turn to terminal is released
+	 * Checks if the button to turn to terminal on the driving joystick is pressed.
+	 * @return true if the button to turn to terminal is pressed
 	 */
 	public boolean getTerminalButton() {
 		return drivingJoystick.getRawButton(Constants.TURN_TO_TERMINAL_BUTTON);
+	}
+
+	/**
+	 * Checks if the button to drive to the detected ball is pressed.
+	 * @return true if the button is pressed
+	 */
+	public boolean getCVBallButton() {
+		return drivingJoystick.getRawButton(Constants.DRIVING_TO_BALL_BUTTON);
 	}
 
 	/* ======================== Private methods ======================== */
