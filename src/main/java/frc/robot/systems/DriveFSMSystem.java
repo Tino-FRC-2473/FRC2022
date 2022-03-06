@@ -53,11 +53,9 @@ public class DriveFSMSystem {
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
 	private Translation2d robotPosLine = Constants.PP_R3_START_POINT;
-	// private Translation2d robotPosLine = new Translation2d(0, 0);
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
 	private Translation2d robotPosArc = Constants.PP_R3_START_POINT;
-	// private Translation2d robotPosArc = new Translation2d(0, 0);
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
@@ -412,10 +410,6 @@ public class DriveFSMSystem {
 
 		if (speed >= Constants.MOTOR_RUN_POWER) {
 			setPowerForAllMotors(Constants.MOTOR_RUN_POWER);
-			// setPowerForAllMotors(Constants.MOTOR_MAX_RUN_POWER_ACCELERATION
-			// 	* (-Math.pow((Constants.MOTOR_MAX_POWER_RATIO_ACCELERATION
-			// 	* Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2)
-			// 	+ Constants.MOTOR_INITAL_POWER_ACCELERATION));
 		} else if (speed <= -Constants.MOTOR_RUN_POWER) {
 			setPowerForAllMotors(-Constants.MOTOR_RUN_POWER);
 		} else {
@@ -478,7 +472,6 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		// double angle = 90 - gyro.getYaw();
 		double angle = Constants.PP_R3_HUB_ANGLE_DEG - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
@@ -595,14 +588,8 @@ public class DriveFSMSystem {
 	 * @return the robot's new position
 	 */
 	public Translation2d updateLineOdometry() {
-		// double adjustedAngle = gyroAngle;
 		double currentEncoderPos = ((-leftMotor.getEncoder().getPosition()
 			+ rightMotor.getEncoder().getPosition()) / 2.0);
-		// double dEncoder = (currentEncoderPos - prevEncoderPosLine)
-			// / Constants.REVOLUTIONS_PER_INCH;
-		// double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
-		// double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
-		// robotPosLine.plus(new Translation2d(dX, dY));
 		robotPosLine = Kinematics.updateLineOdometry(gyroAngle, currentEncoderPos,
 			prevEncoderPosLine, robotPosLine);
 
