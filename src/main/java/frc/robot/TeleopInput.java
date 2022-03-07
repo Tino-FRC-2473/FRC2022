@@ -48,7 +48,6 @@ public class TeleopInput {
 	 * @return Axis value
 	 */
 	public double getLeftJoystickY() {
-		SmartDashboard.putNumber("Left Joystick", leftJoystick.getY());
 		return leftJoystick.getY();
 	}
 
@@ -77,8 +76,6 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isTerminalReleaseButtonPressed() {
-		SmartDashboard.putBoolean("Terminal Release Button",
-			mechJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON));
 		return mechJoystick.getRawButton(Constants.TERMINAL_RELEASE_BUTTON);
 	}
 	/**
@@ -86,8 +83,6 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean wasToggleIntakeButtonPressed() {
-		SmartDashboard.putBoolean("Deploy Intake Button",
-			mechJoystick.getRawButton(Constants.TOGGLE_INTAKE_BUTTON));
 		return mechJoystick.getRawButtonPressed(Constants.TOGGLE_INTAKE_BUTTON);
 	}
 	/**
@@ -95,8 +90,6 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isAscendingButtonPressed() {
-		SmartDashboard.putBoolean("Ascending Button",
-			mechJoystick.getRawButton(Constants.ASCEND_BUTTON));
 		return mechJoystick.getRawButton(Constants.ASCEND_BUTTON);
 	}
 	/**
@@ -104,8 +97,6 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isDescendingButtonPressed() {
-		SmartDashboard.putBoolean("Descending Button",
-			mechJoystick.getRawButton(Constants.DESCEND_BUTTON));
 		return mechJoystick.getRawButton(Constants.DESCEND_BUTTON);
 	}
 
@@ -143,8 +134,6 @@ public class TeleopInput {
 	 * @return true if the forward driving button is pressed
 	 */
 	public boolean isForwardDrivingButtonPressed() {
-		SmartDashboard.putBoolean("Driving Forward",
-			drivingJoystick.getRawButton(Constants.DRIVING_FORWARD_BUTTON));
 		return drivingJoystick.getRawButton(Constants.DRIVING_FORWARD_BUTTON);
 	}
 
@@ -153,8 +142,6 @@ public class TeleopInput {
 	 * @return true if the backward driving button is pressed
 	 */
 	public boolean isBackwardDrivingButtonPressed() {
-		SmartDashboard.putBoolean("Driving Backward",
-			drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON));
 		return drivingJoystick.getRawButton(Constants.DRIVING_BACKWARDS_BUTTON);
 	}
 
@@ -169,11 +156,19 @@ public class TeleopInput {
 	}
 
 	/**
-	 * Checks if the button to turn to terminal on the driving joystick is released.
-	 * @return true if the button to turn to terminal is released
+	 * Checks if the button to turn to terminal on the driving joystick is pressed.
+	 * @return true if the button to turn to terminal is pressed
 	 */
 	public boolean getTerminalButton() {
 		return drivingJoystick.getRawButton(Constants.TURN_TO_TERMINAL_BUTTON);
+	}
+
+	/**
+	 * Checks if the button to drive to the detected ball is pressed.
+	 * @return true if the button is pressed
+	 */
+	public boolean getCVBallButton() {
+		return drivingJoystick.getRawButton(Constants.DRIVING_TO_BALL_BUTTON);
 	}
 
 	/* ======================== Private methods ======================== */

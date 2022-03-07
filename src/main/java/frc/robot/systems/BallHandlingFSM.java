@@ -124,6 +124,9 @@ public class BallHandlingFSM {
 	 */
 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		updateIsInShootingPositionIndicator(false);
+		System.out.println(ballDetector.getProximity());
+		SmartDashboard.putBoolean("Red Ball", getBallInMech() == IntakeMechBallStates.RED);
+		SmartDashboard.putBoolean("Blue Ball", getBallInMech() == IntakeMechBallStates.BLUE);
 
 		SmartDashboard.putBoolean("Red Ball", getBallInMech() == IntakeMechBallStates.RED);
 		SmartDashboard.putBoolean("Blue Ball", getBallInMech() == IntakeMechBallStates.BLUE);
@@ -180,8 +183,9 @@ public class BallHandlingFSM {
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		if (input == null) {
 			if (!isShooterSolenoidExtended
-						&& !isShooterPistonPressurized
-						&& driveState == DriveFSMSystem.FSMState.DEPOSIT_BALL_IDLE) {
+					&& (driveState == DriveFSMSystem.FSMState.DEPOSIT_PRELOAD_BALL_IDLE
+					|| driveState == DriveFSMSystem.FSMState.DEPOSIT_FIRST_BALL_IDLE
+					|| driveState == DriveFSMSystem.FSMState.DEPOSIT_SECOND_BALL_IDLE)) {
 				pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 				return FSMState.FIRING;

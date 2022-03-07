@@ -12,8 +12,8 @@ public class PurePursuit {
 	private ArrayList<Translation2d> keyPoints = new ArrayList<>();
 	private ArrayList<Translation2d> pathPoints = new ArrayList<>();
 	private int lastClosestPointIndex = 0;
-	// lookahead point is this many inches ahead
-	private final int lookaheadDistance = 6;
+	// lookahead point is this many points ahead
+	private static final int LOOKAHEAD_DISTACE = 8;
 
 	// in inches
 	private static final double SPACING = 6.0;
@@ -56,7 +56,7 @@ public class PurePursuit {
 		ArrayList<Double> tempDistances = new ArrayList<>();
 
 		// store distances from robot to each path point in temp list
-		for (int i = lastClosestPointIndex; i < lastClosestPointIndex + lookaheadDistance; i++) {
+		for (int i = lastClosestPointIndex; i < lastClosestPointIndex + LOOKAHEAD_DISTACE; i++) {
 			if (i >= pathPoints.size()) {
 				break;
 			}
@@ -110,7 +110,7 @@ public class PurePursuit {
 		// prevent OOB errors
 		int lookaheadPointIndex = lastClosestPointIndex;
 		for (int i = lastClosestPointIndex + 1;
-			i <= lastClosestPointIndex + lookaheadDistance; i++) {
+			i <= lastClosestPointIndex + LOOKAHEAD_DISTACE; i++) {
 
 			if (i >= pathPoints.size()) {
 				break;
@@ -124,4 +124,15 @@ public class PurePursuit {
 			? pathPoints.get(lookaheadPointIndex) : pathPoints.get(pathPoints.size() - 1);
 		return lookaheadPoint;
 	}
+
+	/**
+	 * Checks if the robot is near the end of the path.
+	 * @param numPoints
+	 * @return Whether the robot is within a certain
+	 * amount of points to the end points
+	 */
+	public boolean isNearEnd(double numPoints) {
+		return (pathPoints.size() - 1 - numPoints) <= lastClosestPointIndex;
+	}
+
 }

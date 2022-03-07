@@ -20,11 +20,11 @@ public class Constants {
 	public static final double TURN_ERROR_THRESHOLD_DEGREE = 1.0;
 	public static final double TELEOP_ACCELERATION_CONSTANT = 0.05;
 	public static final double TELEOP_ACCELERATION_MIN = 0.1;
-	public static final double ENCODER_CONSTANT = 1.0814; //1.0799;
+	public static final double ENCODER_CONSTANT = 1.0814;
 	public static final double COUNTS_PER_MOTOR_REVOLUTION = 42;
 	public static final double GEAR_RATIO = 8.0; //26.0 * 4.67 / 12.0;
 	public static final double REVOLUTIONS_PER_INCH
-		= GEAR_RATIO * ENCODER_CONSTANT / (Math.PI * WHEEL_DIAMETER_INCHES);
+		= GEAR_RATIO / (Math.PI * WHEEL_DIAMETER_INCHES * ENCODER_CONSTANT);
 	public static final double ODOMETRY_MIN_THETA = 1.0;
 	public static final double MOTOR_RUN_POWER = 0.1;
 	public static final double MOTOR_MAX_RUN_POWER_ACCELERATION = 0.35;
@@ -37,6 +37,10 @@ public class Constants {
 	public static final double HANGAR_TURN_TARGET_ANGLE = 180;
 	public static final double RED_TERMINAL_ANGLE_DEG = 43.752;
 	public static final double TIME_FOR_AUTO_SHOOT = 0.8;
+
+	//CV Ball Detection Constants
+	public static final double DETECTED_BALL_MAX_POWER = 0.2;
+	public static final Translation2d LIMELIGHT_POS = new Translation2d(12.0, 0.0);
 
 	//Path constants
 	// For Run 1 the start angle is 26.73
@@ -80,14 +84,16 @@ public class Constants {
 	public static final int TURN_TO_HANGAR_BUTTON = 3;
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
+	public static final int DRIVING_TO_BALL_BUTTON = 6;
 
 	//Pure Pursuit Constants
-	public static final double MAX_IN_TO_POINT = 30;
-	public static final double PP_MAX_SPEED = 0.2;
+  public static final double MAX_IN_TO_POINT = 48;
+	public static final double PP_MAX_SPEED = 0.6;
 	public static final double PP_BALL_MAX_RUN_TIME_SEC = 15.0;
 	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 15.0;
 	public static final double PP_TURN_RUN_TIME_SEC = 2.0;
-	public static final double PP_TERMINAL_BALL_WAIT_TIME_SEC = 4.0;
+	public static final double PP_TERMINAL_BALL_WAIT_TIME_SEC = 3.5;
+	public static final int PP_SLOW_DOWN_NUM_POINTS = 8;
 
 	//Pure Pursuit Start Points and Angles
 	public static final Translation2d PP_R2_START_POINT = new Translation2d(90.653, 0);

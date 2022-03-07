@@ -4,7 +4,7 @@ package frc.robot.systems;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
@@ -20,6 +20,7 @@ import frc.robot.trajectory.Kinematics;
 import frc.robot.trajectory.PurePursuit;
 import frc.robot.HardwareMap;
 import frc.robot.Constants;
+import frc.robot.AutoSelector.DesiredMode;
 
 // Java Imports
 import java.util.ArrayList;
@@ -36,7 +37,8 @@ public class DriveFSMSystem {
 		PURE_PURSUIT,
 		PURE_PURSUIT_TO_HUB,
 		TURN_TO_HUB,
-		DEPOSIT_BALL_IDLE,
+		DEPOSIT_FIRST_BALL_IDLE,
+		DEPOSIT_SECOND_BALL_IDLE,
 		DEPOSIT_PRELOAD_BALL_IDLE,
 		WAIT_TO_RECEIVE_BALLS,
 		TURN_TO_TERMINAL
@@ -51,17 +53,19 @@ public class DriveFSMSystem {
 	private double forwardStateInitialEncoderPos = -1;
 	private double gyroAngle = 0;
 	private Translation2d robotPosLine = Constants.PP_R3_START_POINT;
-	// private Translation2d robotPosLine = new Translation2d(0, 0);
 	private double prevEncoderPosLine = 0;
 	private double prevEncoderPosArc = 0;
 	private Translation2d robotPosArc = Constants.PP_R3_START_POINT;
-	// private Translation2d robotPosArc = new Translation2d(0, 0);
 	private double prevGyroAngle = 0;
 	private double leftPower = 0;
 	private double rightPower = 0;
 	private double previousEncoderCount = 0;
 	private Timer stateTimer;
 	private boolean isDrivingForward = true;
+
+	private DesiredMode autoPath;
+	private double[] cvBallPos = new double[] {0, 0};
+
 
 	private PurePursuit ppController;
 	private ArrayList<Translation2d> ballPoints = new ArrayList<>();
@@ -134,7 +138,7 @@ public class DriveFSMSystem {
 		finishedPurePursuitPath = false;
 
 		if (input == null) {
-			currentState = FSMState.DEPOSIT_BALL_IDLE;
+			currentState = FSMState.DEPOSIT_PRELOAD_BALL_IDLE;
 		} else {
 			currentState = FSMState.TELEOP_STATE;
 		}
@@ -144,6 +148,9 @@ public class DriveFSMSystem {
 
 		// Call one tick of update to ensure outputs reflect start state
 		update(input);
+
+		robotPosArc = Constants.PP_R3_START_POINT;
+
 	}
 
 	/**
@@ -157,9 +164,10 @@ public class DriveFSMSystem {
 
 		updateLineOdometry();
 		updateArcOdometry();
-		System.out.println("odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
-		System.out.println("left: " + leftMotor.getEncoder().getPosition());
-		System.out.println("right: " + rightMotor.getEncoder().getPosition());
+		System.out.println("arc odo: " + robotPosArc.getX() + " " + robotPosArc.getY());
+		System.out.println("line odo: " + robotPosLine.getX() + " " + robotPosLine.getY());
+		// System.out.println("left: " + leftMotor.get());
+		// System.out.println("right: " + rightMotor.get());
 
 
 		switch (currentState) {
@@ -201,7 +209,26 @@ public class DriveFSMSystem {
 						Constants.PP_TURN_RUN_TIME_SEC);
 				break;
 
-			case DEPOSIT_BALL_IDLE:
+			case DEPOSIT_FIRST_BALL_IDLE:
+				System.out.println("depositing first ball");
+				handleBallDepositIdleState(input);
+				break;
+
+			case DEPOSIT_SECOND_BALL_IDLE:
+				System.out.println("depositing second ball");
+				handleBallDepositIdleState(input);
+				break;
+
+			case TURN_TO_TERMINAL:
+				handleTurnState(input, Constants.RED_TERMINAL_ANGLE_DEG,
+					Constants.PP_TURN_RUN_TIME_SEC);
+				break;
+
+			case WAIT_TO_RECEIVE_BALLS:
+				handleWaitToReceiveBallsState(input, Constants.PP_TERMINAL_BALL_WAIT_TIME_SEC);
+				break;
+
+			case DEPOSIT_PRELOAD_BALL_IDLE:
 				handleBallDepositIdleState(input);
 				break;
 
@@ -221,7 +248,6 @@ public class DriveFSMSystem {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
-		outputToShuffleboard();
 		currentState = nextState(input);
 	}
 
@@ -302,17 +328,52 @@ public class DriveFSMSystem {
 			case TURN_TO_HUB:
 				if (finishedTurning) {
 					finishedTurning = false;
+					stateTimer.reset();
 				} else {
 					return FSMState.TURN_TO_HUB;
 				}
-				return FSMState.DEPOSIT_BALL_IDLE;
+				return FSMState.DEPOSIT_FIRST_BALL_IDLE;
 
-			case DEPOSIT_BALL_IDLE:
-				if (stateTimer.hasElapsed(Constants.TIME_FOR_FULL_SHOT)) {
+			case DEPOSIT_FIRST_BALL_IDLE:
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_AUTO_SHOOT)) {
+					stateTimer.reset();
+					return FSMState.DEPOSIT_SECOND_BALL_IDLE;
+				} else {
+					return FSMState.DEPOSIT_FIRST_BALL_IDLE;
+				}
+
+			case DEPOSIT_SECOND_BALL_IDLE:
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_AUTO_SHOOT)) {
+					stateTimer.reset();
+					return FSMState.TELEOP_STATE;
+				} else {
+					return FSMState.DEPOSIT_SECOND_BALL_IDLE;
+				}
+
+			case TURN_TO_TERMINAL:
+				if (finishedTurning) {
+					finishedTurning = false;
+					stateTimer.reset();
+				} else {
+					return FSMState.TURN_TO_TERMINAL;
+				}
+				return FSMState.WAIT_TO_RECEIVE_BALLS;
+
+			case WAIT_TO_RECEIVE_BALLS:
+				if (isStateFinished) {
+					isStateFinished = false;
+					stateTimer.reset();
+					return FSMState.PURE_PURSUIT_TO_HUB;
+				} else {
+					return FSMState.WAIT_TO_RECEIVE_BALLS;
+				}
+
+			case DEPOSIT_PRELOAD_BALL_IDLE:
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_AUTO_SHOOT)) {
 					stateTimer.reset();
 					return FSMState.PURE_PURSUIT;
 				} else {
-					return FSMState.DEPOSIT_BALL_IDLE;
+					return FSMState.DEPOSIT_PRELOAD_BALL_IDLE;
 				}
 
 			case TURN_TO_TERMINAL:
@@ -388,10 +449,6 @@ public class DriveFSMSystem {
 
 		if (speed >= Constants.MOTOR_RUN_POWER) {
 			setPowerForAllMotors(Constants.MOTOR_RUN_POWER);
-			// setPowerForAllMotors(Constants.MOTOR_MAX_RUN_POWER_ACCELERATION
-			// 	* (-Math.pow((Constants.MOTOR_MAX_POWER_RATIO_ACCELERATION
-			// 	* Math.pow(error - inches / 2.0, 2)) / (inches * inches), 2)
-			// 	+ Constants.MOTOR_INITAL_POWER_ACCELERATION));
 		} else if (speed <= -Constants.MOTOR_RUN_POWER) {
 			setPowerForAllMotors(-Constants.MOTOR_RUN_POWER);
 		} else {
@@ -428,16 +485,21 @@ public class DriveFSMSystem {
 			return;
 		}
 		double error = degrees - getHeading();
+		if (error > 180) {
+			error -= 360;
+		}
 		if (Math.abs(error) <= Constants.TURN_ERROR_THRESHOLD_DEGREE) {
 			finishedTurning = true;
 			leftMotor.set(0);
 			rightMotor.set(0);
 			return;
 		}
-		double power = error / Constants.TURN_ERROR_POWER_RATIO;
-		if (Math.abs(power) < Constants.MIN_TURN_POWER) {
-			power = Constants.MIN_TURN_POWER * (power < 0 ? -1 : 1);
+		double power = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
+		if (power < Constants.MIN_TURN_POWER) {
+			power = Constants.MIN_TURN_POWER;
 		}
+
+		power *= (error < 0 && error > -180) ? -1 : 1;
 
 		leftMotor.set(power);
 		rightMotor.set(power);
@@ -449,7 +511,6 @@ public class DriveFSMSystem {
 	* @return the gyro heading
 	*/
 	public double getHeading() {
-		// double angle = 90 - gyro.getYaw();
 		double angle = Constants.PP_R3_HUB_ANGLE_DEG - gyro.getYaw();
 		if (angle < 0) {
 			angle += 360;
@@ -541,7 +602,21 @@ public class DriveFSMSystem {
 				rightPower = turnPower;
 			}
 		}
+		System.out.println("dist: " + cvBallPos[0]);
+		System.out.println("angle: " + cvBallPos[1]);
 
+		if (input.getCVBallButton() && cvBallPos[0] != -1 && cvBallPos[1] != -1) {
+			Translation2d cvTargetPos = new Translation2d(cvBallPos[0],
+				Rotation2d.fromDegrees(cvBallPos[1]));
+			cvTargetPos = cvTargetPos.plus(Constants.LIMELIGHT_POS);
+			System.out.println("target: " + cvTargetPos.toString());
+			Translation2d desiredPowers = Kinematics.inversekinematics(0,
+				new Translation2d(0, 0), cvTargetPos);
+			leftPower = desiredPowers.getY() * Constants.DETECTED_BALL_MAX_POWER;
+			rightPower = desiredPowers.getX() * Constants.DETECTED_BALL_MAX_POWER;
+		}
+
+		System.out.println("right power: " + rightPower);
 		rightMotor.set(rightPower);
 		leftMotor.set(leftPower);
 
@@ -552,17 +627,10 @@ public class DriveFSMSystem {
 	 * @return the robot's new position
 	 */
 	public Translation2d updateLineOdometry() {
-
-		double newEncoderPos = ((-leftMotor.getEncoder().getPosition()
-			+ rightMotor.getEncoder().getPosition()) / 2.0);
-
-		double adjustedAngle = gyroAngle;
 		double currentEncoderPos = ((-leftMotor.getEncoder().getPosition()
 			+ rightMotor.getEncoder().getPosition()) / 2.0);
-		double dEncoder = (currentEncoderPos - prevEncoderPosLine) / Constants.REVOLUTIONS_PER_INCH;
-		double dX = dEncoder * Math.cos(Math.toRadians(adjustedAngle));
-		double dY = dEncoder * Math.sin(Math.toRadians(adjustedAngle));
-		robotPosLine.plus(new Translation2d(dX, dY));
+		robotPosLine = Kinematics.updateLineOdometry(gyroAngle, currentEncoderPos,
+			prevEncoderPosLine, robotPosLine);
 
 		prevEncoderPosLine = currentEncoderPos;
 		return robotPosLine;
@@ -618,8 +686,17 @@ public class DriveFSMSystem {
 
 		Translation2d motorSpeeds = Kinematics.inversekinematics(gyroAngle,
 			robotPosArc, target, true);
-		leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
-		rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
+		if (ppController.isNearEnd(Constants.PP_SLOW_DOWN_NUM_POINTS)) {
+			System.out.println(true);
+			leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED / 2);
+			rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED / 2);
+		} else {
+			leftMotor.set(-motorSpeeds.getX() * Constants.PP_MAX_SPEED);
+			rightMotor.set(motorSpeeds.getY() * Constants.PP_MAX_SPEED);
+		}
+
+		// System.out.println("left power: " + leftMotor.get());
+		// System.out.println("right power: " + rightMotor.get());
 
 	}
 
@@ -659,7 +736,20 @@ public class DriveFSMSystem {
 		rightMotor.set(0);
 	}
 
-	private void outputToShuffleboard() {
-		SmartDashboard.putNumber("Gyro heading", getHeading());
+
+	/**
+	 * Sets the autonomous path to run.
+	 * @param path the path to run
+	 */
+	public void setAutoPath(DesiredMode path) {
+		autoPath = path;
+	}
+
+	/**
+	 * Sets the detected ball position obtained by the limelight camera.
+	 * @param pos the detected ball's position
+	 */
+	public void setCVBallPos(double[] pos) {
+		cvBallPos = pos;
 	}
 }

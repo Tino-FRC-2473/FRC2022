@@ -69,10 +69,12 @@ public class AutoPaths {
 		ArrayList<Translation2d> path = new ArrayList<>();
 		path.add(Constants.PP_R3_START_POINT);
 		path.add(new Translation2d(62, -22));
-		path.add(new Translation2d(191.230, 0));
+		// path.add(new Translation2d(191.230, 0));
+		path.add(new Translation2d(149.215, 8.764));
+		// path.add(new Translation2d(200, 39.286));
 		path.add(new Translation2d(227.904, 65.860));
-		path.add(new Translation2d(249.300, 85.490));
-		// path.add(new Translation2d(269.300, 105.490));
+		// path.add(new Translation2d(249.300, 85.490));
+		path.add(new Translation2d(278.800, 114.990));
 		return path;
 	}
 
@@ -82,10 +84,12 @@ public class AutoPaths {
 	 */
 	public static ArrayList<Translation2d> r3HubPath() {
 		ArrayList<Translation2d> path = new ArrayList<>();
-		path.add(new Translation2d(249.300, 85.490));
-		// path.add(new Translation2d(269.300, 105.490));
+		// path.add(new Translation2d(249.300, 85.490));
+		path.add(new Translation2d(278.800, 114.990));
+		// path.add(new Translation2d(249.300, 85.490));
 		path.add(new Translation2d(227.904, 65.860));
-		path.add(new Translation2d(191.230, 0));
+		path.add(new Translation2d(149.215, 8.764));
+		// path.add(new Translation2d(191.230, 0));
 		path.add(new Translation2d(62, -22));
 		return path;
 	}
