@@ -180,15 +180,21 @@ public class BallHandlingFSM {
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		if (input == null) {
 			if (!isShooterSolenoidExtended
-					&& driveState == DriveFSMSystem.FSMState.DEPOSIT_PRELOAD_BALL_IDLE) {
-				pushCommandTimeStamp = Timer.getFPGATimestamp();
+						&& !isShooterPistonPressurized
+						&& driveState == DriveFSMSystem.FSMState.DEPOSIT_BALL_IDLE) {
+					pushCommandTimeStamp = Timer.getFPGATimestamp();
 
-				return FSMState.FIRING;
-			} else if (isShooterSolenoidExtended
-					&& Timer.getFPGATimestamp() - pushCommandTimeStamp
-					> Constants.TIME_FOR_FULL_SHOT) {
-				return FSMState.RETRACTING;
-			}
+					return FSMState.FIRING;
+				} else if (isShooterSolenoidExtended) {
+					if (Timer.getFPGATimestamp() - pushCommandTimeStamp
+							> Constants.TIME_FOR_FULL_SHOT) {
+						return FSMState.RETRACTING;
+					} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp
+							> Constants.TIME_TO_DEPRESSURIZATION
+							&& isShooterPistonPressurized) {
+						return FSMState.RELEASING_SHOOTER;
+					}
+				}
 			return FSMState.IDLE;
 		}
 
@@ -197,14 +203,18 @@ public class BallHandlingFSM {
 				return FSMState.RELEASING_SHOOTER;
 
 			case IDLE:
-				if (!isShooterSolenoidExtended && !isShooterPistonPressurized && input.isShooterButtonPressed()) {
+				if (!isShooterSolenoidExtended
+						&& !isShooterPistonPressurized
+						&& input.isShooterButtonPressed()) {
 					pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
 				} else if (isShooterSolenoidExtended) {
-					if (Timer.getFPGATimestamp() - pushCommandTimeStamp > Constants.TIME_FOR_FULL_SHOT) {
+					if (Timer.getFPGATimestamp() - pushCommandTimeStamp
+							> Constants.TIME_FOR_FULL_SHOT) {
 						return FSMState.RETRACTING;
-					} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp > Constants.TIME_TO_DEPRESSURIZATION
+					} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp
+							> Constants.TIME_TO_DEPRESSURIZATION
 							&& isShooterPistonPressurized) {
 						return FSMState.RELEASING_SHOOTER;
 					}
@@ -221,14 +231,21 @@ public class BallHandlingFSM {
 				}
 
 			case BALL_INTO_TERMINAL:
-				if (isShooterSolenoidExtended
-						&& Timer.getFPGATimestamp() - pushCommandTimeStamp
-						> Constants.TIME_FOR_FULL_SHOT) {
-					return FSMState.RETRACTING;
-				} else if (!isShooterSolenoidExtended && input.isShooterButtonPressed()) {
+				if (!isShooterSolenoidExtended
+						&& !isShooterPistonPressurized
+						&& input.isShooterButtonPressed()) {
 					pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
+				} else if (isShooterSolenoidExtended) {
+					if (Timer.getFPGATimestamp() - pushCommandTimeStamp
+							> Constants.TIME_FOR_FULL_SHOT) {
+						return FSMState.RETRACTING;
+					} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp
+							> Constants.TIME_TO_DEPRESSURIZATION
+							&& isShooterPistonPressurized) {
+						return FSMState.RELEASING_SHOOTER;
+					}
 				} else if (input.isTerminalReleaseButtonPressed()) {
 					return FSMState.BALL_INTO_TERMINAL;
 				} else {
