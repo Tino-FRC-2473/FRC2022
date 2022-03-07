@@ -87,7 +87,7 @@ public class Constants {
 	public static final int DRIVING_TO_BALL_BUTTON = 6;
 
 	//Pure Pursuit Constants
-  public static final double MAX_IN_TO_POINT = 48;
+	public static final double MAX_IN_TO_POINT = 48;
 	public static final double PP_MAX_SPEED = 0.6;
 	public static final double PP_BALL_MAX_RUN_TIME_SEC = 15.0;
 	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 15.0;

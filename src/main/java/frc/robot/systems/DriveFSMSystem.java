@@ -232,19 +232,6 @@ public class DriveFSMSystem {
 				handleBallDepositIdleState(input);
 				break;
 
-			case TURN_TO_TERMINAL:
-				handleTurnState(input, Constants.RED_TERMINAL_ANGLE_DEG,
-					Constants.PP_TURN_RUN_TIME_SEC);
-				break;
-
-			case WAIT_TO_RECEIVE_BALLS:
-				handleWaitToReceiveBallsState(input, Constants.PP_TERMINAL_BALL_WAIT_TIME_SEC);
-				break;
-
-			case DEPOSIT_PRELOAD_BALL_IDLE:
-				handleBallDepositIdleState(input);
-				break;
-
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
@@ -370,32 +357,6 @@ public class DriveFSMSystem {
 
 			case DEPOSIT_PRELOAD_BALL_IDLE:
 				if (stateTimer.hasElapsed(Constants.TIME_FOR_AUTO_SHOOT)) {
-					stateTimer.reset();
-					return FSMState.PURE_PURSUIT;
-				} else {
-					return FSMState.DEPOSIT_PRELOAD_BALL_IDLE;
-				}
-
-			case TURN_TO_TERMINAL:
-				if (finishedTurning) {
-					finishedTurning = false;
-					stateTimer.reset();
-				} else {
-					return FSMState.TURN_TO_TERMINAL;
-				}
-				return FSMState.WAIT_TO_RECEIVE_BALLS;
-
-			case WAIT_TO_RECEIVE_BALLS:
-				if (isStateFinished) {
-					isStateFinished = false;
-					stateTimer.reset();
-					return FSMState.PURE_PURSUIT_TO_HUB;
-				} else {
-					return FSMState.WAIT_TO_RECEIVE_BALLS;
-				}
-
-			case DEPOSIT_PRELOAD_BALL_IDLE:
-				if (stateTimer.hasElapsed(Constants.TIME_FOR_FULL_SHOT)) {
 					stateTimer.reset();
 					return FSMState.PURE_PURSUIT;
 				} else {
