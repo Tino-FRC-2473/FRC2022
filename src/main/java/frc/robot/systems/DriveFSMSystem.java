@@ -308,7 +308,7 @@ public class DriveFSMSystem {
 				return FSMState.DEPOSIT_BALL_IDLE;
 
 			case DEPOSIT_BALL_IDLE:
-				if (stateTimer.hasElapsed(Constants.PUSH_TIME_SECONDS)) {
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_FULL_SHOT)) {
 					stateTimer.reset();
 					return FSMState.PURE_PURSUIT;
 				} else {
@@ -334,7 +334,7 @@ public class DriveFSMSystem {
 				}
 
 			case DEPOSIT_PRELOAD_BALL_IDLE:
-				if (stateTimer.hasElapsed(Constants.PUSH_TIME_SECONDS)) {
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_FULL_SHOT)) {
 					stateTimer.reset();
 					return FSMState.PURE_PURSUIT;
 				} else {

@@ -12,8 +12,10 @@ public final class HardwareMap {
 	public static final int CAN_ID_SPARK_DRIVE_RIGHT = 5;
 
 	// Pneumatics channel numbers
-	public static final int PCM_CHANNEL_PUSH_BOT_SOLENOID = 0;
-	public static final int PCM_CHANNEL_PULL_BOT_SOLENOID = 1;
+	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND = 1;
+	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND_RELEASE = 0;
+	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT = 5;
+	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT_RELEASE = 4;
 	public static final int PCM_CHANNEL_INTAKE_RETRACT_SOLENOID = 2;
 	public static final int PCM_CHANNEL_INTAKE_RELEASE_SOLENOID = 3;
 }

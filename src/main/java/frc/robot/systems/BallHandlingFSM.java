@@ -29,13 +29,15 @@ public class BallHandlingFSM {
 		RETRACTING,
 		RETRACT_INTAKE_MECH,
 		RELEASE_INTAKE_MECH,
-		RELEASING
+		BALL_INTO_TERMINAL,
+		RELEASING_SHOOTER
 	}
 
 	/* ======================== Private variables ======================== */
 	private FSMState currentState;
 
 	private DoubleSolenoid pushSolenoid;
+	private DoubleSolenoid pullSolenoid;
 	private DoubleSolenoid intakeDeploySolenoid;
 
 	private CANSparkMax intakeMotor;
@@ -45,6 +47,7 @@ public class BallHandlingFSM {
 	private double pushCommandTimeStamp;
 
 	private boolean isShooterSolenoidExtended;
+	private boolean isShooterPistonPressurized;
 	private boolean isIntakeMechRetracted;
 
 	private ColorSensorV3 ballDetector;
@@ -64,8 +67,11 @@ public class BallHandlingFSM {
 	public BallHandlingFSM() {
 		// Perform hardware init
 		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
-			HardwareMap.PCM_CHANNEL_PUSH_BOT_SOLENOID,
-			HardwareMap.PCM_CHANNEL_PULL_BOT_SOLENOID);
+			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND,
+			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND_RELEASE);
+		pullSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT,
+			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT_RELEASE);
 
 		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
 			HardwareMap.PCM_CHANNEL_INTAKE_RELEASE_SOLENOID,
@@ -78,7 +84,7 @@ public class BallHandlingFSM {
 		pDH = new PowerDistribution(1, ModuleType.kRev);
 
 		// Reset state machine
-		pushCommandTimeStamp = Timer.getFPGATimestamp() - Constants.PUSH_TIME_SECONDS;
+		pushCommandTimeStamp = Timer.getFPGATimestamp() - Constants.TIME_FOR_FULL_SHOT;
 		reset();
 		handleRetractIntakeMechState(null);
 		handleRetractingState(null);
@@ -104,6 +110,7 @@ public class BallHandlingFSM {
 		currentState = FSMState.START_STATE;
 
 		isShooterSolenoidExtended = false;
+		isShooterPistonPressurized = false;
 		isIntakeMechRetracted = true;
 		// Call one tick of update to ensure outputs reflect start state
 		update(null, DriveFSMSystem.FSMState.PURE_PURSUIT);
@@ -145,8 +152,12 @@ public class BallHandlingFSM {
 				handleReleaseIntakeMechState(input);
 				break;
 
-			case RELEASING:
-				handleReleasingState(input);
+			case BALL_INTO_TERMINAL:
+				handleBallIntoTerminalState(input);
+				break;
+
+			case RELEASING_SHOOTER:
+				handleReleasingShooterState(input);
 				break;
 
 			default:
@@ -175,7 +186,7 @@ public class BallHandlingFSM {
 				return FSMState.FIRING;
 			} else if (isShooterSolenoidExtended
 					&& Timer.getFPGATimestamp() - pushCommandTimeStamp
-					> Constants.PUSH_TIME_SECONDS) {
+					> Constants.TIME_FOR_FULL_SHOT) {
 				return FSMState.RETRACTING;
 			}
 			return FSMState.IDLE;
@@ -183,17 +194,20 @@ public class BallHandlingFSM {
 
 		switch (currentState) {
 			case START_STATE:
-				return FSMState.IDLE;
+				return FSMState.RELEASING_SHOOTER;
 
 			case IDLE:
-				if (!isShooterSolenoidExtended && input.isShooterButtonPressed()) {
+				if (!isShooterSolenoidExtended && !isShooterPistonPressurized && input.isShooterButtonPressed()) {
 					pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
-				} else if (isShooterSolenoidExtended
-						&& Timer.getFPGATimestamp() - pushCommandTimeStamp
-						> Constants.PUSH_TIME_SECONDS) {
-					return FSMState.RETRACTING;
+				} else if (isShooterSolenoidExtended) {
+					if (Timer.getFPGATimestamp() - pushCommandTimeStamp > Constants.TIME_FOR_FULL_SHOT) {
+						return FSMState.RETRACTING;
+					} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp > Constants.TIME_TO_DEPRESSURIZATION
+							&& isShooterPistonPressurized) {
+						return FSMState.RELEASING_SHOOTER;
+					}
 				} else if (input.wasToggleIntakeButtonPressed()) {
 					if (isIntakeMechRetracted) {
 						return FSMState.RELEASE_INTAKE_MECH;
@@ -201,22 +215,22 @@ public class BallHandlingFSM {
 						return FSMState.RETRACT_INTAKE_MECH;
 					}
 				} else if (input.isTerminalReleaseButtonPressed()) {
-					return FSMState.RELEASING;
+					return FSMState.BALL_INTO_TERMINAL;
 				} else {
 					return FSMState.IDLE;
 				}
 
-			case RELEASING:
+			case BALL_INTO_TERMINAL:
 				if (isShooterSolenoidExtended
 						&& Timer.getFPGATimestamp() - pushCommandTimeStamp
-						> Constants.PUSH_TIME_SECONDS) {
+						> Constants.TIME_FOR_FULL_SHOT) {
 					return FSMState.RETRACTING;
 				} else if (!isShooterSolenoidExtended && input.isShooterButtonPressed()) {
 					pushCommandTimeStamp = Timer.getFPGATimestamp();
 
 					return FSMState.FIRING;
 				} else if (input.isTerminalReleaseButtonPressed()) {
-					return FSMState.RELEASING;
+					return FSMState.BALL_INTO_TERMINAL;
 				} else {
 					return FSMState.IDLE;
 				}
@@ -229,14 +243,17 @@ public class BallHandlingFSM {
 
 			case FIRING:
 				if (input.isTerminalReleaseButtonPressed()) {
-					return FSMState.RELEASING;
+					return FSMState.BALL_INTO_TERMINAL;
 				} else {
 					return FSMState.IDLE;
 				}
 
 			case RETRACTING:
+				return FSMState.RELEASING_SHOOTER;
+
+			case RELEASING_SHOOTER:
 				if (input.isTerminalReleaseButtonPressed()) {
-					return FSMState.RELEASING;
+					return FSMState.BALL_INTO_TERMINAL;
 				} else {
 					return FSMState.IDLE;
 				}
@@ -254,6 +271,7 @@ public class BallHandlingFSM {
 	 */
 	private void handleIdleState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
+		pullSolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeDeploySolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeMotor.setVoltage(
 			getBallInMech() == IntakeMechBallStates.NONE
@@ -276,6 +294,7 @@ public class BallHandlingFSM {
 		pushSolenoid.set(DoubleSolenoid.Value.kForward);
 
 		isShooterSolenoidExtended = true;
+		isShooterPistonPressurized = true;
 	}
 	/**
 	 * Handle behavior in RETRACTING.
@@ -283,9 +302,10 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleRetractingState(TeleopInput input) {
-		pushSolenoid.set(DoubleSolenoid.Value.kReverse);
+		pullSolenoid.set(DoubleSolenoid.Value.kForward);
 
 		isShooterSolenoidExtended = false;
+		isShooterPistonPressurized = true;
 	}
 	/**
 	 * Handle behavior in RETRACT_INTAKE_MECH.
@@ -306,13 +326,25 @@ public class BallHandlingFSM {
 		intakeDeploySolenoid.set(DoubleSolenoid.Value.kForward);
 	}
 	/**
-	 * Handle behavior in RELEASING.
+	 * Handle behavior in BALL_INTO_TERMINAL.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleReleasingState(TeleopInput input) {
+	private void handleBallIntoTerminalState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
+		pullSolenoid.set(DoubleSolenoid.Value.kOff);
+		intakeDeploySolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeMotor.setVoltage(Constants.INTAKE_MOTOR_VOLTAGE);
+	}
+	/**
+	 * Handle behavior in RELEASING_SHOOTER.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleReleasingShooterState(TeleopInput input) {
+		pushSolenoid.set(DoubleSolenoid.Value.kReverse);
+		pullSolenoid.set(DoubleSolenoid.Value.kReverse);
+		isShooterPistonPressurized = false;
 	}
 
 	/**
