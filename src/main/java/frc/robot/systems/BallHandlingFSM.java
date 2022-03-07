@@ -182,19 +182,19 @@ public class BallHandlingFSM {
 			if (!isShooterSolenoidExtended
 						&& !isShooterPistonPressurized
 						&& driveState == DriveFSMSystem.FSMState.DEPOSIT_BALL_IDLE) {
-					pushCommandTimeStamp = Timer.getFPGATimestamp();
+				pushCommandTimeStamp = Timer.getFPGATimestamp();
 
-					return FSMState.FIRING;
-				} else if (isShooterSolenoidExtended) {
-					if (Timer.getFPGATimestamp() - pushCommandTimeStamp
-							> Constants.TIME_FOR_FULL_SHOT) {
-						return FSMState.RETRACTING;
-					} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp
-							> Constants.TIME_TO_DEPRESSURIZATION
-							&& isShooterPistonPressurized) {
-						return FSMState.RELEASING_SHOOTER;
-					}
+				return FSMState.FIRING;
+			} else if (isShooterSolenoidExtended) {
+				if (Timer.getFPGATimestamp() - pushCommandTimeStamp
+						> Constants.TIME_FOR_FULL_SHOT) {
+					return FSMState.RETRACTING;
+				} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp
+						> Constants.TIME_TO_DEPRESSURIZATION
+						&& isShooterPistonPressurized) {
+					return FSMState.RELEASING_SHOOTER;
 				}
+			}
 			return FSMState.IDLE;
 		}
 
