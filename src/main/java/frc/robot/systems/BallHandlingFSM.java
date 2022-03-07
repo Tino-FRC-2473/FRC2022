@@ -87,7 +87,7 @@ public class BallHandlingFSM {
 		pushCommandTimeStamp = Timer.getFPGATimestamp() - Constants.TIME_FOR_FULL_SHOT;
 		reset();
 		handleRetractIntakeMechState(null);
-		handleRETRACT_SHOOTERState(null);
+		handleRetractShooterState(null);
 	}
 
 	/* ======================== Public methods ======================== */
@@ -140,11 +140,11 @@ public class BallHandlingFSM {
 				break;
 
 			case FIRE_SHOOTER:
-				handleFIRING_SHOOTERState(input);
+				handleFireShooterState(input);
 				break;
 
 			case RETRACT_SHOOTER:
-				handleRETRACT_SHOOTERState(input);
+				handleRetractShooterState(input);
 				break;
 
 			case RETRACT_INTAKE_MECH:
@@ -304,14 +304,14 @@ public class BallHandlingFSM {
 	 */
 	private void handleStartState(TeleopInput input) {
 		handleRetractIntakeMechState(input);
-		handleRETRACT_SHOOTERState(input);
+		handleRetractShooterState(input);
 	}
 	/**
 	 * Handle behavior in FIRE_SHOOTER.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleFIRING_SHOOTERState(TeleopInput input) {
+	private void handleFireShooterState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kForward);
 
 		isShooterSolenoidExtended = true;
@@ -322,7 +322,7 @@ public class BallHandlingFSM {
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleRETRACT_SHOOTERState(TeleopInput input) {
+	private void handleRetractShooterState(TeleopInput input) {
 		pullSolenoid.set(DoubleSolenoid.Value.kForward);
 
 		isShooterSolenoidExtended = false;
