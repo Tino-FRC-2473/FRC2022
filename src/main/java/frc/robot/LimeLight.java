@@ -3,7 +3,6 @@ package frc.robot;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class LimeLight {
 	private static LimeLight mLimeLight;
@@ -98,17 +97,7 @@ public class LimeLight {
 	 * Updates limelight data by calling outputToShuffleboard.
 	 */
 	public void update() {
-		outputToShuffleboard();
-	}
 
-	/**
-	 * Outputs data to Shuffleboard.
-	 */
-	private void outputToShuffleboard() {
-		SmartDashboard.putBoolean("Has Target", hasValidTargets());
-		SmartDashboard.putNumber("Horizontal Offset", getXAngle());
-		SmartDashboard.putNumber("Vertical Offset", getYAngle());
-		SmartDashboard.putNumber("Area", getArea());
 	}
 
 	/**

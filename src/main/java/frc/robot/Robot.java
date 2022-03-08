@@ -26,7 +26,7 @@ import frc.robot.systems.CompressorSystem;
 public class Robot extends TimedRobot {
 	private TeleopInput input;
 
-	private AutoSelector autoSelector = new AutoSelector();
+	private AutoSelector autoSelector;
 	private LimeLight limelight;
 
 	// Systems
@@ -57,6 +57,7 @@ public class Robot extends TimedRobot {
 		grabberSystem = new GrabberFSM();
 		limelight = new LimeLight();
 		limelight.setOffLimelight();
+		autoSelector = new AutoSelector();
 	}
 
 	@Override
