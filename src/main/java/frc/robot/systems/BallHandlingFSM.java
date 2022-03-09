@@ -49,6 +49,7 @@ public class BallHandlingFSM {
 	private boolean isShooterSolenoidExtended;
 	private boolean isShooterPistonPressurized;
 	private boolean isIntakeMechRetracted;
+	private boolean firstTickInState;
 
 	private ColorSensorV3 ballDetector;
 
@@ -110,8 +111,10 @@ public class BallHandlingFSM {
 		isShooterSolenoidExtended = false;
 		isShooterPistonPressurized = false;
 		isIntakeMechRetracted = true;
+		firstTickInState = true;
 		// Call one tick of update to ensure outputs reflect start state
 		update(null, DriveFSMSystem.FSMState.PURE_PURSUIT);
+		firstTickInState = true;
 	}
 	/**
 	 * Update FSM based on new inputs in Autonomous. This function only calls
@@ -122,10 +125,6 @@ public class BallHandlingFSM {
 	 */
 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		updateIsInShootingPositionIndicator(false);
-		System.out.println(ballDetector.getProximity());
-		SmartDashboard.putBoolean("Red Ball", getBallInMech() == IntakeMechBallStates.RED);
-		SmartDashboard.putBoolean("Blue Ball", getBallInMech() == IntakeMechBallStates.BLUE);
-
 		SmartDashboard.putBoolean("Red Ball", getBallInMech() == IntakeMechBallStates.RED);
 		SmartDashboard.putBoolean("Blue Ball", getBallInMech() == IntakeMechBallStates.BLUE);
 
@@ -164,7 +163,11 @@ public class BallHandlingFSM {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
+		FSMState previousState = currentState;
+
 		currentState = nextState(input, driveState);
+
+		firstTickInState = previousState != currentState;
 	}
 
 	/* ======================== Private methods ======================== */
@@ -180,7 +183,7 @@ public class BallHandlingFSM {
 	 */
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		if (input == null) {
-			if (!isShooterSolenoidExtended
+			if (!isShooterSolenoidExtended && firstTickInState
 					&& (driveState == DriveFSMSystem.FSMState.DEPOSIT_PRELOAD_BALL_IDLE
 					|| driveState == DriveFSMSystem.FSMState.DEPOSIT_FIRST_BALL_IDLE
 					|| driveState == DriveFSMSystem.FSMState.DEPOSIT_SECOND_BALL_IDLE)) {

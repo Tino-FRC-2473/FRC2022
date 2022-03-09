@@ -14,8 +14,8 @@ public final class HardwareMap {
 	// Pneumatics channel numbers
 	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND = 1;
 	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND_RELEASE = 0;
-	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT = 5;
-	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT_RELEASE = 4;
+	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT = 4;
+	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT_RELEASE = 5;
 	public static final int PCM_CHANNEL_INTAKE_RETRACT_SOLENOID = 2;
 	public static final int PCM_CHANNEL_INTAKE_RELEASE_SOLENOID = 3;
 }
