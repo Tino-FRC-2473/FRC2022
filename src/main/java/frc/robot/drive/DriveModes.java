@@ -75,8 +75,8 @@ public class DriveModes {
 			rightAdjustedInput *= -1;
 		}
 
-		double targetLeftPower = leftAdjustedInput;
-		double targetRightPower = -rightAdjustedInput;
+		double targetLeftPower = -leftAdjustedInput;
+		double targetRightPower = rightAdjustedInput;
 
 		//check if the resulting power will be too low
 		if (Math.abs(targetLeftPower) < Constants.TELEOP_MIN_MOVE_POWER) {
