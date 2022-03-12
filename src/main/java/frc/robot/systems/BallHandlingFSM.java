@@ -131,7 +131,6 @@ public class BallHandlingFSM {
 	 * @param driveState Current FSMState of DriveFSMSystem.
 	 */
 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
-		System.out.println(currentState);
 		updateIsInShootingPositionIndicator(false);
 		SmartDashboard.putBoolean("Red Ball", getBallInMech() == IntakeMechBallStates.RED);
 		SmartDashboard.putBoolean("Blue Ball", getBallInMech() == IntakeMechBallStates.BLUE);
