@@ -114,6 +114,7 @@ public class BallHandlingFSM {
 		firstTickInState = true;
 		// Call one tick of update to ensure outputs reflect start state
 		update(null, DriveFSMSystem.FSMState.PURE_PURSUIT);
+		currentState = FSMState.START_STATE;
 		firstTickInState = true;
 	}
 	/**
@@ -202,7 +203,8 @@ public class BallHandlingFSM {
 			}
 			return FSMState.IDLE;
 		}
-
+System.out.println(isShooterSolenoidExtended);
+System.out.println(isShooterPistonPressurized);
 		switch (currentState) {
 			case START_STATE:
 				return FSMState.DEPRESSURIZE_SHOOTER;
