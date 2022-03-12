@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
-		ballSystem = new BallHandlingFSM();
+		ballSystem = new BallHandlingFSM(autoSelector);
 		grabberSystem = new GrabberFSM();
 		limelight = new LimeLight();
 		limelight.setOffLimelight();

@@ -6,12 +6,25 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class AutoSelector {
 	public enum DesiredMode {
-		RED_3_BALL_A,
-		BLUE_3_BALL_A,
-		RED_3_BALL_B,
-		BLUE_3_BALL_B,
-		RED_1_BALL,
-		BLUE_1_BALL
+		RED_3_BALL_A(3),
+		BLUE_3_BALL_A(3),
+		RED_3_BALL_B(3),
+		BLUE_3_BALL_B(3),
+		RED_1_BALL(1),
+		BLUE_1_BALL(1);
+
+		private final int numBalls;
+		DesiredMode(int numBalls) {
+			this.numBalls = numBalls;
+		}
+
+		/**
+		 * Returns the number of balls being fired in the relevant mode.
+		 * @return The number of balls being fired in the relevant mode.
+		 */
+		public int getNumBalls() {
+			return numBalls;
+		}
 	}
 
 	private SendableChooser<DesiredMode> modeChooser;

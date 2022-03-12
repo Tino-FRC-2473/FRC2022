@@ -16,6 +16,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 // Robot Imports
 import frc.robot.TeleopInput;
+import frc.robot.AutoSelector;
 import frc.robot.Constants;
 import frc.robot.HardwareMap;
 
@@ -53,6 +54,7 @@ public class BallHandlingFSM {
 	private boolean[] hasDepositedBall;
 
 	private ColorSensorV3 ballDetector;
+	private AutoSelector autoSelector;
 
 	public enum IntakeMechBallStates {
 		NONE,
@@ -66,16 +68,18 @@ public class BallHandlingFSM {
 	 * one-time initialization or configuration of hardware required. Note
 	 * the constructor is called only once when the robot boots.
 	 */
-	public BallHandlingFSM() {
+	public BallHandlingFSM(AutoSelector autoSelector) {
+		this.autoSelector = autoSelector;
+
 		// Perform hardware init
-		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND_RELEASE);
-		pullSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+		pullSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT_RELEASE);
 
-		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_INTAKE_RELEASE_SOLENOID,
 			HardwareMap.PCM_CHANNEL_INTAKE_RETRACT_SOLENOID);
 
@@ -108,7 +112,7 @@ public class BallHandlingFSM {
 	 */
 	public void reset() {
 		stateTimer.reset();
-		hasDepositedBall = new boolean[DriveFSMSystem.numBallsInAuto];
+		hasDepositedBall = new boolean[autoSelector.getSelectedAuto().getNumBalls()];
 		currentState = FSMState.START_STATE;
 
 		isShooterPistonExtended = false;
@@ -126,6 +130,7 @@ public class BallHandlingFSM {
 	 * @param driveState Current FSMState of DriveFSMSystem.
 	 */
 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
+		System.out.println(currentState);
 		updateIsInShootingPositionIndicator(false);
 		SmartDashboard.putBoolean("Red Ball", getBallInMech() == IntakeMechBallStates.RED);
 		SmartDashboard.putBoolean("Blue Ball", getBallInMech() == IntakeMechBallStates.BLUE);
@@ -185,7 +190,7 @@ public class BallHandlingFSM {
 				return FSMState.DEPRESSURIZE_SHOOTER;
 			}
 			if (!isShooterPistonExtended && !isShooterPistonPressurized
-					&& driveState.getBallIndex() < DriveFSMSystem.numBallsInAuto
+					&& driveState.getBallIndex() < autoSelector.getSelectedAuto().getNumBalls()
 					&& !hasDepositedBall[driveState.getBallIndex()]) {
 				hasDepositedBall[driveState.getBallIndex()] = true;
 				restartTimer();
