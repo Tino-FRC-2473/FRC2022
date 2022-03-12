@@ -73,14 +73,14 @@ public class BallHandlingFSM {
 		this.autoSelector = autoSelector;
 
 		// Perform hardware init
-		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
+		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND_RELEASE);
-		pullSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
+		pullSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT_RELEASE);
 
-		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
+		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
 			HardwareMap.PCM_CHANNEL_INTAKE_RELEASE_SOLENOID,
 			HardwareMap.PCM_CHANNEL_INTAKE_RETRACT_SOLENOID);
 
