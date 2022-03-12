@@ -44,10 +44,14 @@ public class DriveFSMSystem {
 		TURN_TO_TERMINAL(3);
 
 		private final int ballIndex;
-		private FSMState(int ballIndex) {
+		FSMState(int ballIndex) {
 			this.ballIndex = ballIndex;
 		}
 
+		/**
+		 * Returns the index of the ball being shot during Autonomous
+		 * @return the index of the ball being shot during Autonomous
+		 */
 		public int getBallIndex() {
 			return ballIndex;
 		}
@@ -73,6 +77,7 @@ public class DriveFSMSystem {
 	private boolean isDrivingForward = true;
 
 	private DesiredMode autoPath;
+	public static final int numBallsInAuto = 3;
 	private double[] cvBallPos = new double[] {0, 0};
 
 

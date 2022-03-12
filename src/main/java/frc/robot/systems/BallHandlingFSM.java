@@ -9,8 +9,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import java.util.Arrays;
-
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ColorSensorV3;
@@ -70,14 +68,14 @@ public class BallHandlingFSM {
 	 */
 	public BallHandlingFSM() {
 		// Perform hardware init
-		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
+		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND_RELEASE);
-		pullSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
+		pullSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT_RELEASE);
 
-		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
+		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
 			HardwareMap.PCM_CHANNEL_INTAKE_RELEASE_SOLENOID,
 			HardwareMap.PCM_CHANNEL_INTAKE_RETRACT_SOLENOID);
 
@@ -110,7 +108,7 @@ public class BallHandlingFSM {
 	 */
 	public void reset() {
 		stateTimer.reset();
-		hasDepositedBall = new boolean[3];
+		hasDepositedBall = new boolean[DriveFSMSystem.numBallsInAuto];
 		currentState = FSMState.START_STATE;
 
 		isShooterPistonExtended = false;
@@ -182,14 +180,12 @@ public class BallHandlingFSM {
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
-		System.out.println(driveState + " ::: " + isShooterPistonPressurized);
-		System.out.println(currentState);
 		if (input == null) {
 			if (currentState == FSMState.START_STATE) {
 				return FSMState.DEPRESSURIZE_SHOOTER;
 			}
 			if (!isShooterPistonExtended && !isShooterPistonPressurized
-					&& driveState.getBallIndex() < 3
+					&& driveState.getBallIndex() < DriveFSMSystem.numBallsInAuto
 					&& !hasDepositedBall[driveState.getBallIndex()]) {
 				hasDepositedBall[driveState.getBallIndex()] = true;
 				restartTimer();
