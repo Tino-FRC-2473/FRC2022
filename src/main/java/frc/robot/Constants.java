@@ -36,7 +36,6 @@ public class Constants {
 	public static final double AUTOALIGN_TURN_SPEED = 0.2;
 	public static final double HANGAR_TURN_TARGET_ANGLE = 180;
 	public static final double RED_TERMINAL_ANGLE_DEG = 43.752;
-	public static final double TIME_FOR_AUTO_SHOOT = 0.8;
 
 	//CV Ball Detection Constants
 	public static final double DETECTED_BALL_MAX_POWER = 0.2;
@@ -109,9 +108,16 @@ public class Constants {
 	public static final double ZERO_THRESHOLD = 0.01;
 
 	//Intake Shooter Constants
-	public static final double TIME_FOR_FULL_SHOT = 0.7;
-	public static final double TIME_TO_DEPRESSURIZATION = 0.5;
+	public static final double TIME_FOR_PISTON_EXTENSION = 0.5;
+	public static final double TIME_FOR_PISTON_RETRACTION = 0.05;
+	public static final double TIME_TO_DEPRESSURIZATION = 0.1;
+	public static final double TIME_FOR_FULL_SHOT = TIME_FOR_PISTON_EXTENSION
+													+ TIME_TO_DEPRESSURIZATION;
+	public static final double TIME_FOR_FULL_RETRACTION = TIME_FOR_PISTON_RETRACTION
+														+ TIME_TO_DEPRESSURIZATION;
 	public static final double INTAKE_MOTOR_VOLTAGE = 5;
 	public static final int BALL_PROXIMITY_THRESHOLD = 73;
+	public static final double TIME_FOR_AUTO_SHOOT = TIME_FOR_FULL_SHOT
+													+ TIME_FOR_FULL_RETRACTION
+													+ 0.08;
 }
-

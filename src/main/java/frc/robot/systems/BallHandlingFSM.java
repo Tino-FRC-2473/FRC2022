@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import java.util.Arrays;
+
 // Third party Hardware Imports
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ColorSensorV3;
@@ -44,12 +46,13 @@ public class BallHandlingFSM {
 
 	private PowerDistribution pDH;
 
-	private double pushCommandTimeStamp;
+	private Timer stateTimer;
 
-	private boolean isShooterSolenoidExtended;
+	private boolean isShooterPistonExtended;
 	private boolean isShooterPistonPressurized;
 	private boolean isIntakeMechRetracted;
-	private boolean firstTickInState;
+
+	private boolean[] hasDepositedBall;
 
 	private ColorSensorV3 ballDetector;
 
@@ -67,14 +70,14 @@ public class BallHandlingFSM {
 	 */
 	public BallHandlingFSM() {
 		// Perform hardware init
-		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+		pushSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND_RELEASE);
-		pullSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+		pullSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT,
 			HardwareMap.PCM_CHANNEL_SHOOTER_SOLENOID_RETRACT_RELEASE);
 
-		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH,
+		intakeDeploySolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM,
 			HardwareMap.PCM_CHANNEL_INTAKE_RELEASE_SOLENOID,
 			HardwareMap.PCM_CHANNEL_INTAKE_RETRACT_SOLENOID);
 
@@ -85,7 +88,7 @@ public class BallHandlingFSM {
 		pDH = new PowerDistribution(1, ModuleType.kRev);
 
 		// Reset state machine
-		pushCommandTimeStamp = Timer.getFPGATimestamp() - Constants.TIME_FOR_FULL_SHOT;
+		stateTimer = new Timer();
 		reset();
 	}
 
@@ -106,16 +109,16 @@ public class BallHandlingFSM {
 	 * Ex. if the robot is enabled, disabled, then reenabled.
 	 */
 	public void reset() {
+		stateTimer.reset();
+		hasDepositedBall = new boolean[3];
 		currentState = FSMState.START_STATE;
 
-		isShooterSolenoidExtended = false;
+		isShooterPistonExtended = false;
 		isShooterPistonPressurized = false;
 		isIntakeMechRetracted = true;
-		firstTickInState = true;
 		// Call one tick of update to ensure outputs reflect start state
 		update(null, DriveFSMSystem.FSMState.PURE_PURSUIT);
 		currentState = FSMState.START_STATE;
-		firstTickInState = true;
 	}
 	/**
 	 * Update FSM based on new inputs in Autonomous. This function only calls
@@ -158,17 +161,13 @@ public class BallHandlingFSM {
 				break;
 
 			case DEPRESSURIZE_SHOOTER:
-				handleReleasingShooterState(input);
+				handleDepressurizeShooterState(input);
 				break;
 
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
-		FSMState previousState = currentState;
-
 		currentState = nextState(input, driveState);
-
-		firstTickInState = previousState != currentState;
 	}
 
 	/* ======================== Private methods ======================== */
@@ -183,48 +182,58 @@ public class BallHandlingFSM {
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
+		System.out.println(driveState + " ::: " + isShooterPistonPressurized);
+		System.out.println(currentState);
 		if (input == null) {
-			if (!isShooterSolenoidExtended && firstTickInState
-					&& (driveState == DriveFSMSystem.FSMState.DEPOSIT_PRELOAD_BALL_IDLE
-					|| driveState == DriveFSMSystem.FSMState.DEPOSIT_FIRST_BALL_IDLE
-					|| driveState == DriveFSMSystem.FSMState.DEPOSIT_SECOND_BALL_IDLE)) {
-				pushCommandTimeStamp = Timer.getFPGATimestamp();
+			if (currentState == FSMState.START_STATE) {
+				return FSMState.DEPRESSURIZE_SHOOTER;
+			}
+			if (!isShooterPistonExtended && !isShooterPistonPressurized
+					&& driveState.getBallIndex() < 3
+					&& !hasDepositedBall[driveState.getBallIndex()]) {
+				hasDepositedBall[driveState.getBallIndex()] = true;
+				restartTimer();
 
 				return FSMState.FIRE_SHOOTER;
-			} else if (isShooterSolenoidExtended) {
-				if (Timer.getFPGATimestamp() - pushCommandTimeStamp
-						> Constants.TIME_FOR_FULL_SHOT) {
+			} else if (isShooterPistonExtended) {
+				if (stateTimer.hasElapsed(Constants.TIME_FOR_FULL_SHOT)) {
+					restartTimer();
+
 					return FSMState.RETRACT_SHOOTER;
-				} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp
-						> Constants.TIME_TO_DEPRESSURIZATION
+				} else if (stateTimer.hasElapsed(Constants.TIME_FOR_PISTON_EXTENSION)
 						&& isShooterPistonPressurized) {
 					return FSMState.DEPRESSURIZE_SHOOTER;
 				}
+			} else if (stateTimer.hasElapsed(Constants.TIME_TO_DEPRESSURIZATION)
+						&& isShooterPistonPressurized) {
+				return FSMState.DEPRESSURIZE_SHOOTER;
 			}
 			return FSMState.IDLE;
 		}
-System.out.println(isShooterSolenoidExtended);
-System.out.println(isShooterPistonPressurized);
+
 		switch (currentState) {
 			case START_STATE:
 				return FSMState.DEPRESSURIZE_SHOOTER;
 
 			case IDLE:
-				if (!isShooterSolenoidExtended
+				if (!isShooterPistonExtended
 						&& !isShooterPistonPressurized
 						&& input.isShooterButtonPressed()) {
-					pushCommandTimeStamp = Timer.getFPGATimestamp();
+					restartTimer();
 
 					return FSMState.FIRE_SHOOTER;
-				} else if (isShooterSolenoidExtended) {
-					if (Timer.getFPGATimestamp() - pushCommandTimeStamp
-							> Constants.TIME_FOR_FULL_SHOT) {
+				} else if (isShooterPistonExtended) {
+					if (stateTimer.hasElapsed(Constants.TIME_FOR_FULL_SHOT)) {
+						restartTimer();
+
 						return FSMState.RETRACT_SHOOTER;
-					} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp
-							> Constants.TIME_TO_DEPRESSURIZATION
+					} else if (stateTimer.hasElapsed(Constants.TIME_FOR_PISTON_EXTENSION)
 							&& isShooterPistonPressurized) {
 						return FSMState.DEPRESSURIZE_SHOOTER;
 					}
+				} else if (stateTimer.hasElapsed(Constants.TIME_TO_DEPRESSURIZATION)
+						&& isShooterPistonPressurized) {
+					return FSMState.DEPRESSURIZE_SHOOTER;
 				} else if (input.wasToggleIntakeButtonPressed()) {
 					if (isIntakeMechRetracted) {
 						return FSMState.RELEASE_INTAKE_MECH;
@@ -238,21 +247,24 @@ System.out.println(isShooterPistonPressurized);
 				}
 
 			case BALL_INTO_TERMINAL:
-				if (!isShooterSolenoidExtended
+				if (!isShooterPistonExtended
 						&& !isShooterPistonPressurized
 						&& input.isShooterButtonPressed()) {
-					pushCommandTimeStamp = Timer.getFPGATimestamp();
+					restartTimer();
 
 					return FSMState.FIRE_SHOOTER;
-				} else if (isShooterSolenoidExtended) {
-					if (Timer.getFPGATimestamp() - pushCommandTimeStamp
-							> Constants.TIME_FOR_FULL_SHOT) {
+				} else if (isShooterPistonExtended) {
+					if (stateTimer.hasElapsed(Constants.TIME_FOR_FULL_SHOT)) {
+						restartTimer();
+
 						return FSMState.RETRACT_SHOOTER;
-					} else if (Timer.getFPGATimestamp() - pushCommandTimeStamp
-							> Constants.TIME_TO_DEPRESSURIZATION
+					} else if (stateTimer.hasElapsed(Constants.TIME_FOR_PISTON_EXTENSION)
 							&& isShooterPistonPressurized) {
 						return FSMState.DEPRESSURIZE_SHOOTER;
 					}
+				} else if (stateTimer.hasElapsed(Constants.TIME_TO_DEPRESSURIZATION)
+						&& !isShooterPistonExtended && isShooterPistonPressurized) {
+					return FSMState.DEPRESSURIZE_SHOOTER;
 				} else if (input.isTerminalReleaseButtonPressed()) {
 					return FSMState.BALL_INTO_TERMINAL;
 				} else {
@@ -273,7 +285,7 @@ System.out.println(isShooterPistonPressurized);
 				}
 
 			case RETRACT_SHOOTER:
-				return FSMState.DEPRESSURIZE_SHOOTER;
+				return FSMState.IDLE;
 
 			case DEPRESSURIZE_SHOOTER:
 				if (input.isTerminalReleaseButtonPressed()) {
@@ -317,7 +329,7 @@ System.out.println(isShooterPistonPressurized);
 	private void handleFireShooterState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kForward);
 
-		isShooterSolenoidExtended = true;
+		isShooterPistonExtended = true;
 		isShooterPistonPressurized = true;
 	}
 	/**
@@ -328,7 +340,7 @@ System.out.println(isShooterPistonPressurized);
 	private void handleRetractShooterState(TeleopInput input) {
 		pullSolenoid.set(DoubleSolenoid.Value.kForward);
 
-		isShooterSolenoidExtended = false;
+		isShooterPistonExtended = false;
 		isShooterPistonPressurized = true;
 	}
 	/**
@@ -365,7 +377,7 @@ System.out.println(isShooterPistonPressurized);
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
 	 */
-	private void handleReleasingShooterState(TeleopInput input) {
+	private void handleDepressurizeShooterState(TeleopInput input) {
 		pushSolenoid.set(DoubleSolenoid.Value.kReverse);
 		pullSolenoid.set(DoubleSolenoid.Value.kReverse);
 		isShooterPistonPressurized = false;
@@ -407,5 +419,10 @@ System.out.println(isShooterPistonPressurized);
 
 	private void updateIsInShootingPositionIndicator(boolean isInShootingPosition) {
 		pDH.setSwitchableChannel(isInShootingPosition);
+	}
+
+	private void restartTimer() {
+		stateTimer.reset();
+		stateTimer.start();
 	}
 }

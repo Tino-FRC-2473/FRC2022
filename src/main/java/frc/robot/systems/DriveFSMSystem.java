@@ -28,20 +28,29 @@ import java.util.ArrayList;
 public class DriveFSMSystem {
 	// FSM state definitions
 	public enum FSMState {
-		START_STATE,
-		FORWARD_STATE_10_IN,
-		BACK_TO_TARMAC,
-		BACK_TO_HUB,
-		TURN_STATE,
-		TELEOP_STATE,
-		PURE_PURSUIT,
-		PURE_PURSUIT_TO_HUB,
-		TURN_TO_HUB,
-		DEPOSIT_FIRST_BALL_IDLE,
-		DEPOSIT_SECOND_BALL_IDLE,
-		DEPOSIT_PRELOAD_BALL_IDLE,
-		WAIT_TO_RECEIVE_BALLS,
-		TURN_TO_TERMINAL
+		START_STATE(3),
+		FORWARD_STATE_10_IN(3),
+		BACK_TO_TARMAC(3),
+		BACK_TO_HUB(3),
+		TURN_STATE(3),
+		TELEOP_STATE(3),
+		PURE_PURSUIT(3),
+		PURE_PURSUIT_TO_HUB(3),
+		TURN_TO_HUB(3),
+		DEPOSIT_FIRST_BALL_IDLE(1),
+		DEPOSIT_SECOND_BALL_IDLE(2),
+		DEPOSIT_PRELOAD_BALL_IDLE(0),
+		WAIT_TO_RECEIVE_BALLS(3),
+		TURN_TO_TERMINAL(3);
+
+		private final int ballIndex;
+		private FSMState(int ballIndex) {
+			this.ballIndex = ballIndex;
+		}
+
+		public int getBallIndex() {
+			return ballIndex;
+		}
 	}
 
 	/* ======================== Private variables ======================== */
