@@ -67,6 +67,7 @@ public class BallHandlingFSM {
 	 * Create FSMSystem and initialize to starting state. Also perform any
 	 * one-time initialization or configuration of hardware required. Note
 	 * the constructor is called only once when the robot boots.
+	 * @param autoSelector Object for the Autonomous mode selector
 	 */
 	public BallHandlingFSM(AutoSelector autoSelector) {
 		this.autoSelector = autoSelector;
