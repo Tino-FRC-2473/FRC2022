@@ -38,7 +38,7 @@ public class Constants {
 	public static final double RED_TERMINAL_ANGLE_DEG = 43.752;
 	public static final double TIME_FOR_AUTO_SHOOT = 0.8;
 
-	public static final double CONSTANT = 0.66130718954;
+	public static final double CONSTANT = 0.66130718954; //0.843;
 
 	//Path constants
 	// For Run 1 the start angle is 26.73

@@ -53,8 +53,6 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
-		ballSystem = new BallHandlingFSM();
-		grabberSystem = new GrabberFSM();
 	}
 
 	@Override
@@ -80,17 +78,13 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Teleop Init --------");
 		SmartDashboard.putString("Match Cycle", "TELEOP");
 		driveFsmSystem.reset(input);
-		ballSystem.reset();
-		grabberSystem.reset();
-		limelight.update();
+
 	}
 
 	@Override
 	public void teleopPeriodic() {
 		driveFsmSystem.update(input);
-		ballSystem.update(input, driveFsmSystem.getCurrentState());
-		grabberSystem.update(input);
-		limelight.update();
+
 	}
 
 	@Override

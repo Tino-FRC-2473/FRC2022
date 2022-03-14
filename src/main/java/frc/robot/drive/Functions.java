@@ -40,14 +40,22 @@ public class Functions {
 		return (1 - Math.cos(Math.PI * joystickInput / 2.0));
 	}
 
-	/**
+		/**
 	 * Calculates the adjusted steering power to set the motor
 	 * given the steering wheel input.
 	 * @param steeringInput the input from the steering wheel
 	 * @return the adjusted steering power
 	 */
-	public static double calcSteeringPower(double steeringInput) {
-		return 1 - Math.abs(2 * steeringInput);
+	public static DrivePower calcSteeringPower(double steeringInput) {
+		if (steeringInput > 0) {
+			return new DrivePower(1 + 1 * Math.abs(steeringInput), 1 - 1 * Math.abs(steeringInput));
+		} else {
+			return new DrivePower(1 - 1 * Math.abs(steeringInput), 1 + 1 * Math.abs(steeringInput));
+		}
+		// return new DrivePower(
+		// 	1 + Math.signum(steeringInput) * (1 - Math.cos(Math.PI * steeringInput)),
+		// 	1 - Math.signum(steeringInput) * (1 - Math.cos(Math.PI * steeringInput))
+		// );
 	}
 
 	/**
@@ -59,7 +67,8 @@ public class Functions {
 	 */
 	public static DrivePower turnInPlace(double joystickInput, double steeringInput) {
 		if (Math.abs(steeringInput) > Constants.TELEOP_MIN_TURN_POWER) {
-			return new DrivePower(-steeringInput, -steeringInput);
+			return new DrivePower(-Math.signum(steeringInput) * Math.pow(steeringInput, 2),
+				-Math.signum(steeringInput) * Math.pow(steeringInput, 2));
 		} else {
 			return new DrivePower(0, 0);
 		}

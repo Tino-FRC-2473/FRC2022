@@ -460,7 +460,7 @@ public class DriveFSMSystem {
 		}
 
 		previousEncoderCount = currrentPosTicks;
-		System.out.println("Previous Encoder Count: " + previousEncoderCount);
+		// System.out.println("Previous Encoder Count: " + previousEncoderCount);
 	}
 
 	/**
@@ -530,7 +530,6 @@ public class DriveFSMSystem {
 			return;
 		}
 
-		double leftJoystickY = input.getLeftJoystickY();
 		double rightJoystickY = input.getDrivingJoystickY();
 		double steerAngle = input.getSteerAngle();
 		double currentLeftPower = frontLeftMotor.get();
@@ -573,10 +572,15 @@ public class DriveFSMSystem {
 		backRightMotor.set(rightPower * Constants.CONSTANT);
 		frontLeftMotor.set(leftPower * Constants.CONSTANT);
 		backLeftMotor.set(leftPower * Constants.CONSTANT);
+		// frontRightMotor.set(rightPower);
+		// backRightMotor.set(rightPower);
+		// frontLeftMotor.set(leftPower);
+		// backLeftMotor.set(leftPower);
 
-		System.out.println("left power: " + (leftPower * Constants.CONSTANT));
-		System.out.println("right power: " + (rightPower * Constants.CONSTANT));
+		System.out.println("left power: " + frontLeftMotor.get());
+		System.out.println("right power: " + frontRightMotor.get());
 		System.out.println("joystick y-value: " + input.getDrivingJoystickY());
+		System.out.println("wheel: " + input.getSteerAngle());
 
 	}
 
