@@ -112,11 +112,11 @@ public class Robot extends TimedRobot {
 	public void simulationInit() {
 		System.out.println("-------- Simulation Init --------");
 
-		CANSparkMax[] sparkMaxs = ballSystem.getSparkMaxs();
+		// CANSparkMax[] sparkMaxs = ballSystem.getSparkMaxs();
 
-		for (int i = 0; i < sparkMaxs.length; i++) {
-			REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
-		}
+		// for (int i = 0; i < sparkMaxs.length; i++) {
+		// 	REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
+		// }
 	}
 
 	@Override
