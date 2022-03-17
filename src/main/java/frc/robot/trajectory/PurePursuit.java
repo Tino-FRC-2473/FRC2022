@@ -1,5 +1,6 @@
 package frc.robot.trajectory;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 // WPILib Imports
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -25,9 +26,6 @@ public class PurePursuit {
 	public PurePursuit(ArrayList<Translation2d> initialPoints) {
 		keyPoints = initialPoints;
 		pointInjection();
-		for (Translation2d p : pathPoints) {
-			System.out.println(p);
-		}
 	}
 
 	private void pointInjection() {
@@ -132,7 +130,27 @@ public class PurePursuit {
 	 * amount of points to the end points
 	 */
 	public boolean isNearEnd(double numPoints) {
+		System.out.println("cutoff: " + (pathPoints.size() - 1 - numPoints));
+		System.out.println("closest index: " + lastClosestPointIndex);
 		return (pathPoints.size() - 1 - numPoints) <= lastClosestPointIndex;
+	}
+
+	/**
+	 * Adds extra points at the end of the path to help with heading control.
+	 * @param numPoints number of points to add at the end
+	 * @param angle angle at which to add the points
+	 */
+	public void addInvisPoints(double numPoints, double angle) {
+		ArrayList<Translation2d> tempInvisPoints = pathPoints;
+
+		Translation2d lastPoint = pathPoints.get(pathPoints.size() - 1);
+		for (int i = 1; i <= numPoints; i++) {
+			tempInvisPoints.add(lastPoint.plus(new Translation2d(SPACING * i,
+				Rotation2d.fromDegrees(angle))));
+		}
+
+		pathPoints = tempInvisPoints;
+		System.out.println("------------------------");
 	}
 
 }

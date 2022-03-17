@@ -100,6 +100,14 @@ public class TeleopInput {
 		return mechJoystick.getRawButton(Constants.DESCEND_BUTTON);
 	}
 
+	/**
+	 * Get the value of the forward intake toggle button.
+	 * @return True if button is pressed
+	 */
+	public boolean isForwardIntakeButtonPressed() {
+		return mechJoystick.getRawButtonPressed(Constants.FORWARD_INTAKE_BUTTON);
+	}
+
 	/* ------------------------ Wheel ------------------------ */
 	/**
 	 * Get Angle of the steering Wheel from -1 to 1.

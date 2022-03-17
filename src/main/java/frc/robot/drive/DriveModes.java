@@ -40,8 +40,8 @@ public class DriveModes {
 
 		//reversible driving (currently set on buttons 5 and 6)
 		if (!isDrivingForward) {
-			targetLeftPower = -adjustedInput * adjustedSteering.getLeftPower();
-			targetRightPower = adjustedInput * adjustedSteering.getRightPower();
+			targetLeftPower = -adjustedInput * adjustedSteering.getRightPower();
+			targetRightPower = adjustedInput * adjustedSteering.getLeftPower();
 
 			//checks if the magnitude of the target powers is greater than 1
 			if (Math.abs(targetLeftPower) > 1.0) {
@@ -81,8 +81,8 @@ public class DriveModes {
 			rightAdjustedInput *= -1;
 		}
 
-		double targetLeftPower = leftAdjustedInput;
-		double targetRightPower = -rightAdjustedInput;
+		double targetLeftPower = -leftAdjustedInput;
+		double targetRightPower = rightAdjustedInput;
 
 		//check if the resulting power will be too low
 		if (Math.abs(targetLeftPower) < Constants.TELEOP_MIN_MOVE_POWER) {

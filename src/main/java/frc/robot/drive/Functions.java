@@ -47,7 +47,7 @@ public class Functions {
 	 * @return the adjusted steering power
 	 */
 	public static DrivePower calcSteeringPower(double steeringInput) {
-		return new DrivePower(1 + 2 * steeringInput, 1 - 2 * steeringInput);
+		return new DrivePower(1 + steeringInput, 1 - steeringInput);
 	}
 
 	/**
@@ -59,7 +59,8 @@ public class Functions {
 	 */
 	public static DrivePower turnInPlace(double joystickInput, double steeringInput) {
 		if (Math.abs(steeringInput) > Constants.TELEOP_MIN_TURN_POWER) {
-			return new DrivePower(-steeringInput, -steeringInput);
+			return new DrivePower(-Math.signum(steeringInput) * Math.pow(steeringInput, 2),
+				-Math.signum(steeringInput) * Math.pow(steeringInput, 2));
 		} else {
 			return new DrivePower(0, 0);
 		}

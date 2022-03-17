@@ -7,8 +7,6 @@ import frc.robot.Constants;
 
 public class Kinematics {
 
-	private static boolean keepTurning = false;
-
 	/**
 	 * Calculates the new robot position as if the robot
 	 * traveled in a line.
