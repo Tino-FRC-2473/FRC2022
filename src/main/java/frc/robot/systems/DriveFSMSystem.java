@@ -568,14 +568,14 @@ public class DriveFSMSystem {
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
 
-		frontRightMotor.set(rightPower * Constants.CONSTANT);
-		backRightMotor.set(rightPower * Constants.CONSTANT);
-		frontLeftMotor.set(leftPower * Constants.CONSTANT);
-		backLeftMotor.set(leftPower * Constants.CONSTANT);
-		// frontRightMotor.set(rightPower);
-		// backRightMotor.set(rightPower);
-		// frontLeftMotor.set(leftPower);
-		// backLeftMotor.set(leftPower);
+		// frontRightMotor.set(rightPower * Constants.CONSTANT);
+		// backRightMotor.set(rightPower * Constants.CONSTANT);
+		// frontLeftMotor.set(leftPower * Constants.CONSTANT);
+		// backLeftMotor.set(leftPower * Constants.CONSTANT);
+		frontRightMotor.set(rightPower);
+		backRightMotor.set(rightPower);
+		frontLeftMotor.set(leftPower);
+		backLeftMotor.set(leftPower);
 
 		System.out.println("left power: " + frontLeftMotor.get());
 		System.out.println("right power: " + frontRightMotor.get());
