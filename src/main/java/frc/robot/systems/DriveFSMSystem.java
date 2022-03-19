@@ -528,12 +528,13 @@ public class DriveFSMSystem {
 			currentRightPower));
 
 		// turning in place
-		if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+		if (Math.abs(rightJoystickY) < 0.05) {
 			power = Functions.turnInPlace(rightJoystickY, steerAngle);
 		}
 
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
+		System.out.println("left power: " + leftPower + ",\tright power: " + rightPower);
 
 		if (input.getHangarButton()) {
 			if (Math.abs(gyroAngle - Constants.HANGAR_TURN_TARGET_ANGLE)

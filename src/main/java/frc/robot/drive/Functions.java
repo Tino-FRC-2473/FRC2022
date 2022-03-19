@@ -59,8 +59,7 @@ public class Functions {
 	 */
 	public static DrivePower turnInPlace(double joystickInput, double steeringInput) {
 		if (Math.abs(steeringInput) > Constants.TELEOP_MIN_TURN_POWER) {
-			return new DrivePower(-Math.signum(steeringInput) * Math.pow(steeringInput, 2),
-				-Math.signum(steeringInput) * Math.pow(steeringInput, 2));
+			return new DrivePower(-steeringInput, -steeringInput);
 		} else {
 			return new DrivePower(0, 0);
 		}
