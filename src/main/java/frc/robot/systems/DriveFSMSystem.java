@@ -534,7 +534,6 @@ public class DriveFSMSystem {
 
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
-		System.out.println("left power: " + leftPower + ",\tright power: " + rightPower);
 
 		if (input.getHangarButton()) {
 			if (Math.abs(gyroAngle - Constants.HANGAR_TURN_TARGET_ANGLE)
