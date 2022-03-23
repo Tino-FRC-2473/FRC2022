@@ -561,7 +561,7 @@ public class DriveFSMSystem {
 			currentRightPower));
 
 		// turning in place
-		if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+		if (Math.abs(rightJoystickY) < 0.05) {
 			power = Functions.turnInPlace(rightJoystickY, steerAngle);
 		}
 
@@ -624,13 +624,11 @@ public class DriveFSMSystem {
 	*/
 	private void handleTerminalTurnState(TeleopInput input) {
 
-		double leftJoystickY = input.getLeftJoystickY();
 		double rightJoystickY = input.getDrivingJoystickY();
 
 		if (Math.abs(gyroAngle - Constants.RED_TERMINAL_ANGLE_DEG)
-				> Constants.AUTOALIGN_TURN_ERROR
-				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
-				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+				> 2.0
+				&& Math.abs(rightJoystickY) < 0.05) {
 
 			double error = Constants.RED_TERMINAL_ANGLE_DEG - gyroAngle;
 			double turnPower = Math.abs(error) / Constants.TURN_ERROR_POWER_RATIO;
@@ -647,6 +645,11 @@ public class DriveFSMSystem {
 			backRightMotor.set(rightPower * Constants.CONSTANT);
 			frontLeftMotor.set(leftPower * Constants.CONSTANT);
 			backLeftMotor.set(leftPower * Constants.CONSTANT);
+		} else {
+			frontRightMotor.set(0);
+			backRightMotor.set(0);
+			frontLeftMotor.set(0);
+			backLeftMotor.set(0);
 		}
 	}
 
