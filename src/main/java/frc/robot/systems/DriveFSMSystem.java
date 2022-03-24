@@ -528,7 +528,7 @@ public class DriveFSMSystem {
 			currentRightPower));
 
 		// turning in place
-		if (Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
+		if (Math.abs(rightJoystickY) < Constants.TURNING_IN_PLACE_THRESHOLD) {
 			power = Functions.turnInPlace(rightJoystickY, steerAngle);
 		}
 
@@ -557,7 +557,6 @@ public class DriveFSMSystem {
 		if (input.getTerminalButton()) {
 			if (Math.abs(gyroAngle - terminalAngle)
 				> Constants.AUTOALIGN_TURN_ERROR
-				&& Math.abs(leftJoystickY) < Constants.TELEOP_MIN_MOVE_POWER
 				&& Math.abs(rightJoystickY) < Constants.TELEOP_MIN_MOVE_POWER) {
 
 				double error = terminalAngle - gyroAngle;
@@ -570,6 +569,9 @@ public class DriveFSMSystem {
 
 				leftPower = turnPower;
 				rightPower = turnPower;
+			} else {
+				leftPower = 0;
+				rightPower = 0;
 			}
 		}
 

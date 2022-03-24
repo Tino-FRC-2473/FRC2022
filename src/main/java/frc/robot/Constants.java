@@ -20,6 +20,7 @@ public class Constants {
 	public static final double TURN_ERROR_THRESHOLD_DEGREE = 1.0;
 	public static final double TELEOP_ACCELERATION_CONSTANT = 0.05;
 	public static final double TELEOP_ACCELERATION_MIN = 0.1;
+	public static final double TURNING_IN_PLACE_THRESHOLD = 0.05;
 	public static final double ENCODER_CONSTANT = 1.0814;
 	public static final double COUNTS_PER_MOTOR_REVOLUTION = 42;
 	public static final double GEAR_RATIO = 8.0; //26.0 * 4.67 / 12.0;
@@ -32,12 +33,13 @@ public class Constants {
 	public static final double MOTOR_MAX_POWER_RATIO_ACCELERATION = 2.8;
 	public static final double TANK_DRIVE_STRAIGHT_DRIVE_POWER_DIFF = 0.3;
 	public static final double TRACKWIDTH_IN = 20.72;
-	public static final double AUTOALIGN_TURN_ERROR = 5;
+	public static final double AUTOALIGN_TURN_ERROR = 2;
 	public static final double AUTOALIGN_TURN_SPEED = 0.2;
 	public static final double HANGAR_TURN_TARGET_ANGLE = 180;
 	public static final double RED_TERMINAL_ANGLE_DEG = 43.752;
 	public static final double BLUE_TERMINAL_ANGLE_DEG = 223.752;
 	public static final double TIME_FOR_INITIAL_AUTO_SHOT = 0.3;
+
 
 	//CV Ball Detection Constants
 	public static final double DETECTED_BALL_MAX_POWER = 0.2;
@@ -68,7 +70,7 @@ public class Constants {
 	public static final int MECH_JOYSTICK_PORT = 0;
 	public static final int SHOOTER_BUTTON = 1;
 	public static final int INTAKE_BUTTON = 2;
-	public static final int TERMINAL_RELEASE_BUTTON = 3;
+	public static final int TERMINAL_RELEASE_BUTTON = 2;
 	public static final int ASCEND_BUTTON = 4;
 	public static final int DESCEND_BUTTON = 5;
 	public static final int TOGGLE_INTAKE_BUTTON = 7;
