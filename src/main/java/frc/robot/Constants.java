@@ -93,10 +93,10 @@ public class Constants {
 	public static final double MAX_IN_TO_POINT = 48;
 	public static final double PP_MAX_SPEED = 0.8;
 	public static final double PP_SLOW_DOWN_SPEED = 0.3;
-	public static final double PP_BALL_MAX_RUN_TIME_SEC = 6.0;
-	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 6.0;
+	public static final double PP_BALL_MAX_RUN_TIME_SEC = 1.0;//6
+	public static final double PP_TO_HUB_MAX_RUN_TIME_SEC = 1.0;//6
 	public static final double PP_TURN_RUN_TIME_SEC = 1.0;
-	public static final double PP_TERMINAL_BALL_WAIT_TIME_SEC = 3.5;
+	public static final double PP_TERMINAL_BALL_WAIT_TIME_SEC = 1;//3.5
 	public static final int PP_SLOW_DOWN_NUM_POINTS = 8;
 	public static final int PP_R3_NUM_INVIS_POINTS = 4;
 
@@ -124,16 +124,16 @@ public class Constants {
 	//Intake Shooter Constants
 	public static final int MAX_NUMBER_OF_BALLS = 3;
 	public static final double TIME_FOR_PISTON_EXTENSION = 0.5;
-	public static final double TIME_FOR_PISTON_RETRACTION = 0.05;
+	public static final double TIME_FOR_PISTON_RETRACTION = 0.2;
 	public static final double TIME_TO_DEPRESSURIZATION = 0.1;
 	public static final double TIME_FOR_FULL_SHOT = TIME_FOR_PISTON_EXTENSION
 													+ TIME_TO_DEPRESSURIZATION;
 	public static final double TIME_FOR_FULL_RETRACTION = TIME_FOR_PISTON_RETRACTION
 														+ TIME_TO_DEPRESSURIZATION;
 	public static final double INTAKE_MOTOR_VOLTAGE = 5;
-	public static final int BALL_PROXIMITY_THRESHOLD = 73;
+	public static final int BALL_PROXIMITY_THRESHOLD = 80;
 	public static final double TIME_FOR_AUTO_SHOOT = TIME_FOR_FULL_SHOT
 													+ TIME_FOR_FULL_RETRACTION
-													+ 0.75;
+													+ 0.6;
 	public static final int FORWARD_INTAKE_BUTTON = 3;
 }

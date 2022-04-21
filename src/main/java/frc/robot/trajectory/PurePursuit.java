@@ -82,7 +82,7 @@ public class PurePursuit {
 		(and not the last point) */
 		if (lastClosestPointIndex < pathPoints.size() - 1) {
 			Translation2d closestPoint = pathPoints.get(lastClosestPointIndex);
-			System.out.println("closest point: " + closestPoint);
+			// System.out.println("closest point: " + closestPoint);
 			return closestPoint;
 		}
 
@@ -130,8 +130,8 @@ public class PurePursuit {
 	 * amount of points to the end points
 	 */
 	public boolean isNearEnd(double numPoints) {
-		System.out.println("cutoff: " + (pathPoints.size() - 1 - numPoints));
-		System.out.println("closest index: " + lastClosestPointIndex);
+		// System.out.println("cutoff: " + (pathPoints.size() - 1 - numPoints));
+		// System.out.println("closest index: " + lastClosestPointIndex);
 		return (pathPoints.size() - 1 - numPoints) <= lastClosestPointIndex;
 	}
 

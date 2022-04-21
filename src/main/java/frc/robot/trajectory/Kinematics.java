@@ -156,7 +156,7 @@ public class Kinematics {
 
 		//check if the point is behind the robot
 		//or not in front of it (requires the robot to make too large of an arc)
-		System.out.println("target angle: " + targetAngle);
+		// System.out.println("target angle: " + targetAngle);
 
 		//find out whether the left or right side is the inner/outer set of wheels
 		if ((targetAngle - gyroHeading > 0 && targetAngle - gyroHeading < 180)

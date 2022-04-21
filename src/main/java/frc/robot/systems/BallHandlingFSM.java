@@ -30,7 +30,8 @@ public class BallHandlingFSM {
 		DEPRESSURIZE_SHOOTER,
 		RETRACT_INTAKE_MECH,
 		RELEASE_INTAKE_MECH,
-		BALL_INTO_TERMINAL
+		BALL_INTO_TERMINAL,
+		MOVE_MOTOR_RED_MECH
 	}
 
 	/* ======================== Private variables ======================== */
@@ -41,6 +42,7 @@ public class BallHandlingFSM {
 	private DoubleSolenoid intakeDeploySolenoid;
 
 	private CANSparkMax intakeMotor;
+	private CANSparkMax magicMotor;
 
 	private PowerDistribution pDH;
 
@@ -81,6 +83,8 @@ public class BallHandlingFSM {
 
 		intakeMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_INTAKE,
 			MotorType.kBrushless);
+
+		magicMotor = new CANSparkMax(7, MotorType.kBrushless);
 
 		ballDetector = new ColorSensorV3(I2C.Port.kOnboard);
 		pDH = new PowerDistribution(1, ModuleType.kRev);
@@ -180,7 +184,14 @@ public class BallHandlingFSM {
 	 * @return FSM state for the next iteration
 	 */
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
-		if (input == null) {
+		if (input == null) { //auto
+			if (currentState != FSMState.IDLE){
+				System.out.println("Drive State: " + driveState);
+				System.out.println("State: " + currentState);
+				System.out.println("Extended: " + isShooterPistonExtended);
+				System.out.println("Pressurized: " + isShooterPistonPressurized);
+				System.out.println("Time Elapsed: " + stateTimer.get());
+			}
 			if (currentState == FSMState.START_STATE) {
 				return FSMState.DEPRESSURIZE_SHOOTER;
 			}
@@ -302,6 +313,15 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIdleState(TeleopInput input) {
+		magicMotor.set(0);
+		if (input.isAscendingButtonPressed()){
+			magicMotor.set(0.1);
+		}
+
+		if (input.isDescendingButtonPressed()){
+			magicMotor.set(-0.1);
+		}
+
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
 		pullSolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeDeploySolenoid.set(DoubleSolenoid.Value.kOff);
@@ -379,6 +399,27 @@ public class BallHandlingFSM {
 		pullSolenoid.set(DoubleSolenoid.Value.kReverse);
 		isShooterPistonPressurized = false;
 	}
+
+	// private void moveMotorForHanger(TeleopInput input,
+	// 	double inches) {
+
+	// 	double currentPosTicks = -magicMotor.getEncoder().getPosition();
+
+
+	// 	// Checks if either the encoder value is equal to the inches required (reached destination)
+	// 	// or checks if the robot has hit a wall (encoder value is not changing and motor power is
+	// 	// not zero)
+	// 	if ((inches > 0 && error < Constants.ERR_THRESHOLD_STRAIGHT_IN)
+	// 		|| (inches < 0 && error > -Constants.ERR_THRESHOLD_STRAIGHT_IN)) {
+
+	// 		magicMotor.set(0);
+	// 		return;
+	// 	}
+
+	// 	double speed = 0.1;
+
+	// 	magicMotor.set(speed);
+	// }
 
 	/**
 	 * Get relavent Spark Max instances for simulation.

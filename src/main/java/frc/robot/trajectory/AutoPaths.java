@@ -89,7 +89,7 @@ public class AutoPaths {
 		path.add(new Translation2d(275.188, 111.126));
 		path.add(new Translation2d(227.904, 65.860));
 		path.add(new Translation2d(149.215, 8.764));
-		path.add(new Translation2d(55, -19));
+		path.add(new Translation2d(53, -17));
 		return path;
 	}
 
@@ -172,7 +172,7 @@ public class AutoPaths {
 		path.add(new Translation2d(-275.188, -111.126));
 		path.add(new Translation2d(-227.904, -65.860));
 		path.add(new Translation2d(-149.215, -8.764));
-		path.add(new Translation2d(-55, 19));
+		path.add(new Translation2d(-53, 17));
 		return path;
 	}
 
