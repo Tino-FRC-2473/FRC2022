@@ -105,7 +105,7 @@ public class TeleopInput {
 	 * @return True if button is pressed
 	 */
 	public boolean isForwardIntakeButtonPressed() {
-		return mechJoystick.getRawButtonPressed(Constants.FORWARD_INTAKE_BUTTON);
+		return mechJoystick.getRawButton(Constants.FORWARD_INTAKE_BUTTON);
 	}
 
 	/* ------------------------ Wheel ------------------------ */

@@ -70,7 +70,7 @@ public class Constants {
 	public static final int MECH_JOYSTICK_PORT = 0;
 	public static final int SHOOTER_BUTTON = 1;
 	public static final int INTAKE_BUTTON = 2;
-	public static final int TERMINAL_RELEASE_BUTTON = 2;
+	public static final int TERMINAL_RELEASE_BUTTON = 3;
 	public static final int ASCEND_BUTTON = 4;
 	public static final int DESCEND_BUTTON = 5;
 	public static final int TOGGLE_INTAKE_BUTTON = 7;

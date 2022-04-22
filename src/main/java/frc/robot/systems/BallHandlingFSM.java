@@ -84,7 +84,7 @@ public class BallHandlingFSM {
 		intakeMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_INTAKE,
 			MotorType.kBrushless);
 
-		magicMotor = new CANSparkMax(7, MotorType.kBrushless);
+		magicMotor = new CANSparkMax(5, MotorType.kBrushless);
 
 		ballDetector = new ColorSensorV3(I2C.Port.kOnboard);
 		pDH = new PowerDistribution(1, ModuleType.kRev);
@@ -117,6 +117,8 @@ public class BallHandlingFSM {
 
 		isShooterPistonExtended = false;
 		isShooterPistonPressurized = false;
+		magicMotor.getEncoder().setPosition(0);
+
 		isIntakeMechRetracted = true;
 		// Call one tick of update to ensure outputs reflect start state
 		update(null, DriveFSMSystem.FSMState.PURE_PURSUIT);
@@ -137,6 +139,7 @@ public class BallHandlingFSM {
 		switch (currentState) {
 			case START_STATE:
 				handleStartState(input);
+				break;
 
 			case IDLE:
 				handleIdleState(input);
@@ -185,13 +188,6 @@ public class BallHandlingFSM {
 	 */
 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 		if (input == null) { //auto
-			if (currentState != FSMState.IDLE){
-				System.out.println("Drive State: " + driveState);
-				System.out.println("State: " + currentState);
-				System.out.println("Extended: " + isShooterPistonExtended);
-				System.out.println("Pressurized: " + isShooterPistonPressurized);
-				System.out.println("Time Elapsed: " + stateTimer.get());
-			}
 			if (currentState == FSMState.START_STATE) {
 				return FSMState.DEPRESSURIZE_SHOOTER;
 			}
@@ -314,13 +310,19 @@ public class BallHandlingFSM {
 	 */
 	private void handleIdleState(TeleopInput input) {
 		magicMotor.set(0);
-		if (input.isAscendingButtonPressed()){
+		// System.out.println(input.isAscendingButtonPressed());
+		// System.out.println(input.isForwardIntakeButtonPressed());
+		if (input.isAscendingButtonPressed()) {
+			// went down when button 4 was pressed
 			magicMotor.set(0.1);
 		}
 
-		if (input.isDescendingButtonPressed()){
+		if (input.isDescendingButtonPressed()) {
+			// went up when button 5 was pressed
 			magicMotor.set(-0.1);
 		}
+
+		System.out.println("ecoder value " + magicMotor.getEncoder().getPosition());
 
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
 		pullSolenoid.set(DoubleSolenoid.Value.kOff);
@@ -328,7 +330,8 @@ public class BallHandlingFSM {
 		intakeMotor.setVoltage(
 			getBallInMech() == IntakeMechBallStates.NONE
 			|| input.isForwardIntakeButtonPressed()
-				? -Constants.INTAKE_MOTOR_VOLTAGE : 0);	}
+				? -Constants.INTAKE_MOTOR_VOLTAGE : 0);
+	}
 	/**
 	 * Handle behavior in START_STATE.
 	 * @param input Global TeleopInput if robot in teleop mode or null if

@@ -6,10 +6,10 @@ package frc.robot;
  */
 public final class HardwareMap {
 	// ID numbers for devices on the CAN bus
-	public static final int CAN_ID_SPARK_GRABBER = 8;
-	public static final int CAN_ID_SPARK_INTAKE = 10;
-	public static final int CAN_ID_SPARK_DRIVE_LEFT = 6;
-	public static final int CAN_ID_SPARK_DRIVE_RIGHT = 5;
+	public static final int CAN_ID_SPARK_GRABBER = 1;
+	public static final int CAN_ID_SPARK_INTAKE = 2;
+	public static final int CAN_ID_SPARK_DRIVE_LEFT = 3;
+	public static final int CAN_ID_SPARK_DRIVE_RIGHT = 4;
 
 	// Pneumatics channel numbers
 	public static final int PCM_CHANNEL_SHOOTER_SOLENOID_EXTEND = 1;

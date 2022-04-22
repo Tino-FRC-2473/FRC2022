@@ -1,254 +1,375 @@
-// package frc.robot.systems;
+package frc.robot.systems;
 
-// // // WPILib Imports
-// // import edu.wpi.first.wpilibj.DoubleSolenoid;
-// // import edu.wpi.first.wpilibj.I2C;
-// // import edu.wpi.first.wpilibj.PneumaticsModuleType;
-// // import edu.wpi.first.wpilibj.PowerDistribution;
-// // import edu.wpi.first.wpilibj.Timer;
-// // import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-// // import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// // WPILib Imports
+// import edu.wpi.first.wpilibj.DoubleSolenoid;
+// import edu.wpi.first.wpilibj.I2C;
+// import edu.wpi.first.wpilibj.PneumaticsModuleType;
+// import edu.wpi.first.wpilibj.PowerDistribution;
+// import edu.wpi.first.wpilibj.Timer;
+// import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-// // Third party Hardware Imports
-// import com.revrobotics.CANSparkMax;
-// import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+// Third party Hardware Imports
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-// // Robot Imports
-// import frc.robot.TeleopInput;
+// wpilib imports
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 
-// public class MidHangerFSMSystem {
-// 	/* ======================== Constants ======================== */
-// 	// FSM state definitions
-// 	public enum FSMState {
-// 		IDLE,
-// 		AT_BOTTOM_STATE,
-// 		FULLY_EXTENDED_STATE,
-// 		EXTENDED_TO_MID_RUNG_HEIGHT_STATE,
-// 		DESCEND_TO_GROUND_STATE
-// 	}
+// Robot Imports
+import frc.robot.TeleopInput;
 
-// 	/* ======================== Private variables ======================== */
-// 	private FSMState currentState;
+public class MidHangerFSMSystem {
+	/* ======================== Constants ======================== */
 
-// 	private CANSparkMax magicMotor;
+	// FSM state definitions
+	public enum FSMState {
+		IDLE,
+		AT_BOTTOM_STATE,
+		FULLY_EXTENDED_STATE,
+		EXTENDED_BELOW_MID_RUNG_HEIGHT_STATE,
+		PISTON_LOCK_ENGAGED_STATE,
+		EXTENDED_AT_MID_RUNG_HEIGHT_STATE
+		// DESCEND_TO_GROUND_STATE
+	}
 
-// 	private double magicMotorSpeed;
-// 	private double startingPosTicks;
+	/* ======================== Private variables ======================== */
 
-// 	private double posTicksForBottomSwitchRetract;
-// 	private double posTicksFullyExtended;
-// 	private double posTicksBelowClip;
+	private FSMState currentState;
 
-// 	private boolean isAscendingButtonPressed;
-// 	private boolean isDescendingButtonPressed;
-// 	private boolean isHangerAtBottom;
-// 	private boolean isHangerFullyExtended;
-// 	private boolean isHangerAtMidRungHeight;
-// 	private boolean readyToPressDescendButton;
-// 	private boolean isRobotAtGroundLevel;
-// 	/* ======================== Constructor ======================== */
-// 	/**
-// 	 * Create FSMSystem and initialize to starting state. Also perform any
-// 	 * one-time initialization or configuration of hardware required. Note
-// 	 * the constructor is called only once when the robot boots.
-// 	 */
-// 	public MidHangerFSMSystem() {
-// 		// hardware init
-// 		magicMotor = new CANSparkMax(7, MotorType.kBrushless);
+	private CANSparkMax magicMotor;
 
-// 		magicMotorSpeed = 0.3;
+	private DoubleSolenoid switchSolenoid;
 
-// 		startingPosTicks = magicMotor.getEncoder().getPosition();
-// 		posTicksForBottomSwitchRetract = startingPosTicks - 5;
-// 		posTicksFullyExtended = startingPosTicks + 30;
-// 		posTicksBelowClip = startingPosTicks + 20;
+	private double magicMotorSpeed;
+	private double startingPosTicks;
 
-// 		isAscendingButtonPressed = false;
-// 		isDescendingButtonPressed = false;
-// 		isHangerAtBottom = false;
-// 		isHangerFullyExtended = false;
-// 		isHangerAtMidRungHeight = false;
-// 		readyToPressDescendButton = false;
-// 		isRobotAtGroundLevel = false;
+	private double posTicksForBottomSwitchRetract;
+	private double posTicksFullyExtended;
+	private double posTicksBelowClip;
+	private double posTicksRightAtClip;
 
-// 		reset();
-// 	}
+	private boolean isAscendingButtonPressed;
+	// private boolean isDescendingButtonPressed;
+	private boolean isArmDescendingButtonPressed;
+	private boolean isHangerAtBottom;
+	private boolean isHangerFullyExtended;
+	private boolean isHangerBelowMidRungHeight;
+	private boolean isHangerAtMidRungHeight;
+	private boolean isPistonSwitchFired;
+	// private boolean readyToPressDescendButton;
+	// private boolean isRobotAtGroundLevel;
+	/* ======================== Constructor ======================== */
+	/**
+	 * Create FSMSystem and initialize to starting state. Also perform any
+	 * one-time initialization or configuration of hardware required. Note
+	 * the constructor is called only once when the robot boots.
+	 */
+	public MidHangerFSMSystem() {
+		// hardware init
+		magicMotor = new CANSparkMax(5, MotorType.kBrushless);
 
-// 	/* ======================== Public methods ======================== */
-// 	/**
-// 	 * Return current FSM state.
-// 	 * @return Current FSM state
-// 	 */
-// 	public FSMState getCurrentState() {
-// 		return currentState;
-// 	}
-// 	/**
-// 	 * Reset this system to its start state. This may be called from mode init
-// 	 * when the robot is enabled.
-// 	 *
-// 	 * Note this is distinct from the one-time initialization in the constructor
-// 	 * as it may be called multiple times in a boot cycle,
-// 	 * Ex. if the robot is enabled, disabled, then reenabled.
-// 	 */
-// 	public void reset() {
-// 		currentState = FSMState.IDLE;
-// 	}
-// 	/**
-// 	 * Update FSM based on new inputs in Autonomous. This function only calls
-// 	 * the FSM state specific handlers.
-// 	 * @param input Global TeleopInput if robot in teleop mode or null if
-// 	 *        the robot is in autonomous mode.
-// 	 * @param driveState Current FSMState of DriveFSMSystem.
-// 	 */
-// 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
+		magicMotorSpeed = 0.1;
 
-// 		switch (currentState) {
+		switchSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, 3, 4);
 
-// 			case IDLE:
-// 				handleIdleState(input);
-// 				break;
+		startingPosTicks = magicMotor.getEncoder().getPosition();
+		/*
+		 * Value of 33.428 is from testing encoder value on Wed
+		 */
+		posTicksForBottomSwitchRetract = startingPosTicks + 33.428;
 
-// 			case AT_BOTTOM_STATE:
-// 				handleAtBottomState(input);
-// 				break;
+		/*
+		 * FIND ENCODER VALUE
+		 */
+		posTicksFullyExtended = startingPosTicks - 200;
 
-// 			case FULLY_EXTENDED_STATE:
-// 				handleFullyExtendedState(input);
-// 				break;
+		/*
+		 * FIND ENOCDER VALUE
+		 */
+		posTicksBelowClip = startingPosTicks - 160;
 
-// 			case EXTENDED_TO_MID_RUNG_HEIGHT_STATE:
-// 				handleExtendedToMidRunHeightState(input);
-// 				break;
+		/*
+		 * FIND ENOCDER VALUE
+		 */
+		posTicksRightAtClip = startingPosTicks - 170;
 
-// 			case DESCEND_TO_GROUND_STATE:
-// 				handleDescendToGroundState(input);
-// 				break;
+		isAscendingButtonPressed = false;
+		// isDescendingButtonPressed = false;
+		isArmDescendingButtonPressed = false;
+		isHangerAtBottom = false;
+		isHangerFullyExtended = false;
+		isHangerBelowMidRungHeight = false;
+		isHangerAtMidRungHeight = false;
+		isPistonSwitchFired = false;
+		// readyToPressDescendButton = false;
+		// isRobotAtGroundLevel = false;
 
-// 			default:
-// 				throw new IllegalStateException("Invalid state: " + currentState.toString());
-// 		}
-// 		currentState = nextState(input, driveState);
-// 	}
+		reset();
+	}
 
-// 	/* ======================== Private methods ======================== */
-// 	/**
-// 	 * Decide the next state to transition to. This is a function of the inputs
-// 	 * and the current state of this FSM. This method should not have any side
-// 	 * effects on outputs. In other words, this method should only read or get
-// 	 * values to decide what state to go to.
-// 	 * @param input Global TeleopInput if robot in teleop mode or null if
-// 	 *        the robot is in autonomous mode.
-// 	 * @param driveState Current FSMState of DriveFSMSystem.
-// 	 * @return FSM state for the next iteration
-// 	 */
-// 	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
-// 		switch (currentState) {
-// 			case IDLE:
-// 				if (isAscendingButtonPressed) {
-// 					isAscendingButtonPressed = false;
-// 					return FSMState.AT_BOTTOM_STATE;
-// 				} else if (isDescendingButtonPressed) {
-// 					isDescendingButtonPressed = false;
-// 					return FSMState.DESCEND_TO_GROUND_STATE;
-// 				}
+	/* ======================== Public methods ======================== */
+	/**
+	 * Return current FSM state.
+	 * @return Current FSM state
+	 */
+	public FSMState getCurrentState() {
+		return currentState;
+	}
+	/**
+	 * Reset this system to its start state. This may be called from mode init
+	 * when the robot is enabled.
+	 *
+	 * Note this is distinct from the one-time initialization in the constructor
+	 * as it may be called multiple times in a boot cycle,
+	 * Ex. if the robot is enabled, disabled, then reenabled.
+	 */
+	public void reset() {
+		currentState = FSMState.IDLE;
+		magicMotor.getEncoder().setPosition(0);
+		startingPosTicks = magicMotor.getEncoder().getPosition();
+	}
+	/**
+	 * Update FSM based on new inputs in Autonomous. This function only calls
+	 * the FSM state specific handlers.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 * @param driveState Current FSMState of DriveFSMSystem.
+	 */
+	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 
-// 				return FSMState.IDLE;
+		switch (currentState) {
 
-// 			case AT_BOTTOM_STATE:
-// 				if (isHangerAtBottom) {
-// 					isHangerAtBottom = false;
-// 					return FSMState.FULLY_EXTENDED_STATE;
-// 				} else {
-// 					return FSMState.AT_BOTTOM_STATE;
-// 				}
+			case IDLE:
+				handleIdleState(input);
+				break;
 
-// 			case FULLY_EXTENDED_STATE:
-// 				if (isHangerFullyExtended) {
-// 					isHangerFullyExtended = false;
-// 					return FSMState.EXTENDED_TO_MID_RUNG_HEIGHT_STATE;
-// 				} else {
-// 					return FSMState.FULLY_EXTENDED_STATE;
-// 				}
+			case AT_BOTTOM_STATE:
+				handleAtBottomState(input);
+				break;
 
-// 			case EXTENDED_TO_MID_RUNG_HEIGHT_STATE:
-// 				if (isHangerAtMidRungHeight) {
-// 					isHangerAtMidRungHeight = false;
-// 					readyToPressDescendButton = true;
-// 					return FSMState.IDLE;
-// 				} else {
-// 					return FSMState.EXTENDED_TO_MID_RUNG_HEIGHT_STATE;
-// 				}
+			case FULLY_EXTENDED_STATE:
+				handleFullyExtendedState(input);
+				break;
 
-// 			case DESCEND_TO_GROUND_STATE:
-// 				if (isRobotAtGroundLevel) {
-// 					isRobotAtGroundLevel = false;
-// 					return FSMState.IDLE;
-// 				} else {
-// 					return FSMState.DESCEND_TO_GROUND_STATE;
-// 				}
+			case EXTENDED_BELOW_MID_RUNG_HEIGHT_STATE:
+				handleExtendedBelowMidRunHeightState(input);
+				break;
 
-// 			default:
-// 				throw new IllegalStateException("Invalid state: " + currentState.toString());
-// 		}
-// 	}
+			case PISTON_LOCK_ENGAGED_STATE:
+				handlePistonLockEngagedState(input);
+				break;
 
-// 	/* ------------------------ FSM state handlers ------------------------ */
-// 	/**
-// 	 * Handle behavior in IDLE.
-// 	 * @param input Global TeleopInput if robot in teleop mode or null if
-// 	 *        the robot is in autonomous mode.
-// 	 */
-// 	private void handleIdleState(TeleopInput input) {
-// 		magicMotor.set(0);
+			case EXTENDED_AT_MID_RUNG_HEIGHT_STATE:
+				handleExtendedAtMidRunHeightState(input);
+				break;
 
-// 		if (input.isAscendingButtonPressed()) {
-// 			isAscendingButtonPressed = true;
-// 			return;
-// 		}
+			// case DESCEND_TO_GROUND_STATE:
+			// 	handleDescendToGroundState(input);
+			// 	break;
 
-// 		if (readyToPressDescendButton && input.isDescendingButtonPressed()) {
-// 			readyToPressDescendButton = false;
-// 			isDescendingButtonPressed = true;
-// 			return;
-// 		}
-// 	}
+			default:
+				throw new IllegalStateException("Invalid state: " + currentState.toString());
+		}
+		currentState = nextState(input, driveState);
+	}
 
-// 	private void handleAtBottomState(TeleopInput input) {
-// 		if (magicMotor.getEncoder().getPosition() <= posTicksForBottomSwitchRetract) {
-// 			isHangerAtBottom = true;
-// 			return;
-// 		}
-
-// 		magicMotor.set(-magicMotorSpeed);
-
-// 	}
+	/* ======================== Private methods ======================== */
+	/**
+	 * Decide the next state to transition to. This is a function of the inputs
+	 * and the current state of this FSM. This method should not have any side
+	 * effects on outputs. In other words, this method should only read or get
+	 * values to decide what state to go to.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 * @param driveState Current FSMState of DriveFSMSystem.
+	 * @return FSM state for the next iteration
+	 */
+	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
+		switch (currentState) {
+			case IDLE:
+				if (isAscendingButtonPressed) {
+					isAscendingButtonPressed = false;
+					return FSMState.AT_BOTTOM_STATE;
+				} else if (isArmDescendingButtonPressed) {
+					isArmDescendingButtonPressed = false;
+					return FSMState.EXTENDED_BELOW_MID_RUNG_HEIGHT_STATE;
+				}
 
 
-// 	private void handleFullyExtendedState(TeleopInput input) {
-// 		if (magicMotor.getEncoder().getPosition() >= posTicksFullyExtended) {
-// 			isHangerFullyExtended = true;
-// 			return;
-// 		}
+				// else if (isDescendingButtonPressed) {
+				// 	isDescendingButtonPressed = false;
+				// 	// return FSMState.DESCEND_TO_GROUND_STATE;
+				// }
 
-// 		magicMotor.set(magicMotorSpeed);
+				return FSMState.IDLE;
 
-// 	}
+			case AT_BOTTOM_STATE:
+				if (isHangerAtBottom) {
+					isHangerAtBottom = false;
+					return FSMState.FULLY_EXTENDED_STATE;
+				} else {
+					return FSMState.AT_BOTTOM_STATE;
+				}
 
-// 	private void handleExtendedToMidRunHeightState(TeleopInput input) {
-// 		if (magicMotor.getEncoder().getPosition() <= posTicksBelowClip) {
-// 			isHangerAtMidRungHeight = true;
-// 			return;
-// 		}
+			case FULLY_EXTENDED_STATE:
+				if (isHangerFullyExtended) {
+					isHangerFullyExtended = false;
+					return FSMState.IDLE;
+				} else {
+					return FSMState.FULLY_EXTENDED_STATE;
+				}
 
-// 		magicMotor.set(-magicMotorSpeed);
-// 	}
+			case EXTENDED_BELOW_MID_RUNG_HEIGHT_STATE:
+				if (isHangerBelowMidRungHeight) {
+					isHangerBelowMidRungHeight = false;
+					// readyToPressDescendButton = true;
+					return FSMState.PISTON_LOCK_ENGAGED_STATE;
+				} else {
+					return FSMState.EXTENDED_BELOW_MID_RUNG_HEIGHT_STATE;
+				}
 
-// 	private void handleDescendToGroundState(TeleopInput input) {
-// 		if (magicMotor.getEncoder().getPosition() <= startingPosTicks) {
-// 			isRobotAtGroundLevel = true;
-// 			return;
-// 		}
+			case PISTON_LOCK_ENGAGED_STATE:
+				if (isPistonSwitchFired) {
+					isPistonSwitchFired = false;
+					return FSMState.EXTENDED_AT_MID_RUNG_HEIGHT_STATE;
+				} else {
+					return FSMState.PISTON_LOCK_ENGAGED_STATE;
+				}
 
-// 		magicMotor.set(0.1);
-// 	}
-// }
+			case EXTENDED_AT_MID_RUNG_HEIGHT_STATE:
+				if (isHangerAtMidRungHeight) {
+					isHangerAtMidRungHeight = false;
+					return FSMState.IDLE;
+				} else {
+					return FSMState.EXTENDED_AT_MID_RUNG_HEIGHT_STATE;
+				}
+
+
+			// case DESCEND_TO_GROUND_STATE:
+			// 	if (isRobotAtGroundLevel) {
+			// 		isRobotAtGroundLevel = false;
+			// 		return FSMState.IDLE;
+			// 	} else {
+			// 		return FSMState.DESCEND_TO_GROUND_STATE;
+			// 	}
+
+			default:
+				throw new IllegalStateException("Invalid state: " + currentState.toString());
+		}
+	}
+
+	/* ------------------------ FSM state handlers ------------------------ */
+	/**
+	 * Handle behavior in IDLE.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleIdleState(TeleopInput input) {
+		magicMotor.set(0);
+
+		if (input.isAscendingButtonPressed()) {
+			isAscendingButtonPressed = true;
+			return;
+		}
+
+		if (input.isDescendingButtonPressed()) {
+			isArmDescendingButtonPressed = true;
+			return;
+		}
+
+		// if (readyToPressDescendButton && input.isDescendingButtonPressed()) {
+		// 	readyToPressDescendButton = false;
+		// 	isDescendingButtonPressed = true;
+		// 	return;
+		// }
+	}
+
+	/**
+	 * Handle behavior in for the AT_BOTTOM_STATE.
+	 * Arm will move down to a specific encoder value so the bottom switch
+	 * can retract
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleAtBottomState(TeleopInput input) {
+		if (magicMotor.getEncoder().getPosition() <= posTicksForBottomSwitchRetract) {
+			isHangerAtBottom = true;
+			return;
+		}
+
+		magicMotor.set(magicMotorSpeed);
+
+	}
+
+	/**
+	 * Handle behavior in for the FULLY_EXTENDED_STATE.
+	 * Arm will move up so it is fully extended.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleFullyExtendedState(TeleopInput input) {
+		if (magicMotor.getEncoder().getPosition() >= posTicksFullyExtended) {
+			isHangerFullyExtended = true;
+			return;
+		}
+
+		magicMotor.set(-magicMotorSpeed);
+
+	}
+
+	/**
+	 * Handle behavior in for the EXTEND_BELOW_MID_RUNG_HEIGHT_STATE.
+	 * Arm will move down from fully extended to right below the
+	 * latch.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleExtendedBelowMidRunHeightState(TeleopInput input) {
+		if (magicMotor.getEncoder().getPosition() <= posTicksBelowClip) {
+			isHangerBelowMidRungHeight = true;
+			return;
+		}
+
+		magicMotor.set(magicMotorSpeed);
+	}
+
+	/**
+	 * Handle behavior in for the PISTON_LOCK_ENGAGED_STATE.
+	 * Fires piston so the latch holding the arm in place is
+	 * engaged.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handlePistonLockEngagedState(TeleopInput input) {
+		switchSolenoid.set(DoubleSolenoid.Value.kForward);
+		isPistonSwitchFired = true;
+	}
+
+	/**
+	 * Handle behavior in for the EXTEND_AT_MID_RUNG_HEIGHT_STATE.
+	 * Arm will move down from right below the latch to exactly
+	 * the height of the latch. The height of the arm will be
+	 * the same as the mid-rung.
+	 * @param input Global TeleopInput if robot in teleop mode or null if
+	 *        the robot is in autonomous mode.
+	 */
+	private void handleExtendedAtMidRunHeightState(TeleopInput input) {
+		if (magicMotor.getEncoder().getPosition() >= posTicksRightAtClip) {
+			isHangerAtMidRungHeight = true;
+			return;
+		}
+
+		magicMotor.set(-magicMotorSpeed);
+	}
+
+	// private void handleDescendToGroundState(TeleopInput input) {
+	// 	if (magicMotor.getEncoder().getPosition() <= startingPosTicks) {
+	// 		isRobotAtGroundLevel = true;
+	// 		return;
+	// 	}
+
+	// 	magicMotor.set(0.1);
+	// }
+}
