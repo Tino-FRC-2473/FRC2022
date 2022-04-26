@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // Systems
 import frc.robot.systems.DriveFSMSystem;
 import frc.robot.systems.GrabberFSM;
+import frc.robot.systems.MidHangerFSMSystem;
 import frc.robot.systems.BallHandlingFSM;
 import frc.robot.systems.CompressorSystem;
 
@@ -33,6 +34,7 @@ public class Robot extends TimedRobot {
 	private DriveFSMSystem driveFsmSystem;
 	private BallHandlingFSM ballSystem;
 	private GrabberFSM grabberSystem;
+	private MidHangerFSMSystem hangerSystem;
 
 	// Constants
 	private static final boolean RUN_COMPRESSOR = true;
@@ -53,6 +55,7 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
+		hangerSystem = new MidHangerFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
 		limelight = new LimeLight();
@@ -65,6 +68,7 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Autonomous Init --------");
 		SmartDashboard.putString("Match Cycle", "AUTONOMOUS");
 		driveFsmSystem.reset(null);
+		hangerSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
 		autoSelector.outputToShuffleboard();
@@ -83,19 +87,21 @@ public class Robot extends TimedRobot {
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		SmartDashboard.putString("Match Cycle", "TELEOP");
-		driveFsmSystem.reset(input);
-		ballSystem.reset();
-		grabberSystem.reset();
-		limelight.update();
+		// driveFsmSystem.reset(input);
+		hangerSystem.reset();
+		// ballSystem.reset();
+		// grabberSystem.reset();
+		// limelight.update();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		driveFsmSystem.update(input);
-		ballSystem.update(input, driveFsmSystem.getCurrentState());
-		grabberSystem.update(input);
-		limelight.update();
-		driveFsmSystem.setCVBallPos(limelight.getBallPosition());
+		// driveFsmSystem.update(input);
+		hangerSystem.update(input, driveFsmSystem.getCurrentState());
+		// ballSystem.update(input, driveFsmSystem.getCurrentState());
+		// grabberSystem.update(input);
+		// limelight.update();
+		// driveFsmSystem.setCVBallPos(limelight.getBallPosition());
 	}
 
 	@Override

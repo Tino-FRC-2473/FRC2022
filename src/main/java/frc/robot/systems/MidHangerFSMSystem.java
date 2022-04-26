@@ -16,7 +16,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 // wpilib imports
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
-
+import edu.wpi.first.wpilibj.Timer;
 // Robot Imports
 import frc.robot.TeleopInput;
 
@@ -58,6 +58,8 @@ public class MidHangerFSMSystem {
 	private boolean isHangerBelowMidRungHeight;
 	private boolean isHangerAtMidRungHeight;
 	private boolean isPistonSwitchFired;
+
+	private Timer timerForOff;
 	// private boolean readyToPressDescendButton;
 	// private boolean isRobotAtGroundLevel;
 	/* ======================== Constructor ======================== */
@@ -129,6 +131,9 @@ public class MidHangerFSMSystem {
 		currentState = FSMState.IDLE;
 		magicMotor.getEncoder().setPosition(0);
 		startingPosTicks = magicMotor.getEncoder().getPosition();
+		switchSolenoid.set(DoubleSolenoid.Value.kReverse);
+		timerForOff = new Timer();
+		timerForOff.reset();
 	}
 	/**
 	 * Update FSM based on new inputs in Autonomous. This function only calls
@@ -344,7 +349,12 @@ public class MidHangerFSMSystem {
 	 */
 	private void handlePistonLockEngagedState(TeleopInput input) {
 		switchSolenoid.set(DoubleSolenoid.Value.kForward);
-		isPistonSwitchFired = true;
+		timerForOff.reset();
+		if (timerForOff.hasElapsed(1)) {
+			switchSolenoid.set(DoubleSolenoid.Value.kOff);
+			isPistonSwitchFired = true;
+			return;
+		}
 	}
 
 	/**
