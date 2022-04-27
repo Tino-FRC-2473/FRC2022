@@ -89,7 +89,7 @@ public class Robot extends TimedRobot {
 		SmartDashboard.putString("Match Cycle", "TELEOP");
 		// driveFsmSystem.reset(input);
 		hangerSystem.reset();
-		// ballSystem.reset();
+		ballSystem.reset();
 		// grabberSystem.reset();
 		// limelight.update();
 	}
@@ -98,7 +98,7 @@ public class Robot extends TimedRobot {
 	public void teleopPeriodic() {
 		// driveFsmSystem.update(input);
 		hangerSystem.update(input, driveFsmSystem.getCurrentState());
-		// ballSystem.update(input, driveFsmSystem.getCurrentState());
+		ballSystem.update(input, driveFsmSystem.getCurrentState());
 		// grabberSystem.update(input);
 		// limelight.update();
 		// driveFsmSystem.setCVBallPos(limelight.getBallPosition());

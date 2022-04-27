@@ -72,30 +72,32 @@ public class MidHangerFSMSystem {
 		// hardware init
 		magicMotor = new CANSparkMax(5, MotorType.kBrushless);
 
-		magicMotorSpeed = 0.1;
+		magicMotorSpeed = -0.02;
 
-		switchSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, 3, 4);
+		magicMotor.getEncoder().setPosition(0);
+
+		switchSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, 6, 7);
 
 		startingPosTicks = magicMotor.getEncoder().getPosition();
 		/*
 		 * Value of 33.428 is from testing encoder value on Wed
 		 */
-		posTicksForBottomSwitchRetract = startingPosTicks + 33.428;
+		posTicksForBottomSwitchRetract = startingPosTicks - 30;
 
 		/*
 		 * FIND ENCODER VALUE
 		 */
-		posTicksFullyExtended = startingPosTicks - 200;
+		posTicksFullyExtended = startingPosTicks + 647;
 
 		/*
 		 * FIND ENOCDER VALUE
 		 */
-		posTicksBelowClip = startingPosTicks - 160;
+		posTicksBelowClip = startingPosTicks + 443;
 
 		/*
 		 * FIND ENOCDER VALUE
 		 */
-		posTicksRightAtClip = startingPosTicks - 170;
+		posTicksRightAtClip = startingPosTicks + 500;
 
 		isAscendingButtonPressed = false;
 		// isDescendingButtonPressed = false;
@@ -129,7 +131,6 @@ public class MidHangerFSMSystem {
 	 */
 	public void reset() {
 		currentState = FSMState.IDLE;
-		magicMotor.getEncoder().setPosition(0);
 		startingPosTicks = magicMotor.getEncoder().getPosition();
 		switchSolenoid.set(DoubleSolenoid.Value.kReverse);
 		timerForOff = new Timer();
@@ -144,6 +145,7 @@ public class MidHangerFSMSystem {
 	 */
 	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
 
+		System.out.println(magicMotor.getEncoder().getPosition());
 		switch (currentState) {
 
 			case IDLE:
@@ -320,7 +322,7 @@ public class MidHangerFSMSystem {
 			return;
 		}
 
-		magicMotor.set(-magicMotorSpeed);
+		magicMotor.set(-magicMotorSpeed * 10);
 
 	}
 
@@ -350,7 +352,7 @@ public class MidHangerFSMSystem {
 	private void handlePistonLockEngagedState(TeleopInput input) {
 		switchSolenoid.set(DoubleSolenoid.Value.kForward);
 		timerForOff.reset();
-		if (timerForOff.hasElapsed(1)) {
+		if (timerForOff.hasElapsed(0.02)) {
 			switchSolenoid.set(DoubleSolenoid.Value.kOff);
 			isPistonSwitchFired = true;
 			return;

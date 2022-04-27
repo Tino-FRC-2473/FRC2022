@@ -42,7 +42,6 @@ public class BallHandlingFSM {
 	private DoubleSolenoid intakeDeploySolenoid;
 
 	private CANSparkMax intakeMotor;
-	private CANSparkMax magicMotor;
 
 	private PowerDistribution pDH;
 
@@ -84,8 +83,6 @@ public class BallHandlingFSM {
 		intakeMotor = new CANSparkMax(HardwareMap.CAN_ID_SPARK_INTAKE,
 			MotorType.kBrushless);
 
-		magicMotor = new CANSparkMax(5, MotorType.kBrushless);
-
 		ballDetector = new ColorSensorV3(I2C.Port.kOnboard);
 		pDH = new PowerDistribution(1, ModuleType.kRev);
 
@@ -117,7 +114,6 @@ public class BallHandlingFSM {
 
 		isShooterPistonExtended = false;
 		isShooterPistonPressurized = false;
-		magicMotor.getEncoder().setPosition(0);
 
 		isIntakeMechRetracted = true;
 		// Call one tick of update to ensure outputs reflect start state
@@ -309,21 +305,6 @@ public class BallHandlingFSM {
 	 *        the robot is in autonomous mode.
 	 */
 	private void handleIdleState(TeleopInput input) {
-		magicMotor.set(0);
-		// System.out.println(input.isAscendingButtonPressed());
-		// System.out.println(input.isForwardIntakeButtonPressed());
-		if (input.isAscendingButtonPressed()) {
-			// went down when button 4 was pressed
-			magicMotor.set(0.1);
-		}
-
-		if (input.isDescendingButtonPressed()) {
-			// went up when button 5 was pressed
-			magicMotor.set(-0.1);
-		}
-
-		System.out.println("ecoder value " + magicMotor.getEncoder().getPosition());
-
 		pushSolenoid.set(DoubleSolenoid.Value.kOff);
 		pullSolenoid.set(DoubleSolenoid.Value.kOff);
 		intakeDeploySolenoid.set(DoubleSolenoid.Value.kOff);
