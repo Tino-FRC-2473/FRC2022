@@ -66,6 +66,8 @@ public class DriveModes {
 		double leftAdjustedInput = Functions.calcForwardPower(leftJoystickY);
 		double rightAdjustedInput = Functions.calcForwardPower(rightJoystickY);
 
+		// System.out.println(leftAdjustedInput);
+
 		//if the left and right joysticks are close to the same value
 		//make the power equal (makes driving straight easier)
 		if (Math.abs(leftAdjustedInput - rightAdjustedInput)
@@ -91,6 +93,30 @@ public class DriveModes {
 		if (Math.abs(targetRightPower) < Constants.TELEOP_MIN_MOVE_POWER) {
 			targetRightPower = 0;
 		}
+
+		// System.out.println(targetLeftPower);
+
+		return new DrivePower(targetLeftPower, targetRightPower);
+	}
+
+	/**
+	* Calculate the left and right motor powers in a PS4/Xbox Controller.
+	* @param leftJoystickY left joystick Y input
+	* @param rightJoystickX right joystick X input
+	* @return return the powers to set the left and right motors
+	*/
+	public static DrivePower controllerDrive(double leftJoystickY, double rightJoystickX) {
+
+		double leftAdjustedInput = Functions.calcForwardPower(leftJoystickY);
+		double rightAdjustedInput = Functions.calcForwardPower(leftJoystickY);
+
+		if (rightJoystickX <= 0.05 && rightJoystickX >= -0.05) {
+			leftAdjustedInput = -Functions.calcForwardPower(rightJoystickX);
+			rightAdjustedInput = Functions.calcForwardPower(rightJoystickX);
+		}
+
+		double targetLeftPower = -leftAdjustedInput;
+		double targetRightPower = rightAdjustedInput;
 
 		return new DrivePower(targetLeftPower, targetRightPower);
 	}

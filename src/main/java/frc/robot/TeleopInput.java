@@ -93,6 +93,22 @@ public class TeleopInput {
 		return mechJoystick.getRawButton(Constants.ASCEND_BUTTON);
 	}
 	/**
+	 * Get the value of the Descending button.
+	 * @return True if button is pressed
+	 */
+	public boolean isRawDescendingPressed() {
+		return mechJoystick.getTrigger();
+	}
+
+	/**
+	 * Get the value of the Ascending button.
+	 * @return True if button is pressed
+	 */
+	public boolean isRawAscendingPressed() {
+		return mechJoystick.getRawButton(9);
+	}
+
+	/**
 	 * Get the value of the descending button.
 	 * @return True if button is pressed
 	 */

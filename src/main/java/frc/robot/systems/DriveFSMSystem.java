@@ -95,6 +95,8 @@ public class DriveFSMSystem {
 	private CANSparkMax rightMotor;
 	private CANSparkMax leftMotor;
 
+	private boolean isDrivingInTankDrive;
+
 	private AHRS gyro;
 
 	/* ======================== Constructor ======================== */
@@ -121,6 +123,10 @@ public class DriveFSMSystem {
 		gyro = new AHRS(SPI.Port.kMXP);
 
 		stateTimer = new Timer();
+
+		
+
+		isDrivingInTankDrive = false;
 
 		// Reset state machine
 		reset(null);
@@ -151,6 +157,7 @@ public class DriveFSMSystem {
 
 		gyro.reset();
 		gyro.zeroYaw();
+		gyro.resetDisplacement();
 
 		finishedMovingStraight = false;
 		finishedTurning = false;
@@ -169,6 +176,14 @@ public class DriveFSMSystem {
 		update(input);
 
 		setAutoPath(defaultAutoPath);
+
+
+		System.out.println(Timer.getFPGATimestamp());
+		gyro.calibrate();
+
+		System.out.println("Calibrated Gyro");
+		System.out.println(Timer.getFPGATimestamp());
+
 	}
 
 	/**
@@ -178,6 +193,7 @@ public class DriveFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
+		System.out.println("ax: " + gyro.getRawAccelX()+ "\tay: " + gyro.getRawAccelY() + "\taz: " + gyro.getRawAccelZ());
 		gyroAngle = getHeading();
 
 		updateLineOdometry();
@@ -501,6 +517,8 @@ public class DriveFSMSystem {
 		double steerAngle = input.getSteerAngle();
 		double currentLeftPower = leftMotor.get();
 		double currentRightPower = rightMotor.get();
+		leftMotor.getEncoder().setPosition(0);
+
 
 		if (input.isForwardDrivingButtonPressed()) {
 			isDrivingForward = true;
@@ -514,6 +532,43 @@ public class DriveFSMSystem {
 
 		// DrivePower targetPower = DriveModes.tankDrive(leftJoystickY, rightJoystickY);
 
+		// if (isDrivingInTankDrive) {
+		// 	if (input.getTriggerPressed()) {
+		// 		if (leftJoystickY >= 0.01 && (rightJoystickY > -0.01 && rightJoystickY < 0.01)
+		// 			|| leftJoystickY <= -0.01 && (rightJoystickY > -0.01
+		// 			&& rightJoystickY < 0.01)) {
+		// 			leftMotor.set(leftJoystickY);
+		// 			rightMotor.set(leftJoystickY);
+		// 		} else if (rightJoystickY >= 0.01 && (leftJoystickY > -0.01
+		// 			&& leftJoystickY < 0.01)
+		// 			|| rightJoystickY <= -0.01 && (leftJoystickY > -0.01
+		// 			&& leftJoystickY < 0.01)) {
+		// 			leftMotor.set(-rightJoystickY);
+		// 			rightMotor.set(-rightJoystickY);
+		// 		} else {
+		// 			leftMotor.set(leftJoystickY);
+		// 			rightMotor.set(-rightJoystickY);
+		// 		}
+		// 	} else {
+		// 		if (leftJoystickY >= 0.01 && (rightJoystickY > -0.01 && rightJoystickY < 0.01)
+		// 			|| leftJoystickY <= -0.01 && (rightJoystickY > -0.01
+		// 			&& rightJoystickY < 0.01)) {
+		// 			leftMotor.set(leftJoystickY / 2);
+		// 			rightMotor.set(leftJoystickY / 2);
+		// 		} else if (rightJoystickY >= 0.01 && (leftJoystickY > -0.01
+		// 			&& leftJoystickY < 0.01)
+		// 			|| rightJoystickY <= -0.01 && (leftJoystickY > -0.01
+		// 			&& leftJoystickY < 0.01)) {
+		// 			leftMotor.set(-rightJoystickY / 2);
+		// 			rightMotor.set(-rightJoystickY / 2);
+		// 		} else {
+		// 			leftMotor.set(leftJoystickY / 2);
+		// 			rightMotor.set(-rightJoystickY / 2);
+		// 		}
+		// 	}
+
+
+		// }
 		// multiple speed modes
 		if (input.getTriggerPressed()) {
 			targetPower.scale(Constants.MAX_POWER);
@@ -531,6 +586,9 @@ public class DriveFSMSystem {
 		if (Math.abs(rightJoystickY) < Constants.TURNING_IN_PLACE_THRESHOLD) {
 			power = Functions.turnInPlace(rightJoystickY, steerAngle);
 		}
+
+		System.out.println(power.getLeftPower());
+		System.out.println("Right power: " + power.getRightPower());
 
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
@@ -587,6 +645,8 @@ public class DriveFSMSystem {
 			leftPower = -desiredPowers.getX() * Constants.DETECTED_BALL_MAX_POWER;
 			rightPower = desiredPowers.getY() * Constants.DETECTED_BALL_MAX_POWER;
 		}
+
+		// System.out.println(leftPower);
 
 		rightMotor.set(rightPower);
 		leftMotor.set(leftPower);

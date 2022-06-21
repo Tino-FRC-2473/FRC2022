@@ -8,9 +8,10 @@ import com.revrobotics.REVPhysicsSim;
 
 // WPILib Imports
 import edu.wpi.first.math.system.plant.DCMotor;
-
+// import edu.wpi.first.wpilibj.Relay;
 // WPILib Imports
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 // Systems
@@ -29,15 +30,17 @@ public class Robot extends TimedRobot {
 
 	private AutoSelector autoSelector;
 	private LimeLight limelight;
+	// private Relay lightswitch;
 
 	// Systems
 	private DriveFSMSystem driveFsmSystem;
 	private BallHandlingFSM ballSystem;
 	private GrabberFSM grabberSystem;
-	private MidHangerFSMSystem hangerSystem;
+	// private MidHangerFSMSystem hangerSystem;
 
 	// Constants
 	private static final boolean RUN_COMPRESSOR = true;
+	// private Timer timerForOff;
 
 	/**
 	 * This function is run when the robot is first started up and should be used for any
@@ -55,12 +58,15 @@ public class Robot extends TimedRobot {
 
 		// Instantiate all systems here
 		driveFsmSystem = new DriveFSMSystem();
-		hangerSystem = new MidHangerFSMSystem();
+		// hangerSystem = new MidHangerFSMSystem();
 		ballSystem = new BallHandlingFSM();
 		grabberSystem = new GrabberFSM();
 		limelight = new LimeLight();
 		limelight.setOffLimelight();
 		autoSelector = new AutoSelector();
+
+		// lightswitch.set(Relay.Value.kOn);
+		// timerForOff.reset();
 	}
 
 	@Override
@@ -68,7 +74,7 @@ public class Robot extends TimedRobot {
 		System.out.println("-------- Autonomous Init --------");
 		SmartDashboard.putString("Match Cycle", "AUTONOMOUS");
 		driveFsmSystem.reset(null);
-		hangerSystem.reset();
+		// hangerSystem.reset();
 		ballSystem.reset();
 		grabberSystem.reset();
 		autoSelector.outputToShuffleboard();
@@ -80,28 +86,36 @@ public class Robot extends TimedRobot {
 	public void autonomousPeriodic() {
 		driveFsmSystem.update(input);
 		ballSystem.update(null, driveFsmSystem.getCurrentState());
-		grabberSystem.update(null);
+		// grabberSystem.update(null);
 	}
 
 	@Override
 	public void teleopInit() {
 		System.out.println("-------- Teleop Init --------");
 		SmartDashboard.putString("Match Cycle", "TELEOP");
-		// driveFsmSystem.reset(input);
-		hangerSystem.reset();
+		driveFsmSystem.reset(input);
+
+		// hangerSystem.reset();
 		ballSystem.reset();
-		// grabberSystem.reset();
-		// limelight.update();
+		grabberSystem.reset();
+		limelight.update();
+		// timerForOff.reset();
 	}
 
 	@Override
 	public void teleopPeriodic() {
-		// driveFsmSystem.update(input);
-		hangerSystem.update(input, driveFsmSystem.getCurrentState());
+		driveFsmSystem.update(input);
+		// hangerSystem.update(input);
 		ballSystem.update(input, driveFsmSystem.getCurrentState());
-		// grabberSystem.update(input);
-		// limelight.update();
-		// driveFsmSystem.setCVBallPos(limelight.getBallPosition());
+		grabberSystem.update(input);
+		limelight.update();
+		driveFsmSystem.setCVBallPos(limelight.getBallPosition());
+
+		// lightswitch.set(Relay.Value.kOn);
+		// if (timerForOff.hasElapsed(1)) {
+		// 	timerForOff.reset();
+		// 	lightswitch.set(Relay.Value.kOff);
+		// }
 	}
 
 	@Override
@@ -127,13 +141,13 @@ public class Robot extends TimedRobot {
 	/* Simulation mode handlers, only used for simulation testing  */
 	@Override
 	public void simulationInit() {
-		System.out.println("-------- Simulation Init --------");
+		// System.out.println("-------- Simulation Init --------");
 
-		CANSparkMax[] sparkMaxs = ballSystem.getSparkMaxs();
+		// CANSparkMax[] sparkMaxs = ballSystem.getSparkMaxs();
 
-		for (int i = 0; i < sparkMaxs.length; i++) {
-			REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
-		}
+		// for (int i = 0; i < sparkMaxs.length; i++) {
+		// 	REVPhysicsSim.getInstance().addSparkMax(sparkMaxs[i], DCMotor.getNEO(1));
+		// }
 	}
 
 	@Override

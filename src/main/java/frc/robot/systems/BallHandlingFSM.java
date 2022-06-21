@@ -311,7 +311,8 @@ public class BallHandlingFSM {
 		intakeMotor.setVoltage(
 			getBallInMech() == IntakeMechBallStates.NONE
 			|| input.isForwardIntakeButtonPressed()
-				? -Constants.INTAKE_MOTOR_VOLTAGE : 0);
+				? 0 : 0);
+				// -Constants.INTAKE_MOTOR_VOLTAGE
 	}
 	/**
 	 * Handle behavior in START_STATE.

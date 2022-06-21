@@ -17,6 +17,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.Constants;
 // Robot Imports
 import frc.robot.TeleopInput;
 
@@ -72,11 +73,11 @@ public class MidHangerFSMSystem {
 		// hardware init
 		magicMotor = new CANSparkMax(5, MotorType.kBrushless);
 
-		magicMotorSpeed = -0.02;
+		magicMotorSpeed = -0.4;
 
 		magicMotor.getEncoder().setPosition(0);
 
-		switchSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, 6, 7);
+		switchSolenoid = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 0, 1);
 
 		startingPosTicks = magicMotor.getEncoder().getPosition();
 		/*
@@ -92,7 +93,7 @@ public class MidHangerFSMSystem {
 		/*
 		 * FIND ENOCDER VALUE
 		 */
-		posTicksBelowClip = startingPosTicks + 443;
+		posTicksBelowClip = startingPosTicks + 343;
 
 		/*
 		 * FIND ENOCDER VALUE
@@ -135,17 +136,17 @@ public class MidHangerFSMSystem {
 		switchSolenoid.set(DoubleSolenoid.Value.kReverse);
 		timerForOff = new Timer();
 		timerForOff.reset();
+        magicMotor.getEncoder().setPosition(0);
 	}
 	/**
 	 * Update FSM based on new inputs in Autonomous. This function only calls
 	 * the FSM state specific handlers.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
-	 * @param driveState Current FSMState of DriveFSMSystem.
 	 */
-	public void update(TeleopInput input, DriveFSMSystem.FSMState driveState) {
+	public void update(TeleopInput input) {
 
-		System.out.println(magicMotor.getEncoder().getPosition());
+		System.out.println(magicMotor.getEncoder().getPosition() - startingPosTicks);
 		switch (currentState) {
 
 			case IDLE:
@@ -179,7 +180,7 @@ public class MidHangerFSMSystem {
 			default:
 				throw new IllegalStateException("Invalid state: " + currentState.toString());
 		}
-		currentState = nextState(input, driveState);
+		currentState = nextState(input);
 	}
 
 	/* ======================== Private methods ======================== */
@@ -190,10 +191,9 @@ public class MidHangerFSMSystem {
 	 * values to decide what state to go to.
 	 * @param input Global TeleopInput if robot in teleop mode or null if
 	 *        the robot is in autonomous mode.
-	 * @param driveState Current FSMState of DriveFSMSystem.
 	 * @return FSM state for the next iteration
 	 */
-	private FSMState nextState(TeleopInput input, DriveFSMSystem.FSMState driveState) {
+	private FSMState nextState(TeleopInput input) {
 		switch (currentState) {
 			case IDLE:
 				if (isAscendingButtonPressed) {
@@ -203,12 +203,6 @@ public class MidHangerFSMSystem {
 					isArmDescendingButtonPressed = false;
 					return FSMState.EXTENDED_BELOW_MID_RUNG_HEIGHT_STATE;
 				}
-
-
-				// else if (isDescendingButtonPressed) {
-				// 	isDescendingButtonPressed = false;
-				// 	// return FSMState.DESCEND_TO_GROUND_STATE;
-				// }
 
 				return FSMState.IDLE;
 
@@ -232,6 +226,8 @@ public class MidHangerFSMSystem {
 				if (isHangerBelowMidRungHeight) {
 					isHangerBelowMidRungHeight = false;
 					// readyToPressDescendButton = true;
+                    timerForOff.reset();
+                    timerForOff.start();
 					return FSMState.PISTON_LOCK_ENGAGED_STATE;
 				} else {
 					return FSMState.EXTENDED_BELOW_MID_RUNG_HEIGHT_STATE;
@@ -281,6 +277,14 @@ public class MidHangerFSMSystem {
 			return;
 		}
 
+		if (input.isRawDescendingPressed()) {
+			magicMotor.set(-0.15);
+		}
+
+		if (input.isRawAscendingPressed()) {
+			magicMotor.set(0.15);
+		}
+
 		if (input.isDescendingButtonPressed()) {
 			isArmDescendingButtonPressed = true;
 			return;
@@ -322,7 +326,7 @@ public class MidHangerFSMSystem {
 			return;
 		}
 
-		magicMotor.set(-magicMotorSpeed * 10);
+		magicMotor.set(-magicMotorSpeed * Constants.POWER_MULTIPLIER_FOR_ACCEND_STATE);
 
 	}
 
@@ -351,8 +355,8 @@ public class MidHangerFSMSystem {
 	 */
 	private void handlePistonLockEngagedState(TeleopInput input) {
 		switchSolenoid.set(DoubleSolenoid.Value.kForward);
-		timerForOff.reset();
-		if (timerForOff.hasElapsed(0.02)) {
+        magicMotor.set(0);
+		if (timerForOff.hasElapsed(0.03)) {
 			switchSolenoid.set(DoubleSolenoid.Value.kOff);
 			isPistonSwitchFired = true;
 			return;

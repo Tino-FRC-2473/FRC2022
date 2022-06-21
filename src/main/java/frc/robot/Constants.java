@@ -136,4 +136,7 @@ public class Constants {
 													+ TIME_FOR_FULL_RETRACTION
 													+ 0.6;
 	public static final int FORWARD_INTAKE_BUTTON = 3;
+
+	// Hanger Mech Constants
+	public static final int POWER_MULTIPLIER_FOR_ACCEND_STATE = 10;
 }
