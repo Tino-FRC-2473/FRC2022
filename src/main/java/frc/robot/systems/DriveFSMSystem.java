@@ -74,6 +74,11 @@ public class DriveFSMSystem {
 	private double rightPower = 0;
 	private double previousEncoderCount = 0;
 	private Timer stateTimer;
+	private Timer gyroTimer;
+	private boolean firstTick = true;
+	private double lastTime;
+	private double displacementX;
+	private double displacementY;
 	private boolean isDrivingForward = true;
 
 	private double[] cvBallPos = new double[] {0, 0};
@@ -81,6 +86,7 @@ public class DriveFSMSystem {
 	private double hubAngle = Constants.PP_B3_HUB_ANGLE_DEG;
 	private double terminalAngle = Constants.BLUE_TERMINAL_ANGLE_DEG;
 	private boolean useInvisPoints = true;
+
 
 
 	private PurePursuit ppController;
@@ -123,8 +129,8 @@ public class DriveFSMSystem {
 		gyro = new AHRS(SPI.Port.kMXP);
 
 		stateTimer = new Timer();
+		gyroTimer = new Timer();
 
-		
 
 		isDrivingInTankDrive = false;
 
@@ -154,6 +160,13 @@ public class DriveFSMSystem {
 
 		rightMotor.getEncoder().setPosition(0);
 		leftMotor.getEncoder().setPosition(0);
+
+		gyroTimer.reset();
+		gyroTimer.start();
+		lastTime = 0;
+		displacementX = 0;
+		displacementY = 0;
+		firstTick = true;
 
 		gyro.reset();
 		gyro.zeroYaw();
@@ -193,8 +206,39 @@ public class DriveFSMSystem {
 	 *        the robot is in autonomous mode.
 	 */
 	public void update(TeleopInput input) {
-		System.out.println("ax: " + gyro.getRawAccelX()+ "\tay: " + gyro.getRawAccelY() + "\taz: " + gyro.getRawAccelZ());
 		gyroAngle = getHeading();
+
+		double currentTime = Timer.getFPGATimestamp();
+		if (firstTick) {
+			firstTick = false;
+			displacementX = 0;
+		} else {
+			// displacementX = (leftMotor.getEncoder().getPosition() * Math.PI
+			// 	* Constants.WHEEL_DIAMETER_INCHES) /
+			// Constants.GEAR_RATIO * Math.cos(Math.toRadians(gyroAngle));
+
+			// displacementX = displacementX + gyro.getDisplacementX();
+
+			displacementX = displacementX + leftMotor.getEncoder().getPosition()
+				* Math.cos(Math.toRadians(gyroAngle));
+			displacementY = displacementY + leftMotor.getEncoder().getPosition()
+				* Math.sin(Math.toRadians(gyroAngle));
+			// displacementX += 0.5 * gyro.getWorldLinearAccelX() * 9.80665 *
+			// (currentTime - lastTime) * (currentTime - lastTime) +
+			// gyro.getVelocityX() * (currentTime - lastTime);
+		}
+
+
+
+		System.out.println("dX: " + displacementX);
+		System.out.println("dY: " + displacementY);
+		// System.out.println("V: " + gyro.getVelocityX());
+		// System.out.println("A: " + gyro.getWorldLinearAccelX() * 9.80665);
+		// System.out.println(gyro.getAngle());
+
+
+
+		lastTime = currentTime;
 
 		updateLineOdometry();
 		updateArcOdometry();
@@ -586,9 +630,6 @@ public class DriveFSMSystem {
 		if (Math.abs(rightJoystickY) < Constants.TURNING_IN_PLACE_THRESHOLD) {
 			power = Functions.turnInPlace(rightJoystickY, steerAngle);
 		}
-
-		System.out.println(power.getLeftPower());
-		System.out.println("Right power: " + power.getRightPower());
 
 		leftPower = power.getLeftPower();
 		rightPower = power.getRightPower();
