@@ -88,6 +88,7 @@ public class Constants {
 	public static final int DRIVING_FORWARD_BUTTON = 4;
 	public static final int DRIVING_BACKWARDS_BUTTON = 5;
 	public static final int DRIVING_TO_BALL_BUTTON = 6;
+	public static final int DRIVING_TO_SHOOTING_BUTTON = 9;
 
 	//Pure Pursuit Constants
 	public static final double MAX_IN_TO_POINT = 48;
@@ -120,6 +121,7 @@ public class Constants {
 	//Inverse Kinematics Constants
 	public static final double HORIZONTAL_HEADING_CORRECTION_DEG = 1;
 	public static final double ZERO_THRESHOLD = 0.01;
+	public static final double SHOOTING_CIRCLE_RADIUS = 120.000;
 
 	//Intake Shooter Constants
 	public static final int MAX_NUMBER_OF_BALLS = 3;

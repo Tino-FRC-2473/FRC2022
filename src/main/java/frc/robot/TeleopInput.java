@@ -179,6 +179,14 @@ public class TeleopInput {
 		return drivingJoystick.getRawButton(Constants.DRIVING_TO_BALL_BUTTON);
 	}
 
+	/**
+	 * Checks if the button to drive to shooting position has been pressed.
+	 * @return true if the button is pressed
+	 */
+	public boolean getShootingPositionButton() {
+		return drivingJoystick.getRawButton(Constants.DRIVING_TO_SHOOTING_BUTTON);
+	}
+
 	/* ======================== Private methods ======================== */
 
 }
